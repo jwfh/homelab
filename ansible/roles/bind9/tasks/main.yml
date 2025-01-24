@@ -1,0 +1,28 @@
+---
+- name: Install BIND9
+  pkgng:
+    name: bind920
+    state: present
+- name: Install BIND9 utilities
+  pkgng:
+    name: bind-tools
+    state: present
+- name: Ensure BIND9 service is started and enabled
+  service:
+    name: named
+    state: started
+    enabled: yes
+- name: Copy the named.conf file
+  template:
+    src: named.conf.j2
+    dest: /usr/local/etc/namedb/named.conf
+    owner: root
+    group: bind
+    mode: '0644'
+- name: Ensure the bind directory for zones exists
+  file:
+    path: /var/cache/bind
+    state: directory
+    owner: bind
+    group: bind
+    mode: '0755'

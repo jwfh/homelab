@@ -1,0 +1,15 @@
+options {
+    directory "/var/cache/bind";
+    allow-query { any; };
+    allow-recursion { any; };
+    forwarders {
+        {% for forwarder in dns_forwarders %}
+        {{ forwarder.strip() }};
+        {% endfor %}
+    };
+};
+
+zone "example.com" IN {
+    type master;
+    file "/etc/bind/db.example.com";
+};

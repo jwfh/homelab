@@ -1,0 +1,34 @@
+---
+- name: Install nginx
+  pkgng:
+    name: nginx
+    state: present
+- name: Create logs directory
+  file:
+    path: /var/log/nginx
+    state: directory
+    mode: 0755
+- name: Enable service nginx
+  service:
+    name: nginx
+    enabled: true
+- name: Mount an NFS volume
+  ansible.posix.mount:
+    src: "{{ mirror_nfs_server }}:/mnt/default/mirror"
+    path: "{{ mirror_local_dir }}"
+    opts: rw,nosuid
+    state: mounted
+    fstype: nfs
+- name: Configure nginx
+  template:
+    src: nginx/nginx.conf.j2
+    dest: /usr/local/etc/nginx/nginx.conf
+    owner: root
+    group: wheel
+    mode: '0644'
+  notify: 
+    - restart nginx
+- name: Start service nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started

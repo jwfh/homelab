@@ -1,0 +1,23 @@
+---
+- name: Configure base operating system
+  hosts: all
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+- name: Configure DNS Server (BIND9)
+  hosts: dns_servers
+  become: true
+  vars_files:
+    - "inventory/{{ ansible_host }}.yml"
+  roles:
+    - bind9
+- name: Configure public software mirror
+  hosts: mirrors
+  become: true
+  gather_facts: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - mirror

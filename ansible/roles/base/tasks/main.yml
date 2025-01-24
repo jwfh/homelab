@@ -1,0 +1,8 @@
+---
+- name: Set instance hostname
+  hostname:
+    name: "{{ inventory_hostname }}.{{ ansible_site }}.{{ ansible_root_domain }}"
+- name: Enable service sshd
+  service:
+    name: sshd
+    enabled: true

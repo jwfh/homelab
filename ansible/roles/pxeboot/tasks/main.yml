@@ -1,0 +1,13 @@
+---
+- name: Create /tftpboot directory
+  ansible.builtin.file:
+    path: /tftpboot
+    state: directory
+- name: Enable inetd service
+  service:
+    name: inetd
+    enabled: true
+- name: Start inetd service
+  ansible.builtin.service:
+    name: inetd
+    state: started

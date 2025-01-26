@@ -1,0 +1,26 @@
+---
+- name: Install ACME.sh
+  pkgng:
+    name: acme.sh
+    state: present
+- name: Mount certificates store read-write
+  ansible.posix.mount:
+    src: "{{ services_nfs_server }}:{{ services_nfs_prefix }}/certificates"
+    path: "{{ certificates_local_dir }}"
+    opts: rw,nosuid
+    state: mounted
+    fstype: nfs
+- name: Template ACME.sh update script
+  template:
+    src: acme/update.sh.j2
+    dest: /var/db/acme/update.sh
+    owner: acme
+    group: acme
+    mode: '0755'
+- name: Run certificate renewal daily
+  ansible.builtin.cron:
+    name: renew acme certs
+    minute: "34"
+    hour: "02"
+    user: acme
+    job: "/var/db/acme/update.sh >/dev/null"

@@ -1,0 +1,16 @@
+---
+- name: Install Traefik
+  pkgng:
+    name: traefik
+    state: present
+- name: Enable Traefik service
+  service:
+    name: traefik
+    enabled: true
+- name: Mount certificates store read-only
+  ansible.posix.mount:
+    src: "{{ services_nfs_server }}:{{ services_nfs_prefix }}/certificates"
+    path: "{{ certificates_local_dir }}"
+    opts: ro,nosuid
+    state: mounted
+    fstype: nfs

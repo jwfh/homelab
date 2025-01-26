@@ -12,6 +12,13 @@
   service:
     name: nginx
     enabled: true
+- name: Mount certificates store read-only
+  ansible.posix.mount:
+    src: "{{ services_nfs_server }}:{{ services_nfs_prefix }}/certificates"
+    path: "{{ certificates_local_dir }}"
+    opts: ro,nosuid
+    state: mounted
+    fstype: nfs
 - name: Mount an NFS volume
   ansible.posix.mount:
     src: "{{ mirror_nfs_server }}:{{ mirror_nfs_prefix }}"

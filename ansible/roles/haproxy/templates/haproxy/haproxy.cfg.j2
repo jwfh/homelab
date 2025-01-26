@@ -1,0 +1,53 @@
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/empty
+    user haproxy
+    group haproxy
+    daemon
+    maxconn 4000
+    ssl-default-bind-ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256
+    ssl-default-bind-options ssl-min-ver TLSv1.2 no-tls-tickets
+
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 3000
+
+frontend https_front
+    bind *:443 ssl crt {{ certificates_local_dir }}/{{ certificate_name }}
+    mode http
+    option forwardfor
+    http-request set-header X-Forwarded-Proto https if { ssl_fc }
+
+{% for vhost, details in backend_services.items() %}
+    acl acl_{{ vhost }} hdr(host) -i {{ details.domain_name }}
+{% endfor %}    
+{% for vhost, details in backend_services.items() %}
+    use_backend backend_{{ vhost }} if acl_{{ vhost }}
+{% endfor %}    
+    default_backend error_404
+
+{% for vhost, details in backend_services.items() %}
+backend backend_{{ vhost }}
+    mode {{ details.mode }}
+    balance {{ details.balance }}
+{% for server in details.servers %}
+    server {{ vhost }}_{{ server | regex_replace('[^a-zA-Z0-9]', '_') }} {{ server }}:{{ details.port }} check
+{% endfor %}
+{% endfor %}    
+backend error_404
+    mode http
+    errorfile 404 /usr/local/share/examples/haproxy/errorfiles/403.http

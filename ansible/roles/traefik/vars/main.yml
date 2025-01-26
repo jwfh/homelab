@@ -1,6 +1,3 @@
-mirror_nfs_server: ritchie
-mirror_nfs_prefix: /mnt/default/mirror
-mirror_local_dir: /mirror
 services_nfs_server: ritchie
 services_nfs_prefix: /mnt/default/services
 certificates_local_dir: /usr/local/share/certificates

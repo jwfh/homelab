@@ -1,0 +1,11 @@
+---
+- name: restart haproxy
+  service: name=haproxy state=restarted
+- name: validate haproxy configuration
+  command: /usr/local/sbin/haproxy -q -c -f /usr/local/etc/haproxy.conf
+  changed_when: false
+- name: reload haproxy
+  service: name=haproxy state=reloaded
+  when: haproxy_service_state == "started"
+- name: restart syslogd
+  service: name=syslogd state=restarted

@@ -7,14 +7,14 @@
   roles:
     - base
 - name: Configure DNS Server (BIND9)
-  hosts: dns_servers
+  hosts: dns
   become: true
   vars_files:
     - "inventory/{{ ansible_host }}.yml"
   roles:
     - bind9
 - name: Configure public software mirror
-  hosts: mirrors
+  hosts: mirror
   become: true
   gather_facts: true
   vars_files:
@@ -28,3 +28,31 @@
     - "inventory/host_variables/{{ ansible_host }}.yml"
   roles:
     - plex
+- name: Configure netboot servers
+  hosts: netboot
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - pxeboot
+- name: Configure HAProxy reverse proxy servers
+  hosts: haproxy
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - haproxy
+- name: Configure Traefik reverse proxy servers
+  hosts: traefik
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - traefik
+- name: Configure ACME.sh certificate management server
+  hosts: acme
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - acme

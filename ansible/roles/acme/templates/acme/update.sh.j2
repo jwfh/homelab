@@ -1,0 +1,10 @@
+#!/bin/sh
+
+/usr/local/sbin/acme.sh --cron
+
+cp -R /var/db/acme/certs/ "{{ certificates_local_dir }}/acme/"
+
+for d in $(acme.sh --list | tail -n+2 | cut -d' ' -f1); do
+  cer="$(find "{{ certificates_local_dir }}/acme" -type f -name "$d.cer" | head -n1)"
+  DEPLOY_HAPROXY_PEM_PATH="$(dirname "$cer")" acme.sh --deploy -d $d --deploy-hook haproxy
+done

@@ -1,0 +1,52 @@
+---
+- name: Install HAProxy
+  pkgng:
+    name: haproxy
+    state: present
+- name: Create haproxy user
+  ansible.builtin.user:
+    name: haproxy
+    comment: HAProxy server
+    uid: 200
+    shell: /usr/sbin/nologin
+    home: /var/empty
+- name: Enable HAProxy service
+  service:
+    name: haproxy
+    enabled: true
+- name: Mount certificates store read-only
+  ansible.posix.mount:
+    src: "{{ services_nfs_server }}:{{ services_nfs_prefix }}/certificates"
+    path: "{{ certificates_local_dir }}"
+    opts: ro,nosuid
+    state: mounted
+    fstype: nfs
+- name: Create configuration directory
+  file:
+    name: /usr/local/etc/haproxy
+    state: directory
+    mode: 0755
+    owner: root
+    group: wheel
+- name: Configure syslog to accept HAProxy logs
+  template:
+    src: haproxy/syslog.conf.j2
+    dest: /etc/syslog.conf
+    owner: root
+    group: wheel
+    mode: '0644'
+  notify: 
+    - restart syslogd
+- name: Configure HAProxy
+  template:
+    src: haproxy/haproxy.cfg.j2
+    dest: /usr/local/etc/haproxy.conf
+    owner: root
+    group: wheel
+    mode: '0644'
+  notify: 
+    - restart haproxy
+- name: Start service HAProxy
+  ansible.builtin.service:
+    name: haproxy
+    state: started

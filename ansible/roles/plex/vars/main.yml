@@ -1,0 +1,3 @@
+plex_nfs_server: ritchie
+plex_nfs_media_prefix: /mnt/default/media
+plex_local_dir: /media

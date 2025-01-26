@@ -14,7 +14,7 @@
     enabled: true
 - name: Mount an NFS volume
   ansible.posix.mount:
-    src: "{{ mirror_nfs_server }}:/mnt/default/mirror"
+    src: "{{ mirror_nfs_server }}:{{ mirror_nfs_prefix }}"
     path: "{{ mirror_local_dir }}"
     opts: rw,nosuid
     state: mounted

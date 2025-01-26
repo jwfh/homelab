@@ -1,0 +1,27 @@
+---
+- name: Install Plex
+  pkgng:
+    name: plexmediaserver
+    state: present
+- name: Enable Plex service
+  service:
+    name: plexmediaserver
+    enabled: true
+- name: Mount TV directory
+  ansible.posix.mount:
+    src: "{{ plex_nfs_server }}:{{ plex_nfs_media_prefix }}/tv"
+    path: "{{ plex_local_dir }}/tv"
+    opts: ro,nosuid
+    state: mounted
+    fstype: nfs
+- name: Mount movies directory
+  ansible.posix.mount:
+    src: "{{ plex_nfs_server }}:{{ plex_nfs_media_prefix }}/movies"
+    path: "{{ plex_local_dir }}/movies"
+    opts: ro,nosuid
+    state: mounted
+    fstype: nfs
+- name: Start Plex service
+  ansible.builtin.service:
+    name: plexmediaserver
+    state: started

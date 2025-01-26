@@ -1,2 +1,3 @@
 mirror_nfs_server: ritchie
+mirror_nfs_prefix: /mnt/default/mirror
 mirror_local_dir: /mirror

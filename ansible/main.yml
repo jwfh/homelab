@@ -21,3 +21,10 @@
     - "inventory/host_variables/{{ ansible_host }}.yml"
   roles:
     - mirror
+- name: Configure Plex Media Server
+  hosts: plex
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - plex

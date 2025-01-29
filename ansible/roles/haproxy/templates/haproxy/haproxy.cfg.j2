@@ -1,7 +1,5 @@
 global
-    log /dev/log local0
-    log /dev/log local1 notice
-    chroot /var/empty
+    log /dev/log local1
     user haproxy
     group haproxy
     daemon
@@ -26,7 +24,8 @@ defaults
     timeout check           10s
     maxconn                 3000
 
-frontend https_front
+frontend https
+    log /dev/log local0
     bind *:443 ssl crt {{ certificates_local_dir }}/{{ certificate_name }}
     mode http
     option forwardfor
@@ -36,18 +35,21 @@ frontend https_front
     acl acl_{{ vhost }} hdr(host) -i {{ details.domain_name }}
 {% endfor %}    
 {% for vhost, details in backend_services.items() %}
-    use_backend backend_{{ vhost }} if acl_{{ vhost }}
+    use_backend {{ vhost }} if acl_{{ vhost }}
 {% endfor %}    
-    default_backend error_404
+    default_backend err_404
 
 {% for vhost, details in backend_services.items() %}
-backend backend_{{ vhost }}
+backend {{ vhost }}
     mode {{ details.mode }}
     balance {{ details.balance }}
+{% for option in (details.options | default({})) %}
+    option {{ option }}
+{% endfor %}
 {% for server in details.servers %}
-    server {{ vhost }}_{{ server | regex_replace('[^a-zA-Z0-9]', '_') }} {{ server }}:{{ details.port }} check
+    server {{ server }} {{ server }}:{{ details.port }} check
 {% endfor %}
 {% endfor %}    
-backend error_404
+backend err_404
     mode http
     errorfile 404 /usr/local/share/examples/haproxy/errorfiles/403.http

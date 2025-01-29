@@ -5,7 +5,7 @@
 #	may want to use only tabs as field separators here.
 #	Consult the syslog.conf(5) manpage.
 *.err;kern.warning;auth.notice;mail.crit		/dev/console
-local0.*                    /var/log/haproxy-traffic.log
+#local0.*                    /var/log/haproxy-traffic.log
 local1.*                    /var/log/haproxy.log
 *.notice;authpriv.none;kern.debug;lpr.info;mail.crit;news.err	/var/log/messages
 security.*					/var/log/security

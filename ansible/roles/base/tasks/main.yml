@@ -18,3 +18,4 @@
   pkgng:
     name: htop
     state: present
+- include_tasks: tasks/users.yml

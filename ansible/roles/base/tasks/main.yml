@@ -1,21 +1,6 @@
 ---
-- name: Set instance hostname
-  hostname:
-    name: "{{ inventory_hostname }}.{{ ansible_site }}.{{ ansible_root_domain }}"
-- name: Enable service sshd
-  service:
-    name: sshd
-    enabled: true
-- name: Install sudo
-  pkgng:
-    name: sudo
-    state: present
-- name: Install vim
-  pkgng:
-    name: vim
-    state: present
-- name: Install htop
-  pkgng:
-    name: htop
-    state: present
+- include_tasks: tasks/hostname.yml
+- include_tasks: tasks/hosts.yml
 - include_tasks: tasks/users.yml
+- include_tasks: tasks/packages.yml
+- include_tasks: tasks/services.yml

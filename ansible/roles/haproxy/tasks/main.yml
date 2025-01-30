@@ -21,6 +21,15 @@
     opts: ro,nosuid
     state: mounted
     fstype: nfs
+- name: Touch HAProxy log file
+  ansible.builtin.file:
+    path: /var/log/haproxy.log
+    state: touch
+    mode: u=rw,g=r,o=r
+    owner: root
+    group: wheel
+  notify: 
+    - restart syslogd
 - name: Configure syslog to accept HAProxy logs
   template:
     src: haproxy/syslog.conf.j2

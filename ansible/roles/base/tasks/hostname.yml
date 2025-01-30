@@ -1,0 +1,17 @@
+---
+- name: Set instance hostname
+  hostname:
+    name: "{{ inventory_hostname }}.{{ ansible_site }}.{{ ansible_root_domain }}"
+  register: hostname
+- name: Set instance hostname in /etc/rc.conf
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: '^hostname='
+    line: 'hostname="{{ inventory_hostname }}.{{ ansible_site }}.{{ ansible_root_domain }}"'
+    state: present
+- name: Reboot if hostname changed
+  reboot:
+    reboot_timeout: 300
+    connect_timeout: 30
+    msg: "Rebooting to apply new hostname"
+  when: hostname.changed

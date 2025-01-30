@@ -1,0 +1,5 @@
+---
+- name: Enable service sshd
+  service:
+    name: sshd
+    enabled: true

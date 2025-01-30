@@ -46,7 +46,7 @@ http {
         #access_log  logs/host.access.log  main;
 
         location / {
-            root   {{ mirror_local_dir }}/www;
+            root   {{ webroot_local_dir }}/www;
             index  index.html index.htm;
             autoindex on;
         }

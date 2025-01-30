@@ -1,6 +1,6 @@
 ---
 - name: Configure base operating system
-  hosts: all
+  hosts: managed
   become: true
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
@@ -10,7 +10,7 @@
   hosts: dns
   become: true
   vars_files:
-    - "inventory/{{ ansible_host }}.yml"
+    - "inventory/host_variables/{{ ansible_host }}.yml"
   roles:
     - bind9
 - name: Configure public software mirror
@@ -19,8 +19,24 @@
   gather_facts: true
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
+  vars:
+    webroot_nfs_server: ritchie
+    webroot_nfs_prefix: /mnt/default/mirror
+    webroot_local_dir: /mirror
   roles:
-    - mirror
+    - static-webserver
+- name: Configure portfolio site
+  hosts: homepage
+  become: true
+  gather_facts: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  vars:
+    webroot_nfs_server: ritchie
+    webroot_nfs_prefix: /mnt/default/services/homepage
+    webroot_local_dir: /homepage
+  roles:
+    - static-webserver
 - name: Configure Plex Media Server
   hosts: plex
   become: true

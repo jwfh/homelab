@@ -1,0 +1,20 @@
+---
+- name: Install sudo
+  pkgng:
+    name: sudo
+    state: present
+- name: Configure sudo for wheel
+  template:
+    src: sudoers/wheel.j2
+    dest: /usr/local/etc/sudoers.d/wheel
+    owner: root
+    group: wheel
+    mode: '0600'
+- name: Install vim
+  pkgng:
+    name: vim
+    state: present
+- name: Install htop
+  pkgng:
+    name: htop
+    state: present

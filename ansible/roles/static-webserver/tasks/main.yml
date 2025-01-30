@@ -8,7 +8,7 @@
     path: /var/log/nginx
     state: directory
     mode: 0755
-- name: Enable service nginx
+- name: Enable nginx service
   service:
     name: nginx
     enabled: true
@@ -21,8 +21,8 @@
     fstype: nfs
 - name: Mount an NFS volume
   ansible.posix.mount:
-    src: "{{ mirror_nfs_server }}:{{ mirror_nfs_prefix }}"
-    path: "{{ mirror_local_dir }}"
+    src: "{{ webroot_nfs_server }}:{{ webroot_nfs_prefix }}"
+    path: "{{ webroot_local_dir }}"
     opts: rw,nosuid
     state: mounted
     fstype: nfs

@@ -20,7 +20,6 @@
   authorized_key:
     user: jwhouse
     state: present
-    exclusive: true
     key: '{{ item }}'
   with_file:
     - public_keys/jwhouse/jacobhouse-desktop.pub

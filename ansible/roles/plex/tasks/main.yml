@@ -25,7 +25,3 @@
   ansible.builtin.service:
     name: plexmediaserver
     state: started
-- name: Install rsync
-  pkgng:
-    name: rsync
-    state: present

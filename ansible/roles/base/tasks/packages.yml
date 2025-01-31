@@ -18,3 +18,7 @@
   pkgng:
     name: htop
     state: present
+- name: Install rsync
+  pkgng:
+    name: rsync
+    state: present

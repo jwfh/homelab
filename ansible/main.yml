@@ -13,6 +13,13 @@
     - "inventory/host_variables/{{ ansible_host }}.yml"
   roles:
     - bind9
+- name: Configure SSH bastion
+  hosts: bastion
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - bastion
 - name: Configure public software mirror
   hosts: mirror
   become: true

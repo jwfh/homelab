@@ -1,0 +1,3 @@
+---
+- name: restart motd
+  service: name=motd state=restarted

@@ -1,0 +1,18 @@
+---
+- name: Configure motd
+  template:
+    src: motd.j2
+    dest: /etc/motd.template
+    owner: root
+    group: wheel
+    mode: '0644'
+  notify: 
+    - restart motd
+- name: Install ZSH
+  pkgng:
+    name: zsh
+    state: present
+- name: Install Fish
+  pkgng:
+    name: fish
+    state: present

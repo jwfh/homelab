@@ -1,4 +1,5 @@
 127.0.0.1	localhost.{{ ansible_site }}.{{ ansible_root_domain }}		localhost
+
 {% for item in groups.all %}
 {{ hostvars[item].ansible_host }}	{{ item }}.{{ hostvars[item].ansible_site }}.{{ hostvars[item].ansible_root_domain }}		{{ item }}
 {% endfor %}

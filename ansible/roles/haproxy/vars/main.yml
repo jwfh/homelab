@@ -2,26 +2,3 @@ services_nfs_server: ritchie
 services_nfs_prefix: /mnt/default/services
 certificates_local_dir: /usr/local/share/certificates
 certificate_name: acme/jwfh.ca_ecc/jwfh.ca.pem
-backend_services:
-  homepage:
-    mode: http
-    balance: roundrobin
-    port: 80
-    domain_name: jwfh.ca
-    servers: 
-      - gizmo.lemarchant.jacobhouse.ca
-      - bowser.lemarchant.jacobhouse.ca
-  plex:
-    mode: http
-    balance: sticky
-    port: 32400
-    domain_name: plex.jwfh.ca
-    servers: 
-      - pixel.lemarchant.jacobhouse.ca
-  mirror:
-    mode: http
-    balance: roundrobin
-    port: 80
-    domain_name: mirror.jwfh.ca
-    servers: 
-      - muffin.lemarchant.jacobhouse.ca

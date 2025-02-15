@@ -10,7 +10,7 @@
     comment: "Noah Gallant"
     shell: /bin/sh
     group: ngallant
-    groups: wheel
+    groups: '{{ wheel }}'
     append: false
     home: /home/ngallant
     create_home: yes

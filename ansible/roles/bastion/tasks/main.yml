@@ -8,11 +8,5 @@
     mode: '0644'
   notify: 
     - restart motd
-- name: Install ZSH
-  pkgng:
-    name: zsh
-    state: present
-- name: Install Fish
-  pkgng:
-    name: fish
-    state: present
+  when:
+    - ansible_facts['distribution'] == "FreeBSD"

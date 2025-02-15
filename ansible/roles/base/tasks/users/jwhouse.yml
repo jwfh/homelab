@@ -10,7 +10,7 @@
     comment: "Jacob House"
     shell: /bin/sh
     group: jwhouse
-    groups: wheel
+    groups: '{{ wheel }}'
     append: false
     home: /home/jwhouse
     create_home: yes

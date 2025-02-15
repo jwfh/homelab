@@ -9,6 +9,8 @@
     regexp: '^hostname='
     line: 'hostname="{{ inventory_hostname }}.{{ ansible_site }}.{{ ansible_root_domain }}"'
     state: present
+  when:
+    - ansible_facts['distribution'] == "FreeBSD"
 - name: Reboot if hostname changed
   reboot:
     reboot_timeout: 300

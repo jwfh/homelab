@@ -20,6 +20,15 @@
     - "inventory/host_variables/{{ ansible_host }}.yml"
   roles:
     - bastion
+    - user-server
+- name: Configure compute nodes
+  hosts: compute
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - user-server
+    - generic-compute
 - name: Configure public software mirror
   hosts: mirror
   become: true

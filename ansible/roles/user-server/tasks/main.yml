@@ -1,0 +1,9 @@
+---
+- name: Install ZSH
+  package:
+    name: zsh
+    state: present
+- name: Install Fish
+  package:
+    name: fish
+    state: present

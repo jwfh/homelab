@@ -21,6 +21,10 @@
     opts: ro,nosuid
     state: mounted
     fstype: nfs
+- name: Check if HAProxy log file exists
+  stat:
+    path: /var/log/haproxy.log
+  register: haproxy_log
 - name: Touch HAProxy log file
   ansible.builtin.file:
     path: /var/log/haproxy.log
@@ -30,6 +34,7 @@
     group: wheel
   notify: 
     - restart syslogd
+  when: 'not haproxy_log.stat.exists'
 - name: Configure syslog to accept HAProxy logs
   template:
     src: haproxy/syslog.conf.j2

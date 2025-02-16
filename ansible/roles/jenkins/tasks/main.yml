@@ -1,0 +1,16 @@
+---
+- name: Install Jenkins LTS
+  package:
+    name: jenkins-lts
+    state: present
+- name: Mount Jenkins home via NFS
+  ansible.posix.mount:
+    src: "{{ services_nfs_server }}:{{ services_nfs_prefix }}/jenkins"
+    path: "{{ jenkins_home_local_dir }}"
+    opts: rw,nosuid
+    state: mounted
+    fstype: nfs
+- name: Enable jenkins service
+  service:
+    name: jenkins
+    enabled: true

@@ -1,0 +1,3 @@
+services_nfs_server: ritchie
+services_nfs_prefix: /mnt/default/services
+jenkins_home_local_dir: /usr/local/jenkins

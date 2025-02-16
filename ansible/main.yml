@@ -60,6 +60,13 @@
     - "inventory/host_variables/{{ ansible_host }}.yml"
   roles:
     - plex
+- name: Configure CI/CD controller nodes
+  hosts: cicd-controller
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - jenkins
 - name: Configure netboot servers
   hosts: netboot
   become: true
@@ -91,6 +98,13 @@
         domain_name: plex.jwfh.ca
         servers: 
           - pixel.lemarchant.jacobhouse.ca
+      jenkins:
+        mode: http
+        balance: sticky
+        port: 8080
+        domain_name: ci.jwfh.ca
+        servers:
+          - papillon.lemarchant.jacobhouse.ca
       mirror:
         mode: http
         balance: roundrobin

@@ -16,3 +16,10 @@
     create_home: yes
     uid: 213815
     password: '*************'
+- name: User 'ngallant' authorized key
+  authorized_key:
+    user: ngallant
+    state: present
+    key: '{{ item }}'
+  with_file:
+    - public_keys/ngallant/ngallant.pub

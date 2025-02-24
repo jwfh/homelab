@@ -3,12 +3,11 @@
   hostname:
     name: "{{ inventory_hostname }}.{{ ansible_site }}.{{ ansible_root_domain }}"
   register: hostname
-- name: Set instance hostname in /etc/rc.conf
+- name: Remove hostname line from /etc/rc.conf # The above block will write it to /etc/rc.conf.d/hostname on FreeBSD
   lineinfile:
     path: /etc/rc.conf
     regexp: '^hostname='
-    line: 'hostname="{{ inventory_hostname }}.{{ ansible_site }}.{{ ansible_root_domain }}"'
-    state: present
+    state: absent
   when:
     - ansible_facts['distribution'] == "FreeBSD"
 - name: Reboot if hostname changed

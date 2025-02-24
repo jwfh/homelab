@@ -1,0 +1,5 @@
+---
+- name: Install cloudflared package
+  package:
+    name: cloudflared
+    state: present

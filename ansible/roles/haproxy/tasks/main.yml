@@ -21,6 +21,7 @@
     opts: ro,nosuid
     state: mounted
     fstype: nfs
+  when: certificate_store_access == 'mount'
 - name: Check if HAProxy log file exists
   stat:
     path: /var/log/haproxy.log

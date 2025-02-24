@@ -1,0 +1,21 @@
+---
+- name: Install Postgres 17
+  package:
+    name: 
+      - postgresql17-server 
+      - postgresql17-client
+      - postgresql17-contrib
+    state: present
+- name: Enable Postgres 17 service
+  service:
+    name: postgresql
+    enabled: true
+- name: Start Postgres 17 service
+  service:
+    name: postgresql
+    state: started
+- name: Create Postgres databases
+  postgresql_db:
+    name: "{{ item }}"
+    state: present
+  with_items: '{{ pg_database_names }}'

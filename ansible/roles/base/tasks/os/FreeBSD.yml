@@ -1,0 +1,42 @@
+---
+- name: Get timestamp of last forced package update
+  shell: 'cat /var/cache/pkg/.ansible-force-update 2>/dev/null || :'
+  failed_when: false
+  register: flag_pkg_force_update
+- name: Force update package repository
+  command: pkg update -f
+  when: 
+    - flag_pkg_force_update.stdout == '' or ((ansible_date_time.iso8601 | to_datetime('%Y-%m-%dT%H:%M:%SZ')) - (flag_pkg_force_update.stdout | to_datetime('%Y-%m-%dT%H:%M:%SZ'))).days > 7
+  register: result_pkg_update
+- name: Record timestamp of last forced package update
+  shell: 'date -u "+%Y-%m-%dT%H:%M:%SZ" > /var/cache/pkg/.ansible-force-update'
+  when:
+    - result_pkg_update.changed
+  
+- name: Upgrade packages
+  shell: /usr/local/sbin/pkg upgrade -y
+  register: result_pkg_upgrade
+  changed_when: "'Your packages are up to date' not in result_pkg_upgrade.stdout"
+
+- name: Patch OS if any available
+  when:  "'amd64'  in ansible_architecture"
+  block:
+    - name: Fetch OS patches
+      shell: freebsd-update --not-running-from-cron fetch
+      register: result_freebsd_update_fetch
+      changed_when: "'No updates needed' not in result_freebsd_update_fetch.stdout"
+    - name: Install OS patches
+      when: result_freebsd_update_fetch.changed
+      shell:  /usr/sbin/freebsd-update install
+      register: result_freebsd_update_install
+    - name: Clean OS update cache due to corrupted update
+      shell: rm -rf /var/db/freebsd-update/*
+      when: "result_freebsd_update_install.changed and 'unexpected end of file' in result_freebsd_update_install.stdout"
+      failed_when: true
+
+- name: Reboot after package or OS upgrade
+  when: (result_freebsd_update_install.changed or result_pkg_upgrade.changed)
+  reboot:
+    reboot_timeout: 300
+    connect_timeout: 30
+    msg: "Rebooting to apply new updates"

@@ -1,8 +1,12 @@
 ---
-- name: Install sudo
+- name: Install required base packages
   package:
-    name: sudo
-    state: present
+    name: 
+      - sudo
+      - vim
+      - htop
+      - rsync
+    state: latest
 - name: Configure sudo for wheel
   template:
     src: sudoers/wheel.j2
@@ -10,15 +14,3 @@
     owner: root
     group: '{{ wheel }}'
     mode: '0600'
-- name: Install vim
-  package:
-    name: vim
-    state: present
-- name: Install htop
-  package:
-    name: htop
-    state: present
-- name: Install rsync
-  package:
-    name: rsync
-    state: present

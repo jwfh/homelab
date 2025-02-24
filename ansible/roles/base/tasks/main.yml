@@ -14,3 +14,6 @@
 - include_tasks: tasks/users.yml
 - include_tasks: tasks/packages.yml
 - include_tasks: tasks/services.yml
+- include_tasks: tasks/qemu.yml
+  when: "'QEMU' in ansible_facts.processor | join(' ')"
+- include_tasks: tasks/os/{{ansible_os_family}}.yml

@@ -64,6 +64,30 @@
     mode: '0644'
   notify: 
     - restart syslogd
+- name: Configure extra steps for external host requirements
+  block:
+    - name: Create download-asn-range script
+      copy: src=files/download-asn-range.sh dest=//usr/local/sbin/download-asn-range mode=700
+    - name: Check if CloudFlare ASN range list exists
+      stat:
+        path: /usr/local/share/AS13335.dat
+      register: cloudflare_asn_file
+    - name: Download ASN range list
+      shell: /usr/local/sbin/download-asn-range 13335 /usr/local/share/AS13335.dat
+      when:
+        - 'not cloudflare_asn_file.stat.exists'
+    - name: Configure automatic updating of ASN range list
+      cron:
+        name: Download CloudFlare ASN range list once every 24 hours
+        job: /usr/local/sbin/download-asn-range 13335 /usr/local/share/AS13335.dat
+        user: root
+        minute: 0
+        hour: 0
+        day: '*'
+        month: '*'
+        weekday: '*'
+  when:
+    - haproxy_is_external
 - name: Configure HAProxy
   template:
     src: haproxy/haproxy.cfg.j2

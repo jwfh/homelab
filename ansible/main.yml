@@ -82,7 +82,8 @@
   roles:
     - haproxy
   vars:
-    backend_services:
+    haproxy_is_external: false
+    haproxy_backend_services:
       homepage:
         mode: http
         balance: roundrobin
@@ -120,7 +121,8 @@
   roles:
     - haproxy
   vars:
-    backend_services:
+    is_external: true
+    haproxy_backend_services:
       homepage:
         mode: http
         balance: roundrobin

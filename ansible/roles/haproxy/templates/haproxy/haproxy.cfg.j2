@@ -13,7 +13,9 @@ defaults
     option                  httplog
     option                  dontlognull
     option http-server-close
+{% if not haproxy_is_external %}
     option forwardfor       except 127.0.0.0/8
+{% endif %}
     retries                 3
     timeout http-request    10s
     timeout queue           1m
@@ -28,7 +30,13 @@ frontend https
     log /dev/log local0
     bind *:443 ssl crt {{ certificates_local_dir }}/{{ certificate_name }}
     mode http
+{% if haproxy_is_external %}
+    acl from_cf src -f /usr/local/share/AS13335.dat
+    acl cf_ip_hdr req.hdr(CF-Connecting-IP) -m found
+    http-request set-header X-Forwarded-For %[req.hdr(CF-Connecting-IP)] if from_cf cf_ip_hdr
+{% else %}
     option forwardfor
+{% endif %}
     http-request set-header X-Forwarded-Proto https if { ssl_fc }
 
 {% for vhost, details in backend_services.items() %}

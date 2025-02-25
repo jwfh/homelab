@@ -122,9 +122,9 @@
   vars:
     backend_services:
       homepage:
-        mode: https
+        mode: http
         balance: roundrobin
-        port: 443
+        port: 80
         domain_name: jwfh.ca
         servers: 
           - gizmo.lemarchant.jacobhouse.ca

@@ -44,7 +44,7 @@ frontend https
 {% endfor %}    
 {% for vhost, details in haproxy_backend_services.items() %}
     use_backend {{ vhost }} if acl_{{ vhost }}
-{% endfor %}    
+{% endfor %}
     default_backend err_404
 
 {% for vhost, details in haproxy_backend_services.items() %}

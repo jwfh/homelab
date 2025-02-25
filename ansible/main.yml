@@ -97,7 +97,7 @@
 #         port: 80
 #         domain_name: jwfh.ca
 #         servers: 
-#           - gizmo.lemarchant.jacobhouse.ca
+#           - scooby.lemarchant.jacobhouse.ca
 #           - bowser.lemarchant.jacobhouse.ca
 #       plex:
 #         mode: http
@@ -136,7 +136,7 @@
         port: 80
         domain_name: jwfh.ca
         servers: 
-          - gizmo.lemarchant.jacobhouse.ca
+          - scooby.lemarchant.jacobhouse.ca
           - bowser.lemarchant.jacobhouse.ca
 # - name: Configure ACME.sh certificate management server
 #   hosts: acme

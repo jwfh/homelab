@@ -127,7 +127,8 @@
         port: 443
         domain_name: jwfh.ca
         servers: 
-          - ratchet.lemarchant.jacobhouse.ca
+          - gizmo.lemarchant.jacobhouse.ca
+          - bowser.lemarchant.jacobhouse.ca
 - name: Configure ACME.sh certificate management server
   hosts: acme
   become: true

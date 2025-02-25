@@ -1,0 +1,2 @@
+nginx_autoindex: off
+nginx_404_is_403: true

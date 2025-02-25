@@ -1,5 +1,3 @@
-nginx_autoindex:
-nginx_404_is_403:
 services_nfs_server: ritchie
 services_nfs_prefix: /mnt/default/services
 certificates_local_dir: /usr/local/share/certificates

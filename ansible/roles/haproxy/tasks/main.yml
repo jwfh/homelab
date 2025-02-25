@@ -64,7 +64,7 @@
         group: '{{ wheel }}'
         mode: '700'
     - name: Create download-asn-range script
-      copy: src=files/download-asn-range.sh dest=//usr/local/sbin/download-asn-range mode=700
+      copy: src=download-asn-range.sh dest=//usr/local/sbin/download-asn-range mode=700
     - name: Check if CloudFlare ASN range list exists
       stat:
         path: /usr/local/share/AS13335.dat

@@ -26,6 +26,10 @@
     opts: rw,nosuid
     state: mounted
     fstype: nfs
+- name: Create custom error pages
+  copy: src='{{ item }}' dest='/usr/local/www/nginx/{{ item | basename }}' mode=0644
+  with_fileglob:
+    - error_pages/*
 - name: Configure nginx
   template:
     src: nginx/nginx.conf.j2

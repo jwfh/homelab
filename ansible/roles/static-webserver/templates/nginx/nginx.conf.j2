@@ -26,7 +26,11 @@ http {
         location / {
             root   {{ webroot_local_dir }}/www;
             index  index.html index.htm;
-            autoindex {{ nginx_autoindex }};
+{% if nginx_autoindex %}
+            autoindex on;
+{% else %}
+            autoindex off;
+{% endif %}
         }
 
         error_page  403              /403.html;
@@ -35,7 +39,7 @@ http {
 {% else %}
         error_page  404              /404.html;
 {% endif %}
-        error_page  500 502 503 504  /50x.html
+        error_page  500 502 503 504  /50x.html;
 
         location ~ /(\/403\.html|404\.html|50x\.html)/ {
             root   /usr/local/www/nginx;

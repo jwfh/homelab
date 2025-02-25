@@ -43,7 +43,7 @@
 #   vars_files:
 #     - "inventory/host_variables/{{ ansible_host }}.yml"
 #   vars:
-#     nginx_autoindex: on
+#     nginx_autoindex: true
 #     webroot_nfs_server: ritchie
 #     webroot_nfs_prefix: /mnt/default/mirror
 #     webroot_local_dir: /mirror

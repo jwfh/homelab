@@ -1,4 +1,11 @@
 ---
+- name: Set base custom facts
+  hosts: managed
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - jwfh-set-facts
 # - name: Configure base operating system
 #   hosts: managed
 #   become: true

@@ -1,2 +1,1 @@
-wheel: sudo
 sudoers_dir: /etc/sudoers.d

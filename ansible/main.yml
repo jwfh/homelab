@@ -48,18 +48,18 @@
 #     webroot_local_dir: /mirror
 #   roles:
 #     - static-webserver
-# - name: Configure portfolio site
-#   hosts: homepage
-#   become: true
-#   gather_facts: true
-#   vars_files:
-#     - "inventory/host_variables/{{ ansible_host }}.yml"
-#   vars:
-#     webroot_nfs_server: ritchie
-#     webroot_nfs_prefix: /mnt/default/services/homepage
-#     webroot_local_dir: /homepage
-#   roles:
-#     - static-webserver
+- name: Configure portfolio site
+  hosts: homepage
+  become: true
+  gather_facts: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  vars:
+    webroot_nfs_server: ritchie
+    webroot_nfs_prefix: /mnt/default/services/homepage
+    webroot_local_dir: /homepage
+  roles:
+    - static-webserver
 # - name: Configure Plex Media Server
 #   hosts: plex
 #   become: true

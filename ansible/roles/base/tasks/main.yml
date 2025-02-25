@@ -12,9 +12,7 @@
 - name: Load facts from SSM parameter store
   set_fact:
     ssm_parameters: "{{ ssm_parameters | default({}) | combine({item:  lookup('amazon.aws.aws_ssm', '/homelab/{{ ansible_site }}/{{ item }}', region=aws_ssm_parameter_region, profile=aws_ssm_parameter_profile)}) }}"
-  loop: "{{ ssm_parameter_names }}"
-- name: debug
-  debug: msg="{{ ssm_parameters }}"
+  loop: "{{ ssm_parameter_names | default([]) }}"
 - include_tasks: tasks/hostname.yml
 - include_tasks: tasks/hosts.yml
 - include_tasks: tasks/users.yml

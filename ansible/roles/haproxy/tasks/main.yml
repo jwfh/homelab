@@ -22,6 +22,25 @@
     state: mounted
     fstype: nfs
   when: certificate_store_access == 'mount'
+- name: Configure key syncing for hosts that cannot mount via NFS
+  block:
+    - name: Create .ssh directory for certificate-reader key
+      file:
+        name: /root/.ssh
+        state: directory
+        owner: root
+        group: '{{ wheel }}'
+        mode: '700'
+    - name: Create certificate-reader SSH key in root's $HOME
+      copy: content="{{ ssm_parameters['certificate-reader-ssh-private-key'] }}" dest=/root/.ssh/acme-ro mode=600
+    - name: Write sync-certificate script
+      template:
+        src: sync-certificate.sh.j2
+        dest: /root/sync-certificate
+        owner: root
+        group: '{{ wheel }}'
+        mode: '700'
+  when: certificate_store_access == 'copy'
 - name: Check if HAProxy log file exists
   stat:
     path: /var/log/haproxy.log
@@ -32,7 +51,7 @@
     state: touch
     mode: u=rw,g=r,o=r
     owner: root
-    group: wheel
+    group: '{{ wheel }}'
   notify: 
     - restart syslogd
   when: 'not haproxy_log.stat.exists'
@@ -41,7 +60,7 @@
     src: haproxy/syslog.conf.j2
     dest: /etc/syslog.conf
     owner: root
-    group: wheel
+    group: '{{ wheel }}'
     mode: '0644'
   notify: 
     - restart syslogd
@@ -50,7 +69,7 @@
     src: haproxy/haproxy.cfg.j2
     dest: /usr/local/etc/haproxy.conf
     owner: root
-    group: wheel
+    group: '{{ wheel }}'
     mode: '0644'
   notify: 
     - restart haproxy

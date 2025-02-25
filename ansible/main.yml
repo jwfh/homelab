@@ -61,7 +61,7 @@
   roles:
     - plex
 - name: Configure CI/CD controller nodes
-  hosts: cicd-controller
+  hosts: cicd_controller
   become: true
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
@@ -75,7 +75,7 @@
   roles:
     - pxeboot
 - name: Configure HAProxy reverse proxy servers for internal services
-  hosts: internal-haproxy
+  hosts: internal_haproxy
   become: true
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
@@ -113,7 +113,7 @@
         servers: 
           - muffin.lemarchant.jacobhouse.ca
 - name: Configure HAProxy reverse proxy servers for external services
-  hosts: external-haproxy
+  hosts: external_haproxy
   become: true
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
@@ -121,13 +121,13 @@
     - haproxy
   vars:
     backend_services:
-      mirror:
-        mode: http
+      homepage:
+        mode: https
         balance: roundrobin
-        port: 80
-        domain_name: mirror.jwfh.ca
+        port: 443
+        domain_name: jwfh.ca
         servers: 
-          - muffin.lemarchant.jacobhouse.ca
+          - ratchet.lemarchant.jacobhouse.ca
 - name: Configure ACME.sh certificate management server
   hosts: acme
   become: true

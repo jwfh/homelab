@@ -35,7 +35,7 @@ frontend https
     acl from_cf src -f /usr/local/share/AS13335.dat
     acl cf_ip_hdr req.hdr(CF-Connecting-IP) -m found
     http-request set-header X-Forwarded-For %[req.hdr(CF-Connecting-IP)] if from_cf cf_ip_hdr
-    log-format "%ci:%cp %{+Q}[var(txn.req_cf_cxn_ip)] [%tr] %ft %b/%s %TR/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r"
+    log-format "%[var(txn.req_cf_cxn_ip)]/%ci:%cp [%tr] %ft %b/%s %TR/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r"
     http-request set-var(txn.req_cf_cxn_ip) req.hdr(CF-Connecting-IP)
 {% endif %}
 

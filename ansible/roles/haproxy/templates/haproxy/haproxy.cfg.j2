@@ -13,14 +13,8 @@ defaults
     option                  httplog
     option                  dontlognull
     option http-server-close
-{% if haproxy_is_external %}
-    acl from_cf src -f /usr/local/share/AS13335.dat
-    acl cf_ip_hdr req.hdr(CF-Connecting-IP) -m found
-    http-request set-header X-Forwarded-For %[req.hdr(CF-Connecting-IP)] if from_cf cf_ip_hdr
-    log-format "%ci:%cp %{+Q}[var(txn.req_cf_cxn_ip)] [%tr] %ft %b/%s %TR/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r"
-    http-request set-var(txn.req_cf_cxn_ip) req.hdr(CF-Connecting-IP)
-{% else %}
-    option forwardfor
+{% if not haproxy_is_external %}
+    option forwardfor       except 127.0.0.0/8
 {% endif %}
     retries                 3
     timeout http-request    10s
@@ -37,6 +31,13 @@ frontend https
     bind *:443 ssl crt {{ certificates_local_dir }}/{{ certificate_name }}
     mode http
     http-request set-header X-Forwarded-Proto https if { ssl_fc }
+{% if haproxy_is_external %}
+    acl from_cf src -f /usr/local/share/AS13335.dat
+    acl cf_ip_hdr req.hdr(CF-Connecting-IP) -m found
+    http-request set-header X-Forwarded-For %[req.hdr(CF-Connecting-IP)] if from_cf cf_ip_hdr
+    log-format "%ci:%cp %{+Q}[var(txn.req_cf_cxn_ip)] [%tr] %ft %b/%s %TR/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r"
+    http-request set-var(txn.req_cf_cxn_ip) req.hdr(CF-Connecting-IP)
+{% endif %}
 
 {% for vhost, details in haproxy_backend_services.items() %}
     acl acl_{{ vhost }} hdr(host) -i {{ details.domain_name }}

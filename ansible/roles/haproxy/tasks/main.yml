@@ -44,7 +44,7 @@
     opts: ro,nosuid
     state: mounted
     fstype: nfs
-  when: 'not ha_proxy_is_external'
+  when: 'not haproxy_is_external'
 - name: Configure extra steps for external host requirements
   block:
     - name: Create .ssh directory for certificate-reader key

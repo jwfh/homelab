@@ -14,33 +14,6 @@
   service:
     name: haproxy
     enabled: true
-- name: Mount certificates store read-only
-  ansible.posix.mount:
-    src: "{{ services_nfs_server }}:{{ services_nfs_prefix }}/certificates"
-    path: "{{ certificates_local_dir }}"
-    opts: ro,nosuid
-    state: mounted
-    fstype: nfs
-  when: certificate_store_access == 'mount'
-- name: Configure key syncing for hosts that cannot mount via NFS
-  block:
-    - name: Create .ssh directory for certificate-reader key
-      file:
-        name: /root/.ssh
-        state: directory
-        owner: root
-        group: '{{ wheel }}'
-        mode: '700'
-    - name: Create certificate-reader SSH key in root's $HOME
-      copy: content="{{ ssm_parameters['certificate-reader-ssh-private-key'] }}" dest=/root/.ssh/acme-ro mode=600
-    - name: Write sync-certificate script
-      template:
-        src: sync-certificate.sh.j2
-        dest: /root/sync-certificate
-        owner: root
-        group: '{{ wheel }}'
-        mode: '700'
-  when: certificate_store_access == 'copy'
 - name: Check if HAProxy log file exists
   stat:
     path: /var/log/haproxy.log
@@ -64,8 +37,32 @@
     mode: '0644'
   notify: 
     - restart syslogd
+- name: Mount certificates store read-only
+  ansible.posix.mount:
+    src: "{{ services_nfs_server }}:{{ services_nfs_prefix }}/certificates"
+    path: "{{ certificates_local_dir }}"
+    opts: ro,nosuid
+    state: mounted
+    fstype: nfs
+  when: 'not ha_proxy_is_external'
 - name: Configure extra steps for external host requirements
   block:
+    - name: Create .ssh directory for certificate-reader key
+      file:
+        name: /root/.ssh
+        state: directory
+        owner: root
+        group: '{{ wheel }}'
+        mode: '700'
+    - name: Create certificate-reader SSH key in root's $HOME
+      copy: content="{{ ssm_parameters['certificate-reader-ssh-private-key'] }}" dest=/root/.ssh/acme-ro mode=600
+    - name: Write sync-certificate script
+      template:
+        src: sync-certificate.sh.j2
+        dest: /root/sync-certificate
+        owner: root
+        group: '{{ wheel }}'
+        mode: '700'
     - name: Create download-asn-range script
       copy: src=files/download-asn-range.sh dest=//usr/local/sbin/download-asn-range mode=700
     - name: Check if CloudFlare ASN range list exists

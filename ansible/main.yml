@@ -1,11 +1,11 @@
 ---
-- name: Configure base operating system
-  hosts: managed
-  become: true
-  vars_files:
-    - "inventory/host_variables/{{ ansible_host }}.yml"
-  roles:
-    - base
+# - name: Configure base operating system
+#   hosts: managed
+#   become: true
+#   vars_files:
+#     - "inventory/host_variables/{{ ansible_host }}.yml"
+#   roles:
+#     - base
 # - name: Configure DNS Server (BIND9)
 #   hosts: dns
 #   become: true
@@ -121,7 +121,7 @@
   roles:
     - haproxy
   vars:
-    is_external: true
+    haproxy_is_external: true
     haproxy_backend_services:
       homepage:
         mode: http

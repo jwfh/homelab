@@ -36,19 +36,19 @@
 #   roles:
 #     - user-server
 #     - generic-compute
-# - name: Configure public software mirror
-#   hosts: mirror
-#   become: true
-#   gather_facts: true
-#   vars_files:
-#     - "inventory/host_variables/{{ ansible_host }}.yml"
-#   vars:
-#     nginx_autoindex: true
-#     webroot_nfs_server: ritchie
-#     webroot_nfs_prefix: /mnt/default/mirror
-#     webroot_local_dir: /mirror
-#   roles:
-#     - static-webserver
+- name: Configure public software mirror
+  hosts: mirror
+  become: true
+  gather_facts: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  vars:
+    nginx_autoindex: true
+    webroot_nfs_server: ritchie
+    webroot_nfs_prefix: /mnt/default/mirror
+    webroot_local_dir: /mirror
+  roles:
+    - static-webserver
 - name: Configure portfolio site
   hosts: homepage
   become: true
@@ -61,6 +61,12 @@
     webroot_local_dir: /homepage
   roles:
     - static-webserver
+- name: Shlink server
+  hosts: shlink
+  become: true
+  gather_facts: true
+  roles:
+    - shlink
 # - name: Configure Plex Media Server
 #   hosts: plex
 #   become: true
@@ -82,45 +88,46 @@
 #     - "inventory/host_variables/{{ ansible_host }}.yml"
 #   roles:
 #     - pxeboot
-# - name: Configure HAProxy reverse proxy servers for internal services
-#   hosts: internal_haproxy
-#   become: true
-#   vars_files:
-#     - "inventory/host_variables/{{ ansible_host }}.yml"
-#   roles:
-#     - haproxy
-#   vars:
-#     haproxy_is_external: false
-#     haproxy_backend_services:
-#       homepage:
-#         mode: http
-#         balance: roundrobin
-#         port: 80
-#         domain_name: jwfh.ca
-#         servers: 
-#           - scooby.lemarchant.jacobhouse.ca
-#           - bowser.lemarchant.jacobhouse.ca
-#       plex:
-#         mode: http
-#         balance: sticky
-#         port: 32400
-#         domain_name: plex.jwfh.ca
-#         servers: 
-#           - pixel.lemarchant.jacobhouse.ca
-#       jenkins:
-#         mode: http
-#         balance: sticky
-#         port: 8080
-#         domain_name: ci.jwfh.ca
-#         servers:
-#           - papillon.lemarchant.jacobhouse.ca
-#       mirror:
-#         mode: http
-#         balance: roundrobin
-#         port: 80
-#         domain_name: mirror.jwfh.ca
-#         servers: 
-#           - muffin.lemarchant.jacobhouse.ca
+- name: Configure HAProxy reverse proxy servers for internal services
+  hosts: internal_haproxy
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - haproxy
+  vars:
+    certificate_cn: jwfh.ca
+    haproxy_is_external: false
+    haproxy_backend_services:
+      homepage:
+        mode: http
+        balance: roundrobin
+        port: 80
+        domain_name: jwfh.ca
+        servers: 
+          - scooby.lemarchant.jacobhouse.ca
+          - bowser.lemarchant.jacobhouse.ca
+      plex:
+        mode: http
+        balance: sticky
+        port: 32400
+        domain_name: plex.jwfh.ca
+        servers: 
+          - pixel.lemarchant.jacobhouse.ca
+      jenkins:
+        mode: http
+        balance: sticky
+        port: 8080
+        domain_name: ci.jwfh.ca
+        servers:
+          - papillon.lemarchant.jacobhouse.ca
+      mirror:
+        mode: http
+        balance: roundrobin
+        port: 80
+        domain_name: mirror.jwfh.ca
+        servers: 
+          - muffin.lemarchant.jacobhouse.ca
 - name: Configure HAProxy reverse proxy servers for external services
   hosts: external_haproxy
   become: true
@@ -129,6 +136,7 @@
   roles:
     - haproxy
   vars:
+    certificate_cn: jwfh.ca
     haproxy_is_external: true
     haproxy_backend_services:
       homepage:

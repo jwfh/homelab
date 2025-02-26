@@ -1,9 +1,7 @@
-
-#user  nobody;
-worker_processes  1;
+worker_processes 1;
 
 events {
-    worker_connections  1024;
+    worker_connections 1024;
 }
 
 http {
@@ -14,18 +12,18 @@ http {
     #                  '$status $body_bytes_sent "$http_referer" '
     #                  '"$http_user_agent" "$http_x_forwarded_for"';
 
-    sendfile        on;
-    keepalive_timeout  65;
-    gzip  on;
+    sendfile on;
+    keepalive_timeout 65;
+    gzip on;
 
     server {
-        listen       80;
-        server_name  localhost;
-        add_header server "jwfh";
+        listen 80;
+        server_name "{{ inventory_hostname }}.{{ ansible_site }}.{{ ansible_root_domain }}";
+        server_tokens off;
 
         location / {
-            root   {{ webroot_local_dir }}/www;
-            index  index.html index.htm;
+            root {{ webroot_local_dir }}/www;
+            index index.html index.htm;
 {% if nginx_autoindex %}
             autoindex on;
 {% else %}
@@ -33,16 +31,21 @@ http {
 {% endif %}
         }
 
-        error_page  403              /403.html;
-{% if nginx_404_is_403 %}
-        error_page  404 =403         /404.html;
+        error_page 403 /403.hml;
+{% if nginx_all_errors_403 %}
+        error_page 404 =403 /403.html;
+        error_page 500 =403 /403.html;
+        error_page 502 =403 /403.html;
+        error_page 503 =403 /403.html;
+        error_page 504 =403 /403.html;
 {% else %}
-        error_page  404              /404.html;
+        error_page 404 /404.html;
+        error_page 500 502 503 504 /50x.html;
 {% endif %}
-        error_page  500 502 503 504  /50x.html;
 
-        location ~ /(\/403\.html|404\.html|50x\.html)/ {
-            root   /usr/local/www/nginx;
+        location ~* /(403|404|50x)\\.html {
+            root /usr/local/www/nginx;
+            types { } default_type "text/plain; charset=utf-8";
         }
 
         location ~ /\.ht {

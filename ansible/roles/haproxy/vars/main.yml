@@ -1,4 +1,1 @@
-services_nfs_server: ritchie
-services_nfs_prefix: /mnt/default/services
 certificates_local_dir: /usr/local/share/certificates
-certificate_name: acme/jwfh.ca_ecc/jwfh.ca.pem

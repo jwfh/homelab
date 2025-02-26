@@ -4,7 +4,7 @@
     name: haproxy
     state: present
 - name: Create haproxy user
-  ansible.builtin.user:
+  user:
     name: haproxy
     comment: HAProxy server
     uid: 200
@@ -19,7 +19,7 @@
     path: /var/log/haproxy.log
   register: haproxy_log
 - name: Touch HAProxy log file
-  ansible.builtin.file:
+  file:
     path: /var/log/haproxy.log
     state: touch
     mode: u=rw,g=r,o=r
@@ -37,32 +37,8 @@
     mode: '0644'
   notify: 
     - restart syslogd
-- name: Mount certificates store read-only
-  ansible.posix.mount:
-    src: "{{ services_nfs_server }}:{{ services_nfs_prefix }}/certificates"
-    path: "{{ certificates_local_dir }}"
-    opts: ro,nosuid
-    state: mounted
-    fstype: nfs
-  when: 'not haproxy_is_external'
 - name: Configure extra steps for external host requirements
   block:
-    - name: Create .ssh directory for certificate-reader key
-      file:
-        name: /root/.ssh
-        state: directory
-        owner: root
-        group: '{{ wheel }}'
-        mode: '700'
-    - name: Create certificate-reader SSH key in root's $HOME
-      copy: content="{{ ssm_parameters['certificate-reader-ssh-private-key'] }}" dest=/root/.ssh/acme-ro mode=600
-    - name: Write sync-certificate script
-      template:
-        src: sync-certificate.sh.j2
-        dest: /root/sync-certificate
-        owner: root
-        group: '{{ wheel }}'
-        mode: '700'
     - name: Create download-asn-range script
       copy: src=download-asn-range.sh dest=//usr/local/sbin/download-asn-range mode=700
     - name: Check if CloudFlare ASN range list exists
@@ -85,6 +61,14 @@
         weekday: '*'
   when:
     - haproxy_is_external
+- name: Install TLS certificate
+  include_role: 
+    name: install-cert
+  vars:
+    web_server_user: haproxy
+    web_server_group: haproxy
+    web_services:
+      - haproxy
 - name: Configure HAProxy
   template:
     src: haproxy/haproxy.cfg.j2
@@ -93,7 +77,7 @@
     group: '{{ wheel }}'
     mode: '0644'
   notify: 
-    - restart haproxy
+    - reload haproxy
 - name: Start service HAProxy
   ansible.builtin.service:
     name: haproxy

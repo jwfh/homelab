@@ -12,13 +12,6 @@
   service:
     name: nginx
     enabled: true
-- name: Mount certificates store read-only
-  ansible.posix.mount:
-    src: "{{ services_nfs_server }}:{{ services_nfs_prefix }}/certificates"
-    path: "{{ certificates_local_dir }}"
-    opts: ro,nosuid
-    state: mounted
-    fstype: nfs
 - name: Mount an NFS volume
   ansible.posix.mount:
     src: "{{ webroot_nfs_server }}:{{ webroot_nfs_prefix }}"
@@ -30,6 +23,14 @@
   copy: src='{{ item }}' dest='/usr/local/www/nginx/{{ item | basename }}' mode=0644
   with_fileglob:
     - error_pages/*
+- name: Install TLS certificate
+  include_role: 
+    name: install-cert
+  vars:
+    web_server_user: www
+    web_server_group: www
+    web_services:
+      - nginx
 - name: Configure nginx
   template:
     src: nginx/nginx.conf.j2
@@ -40,6 +41,6 @@
   notify: 
     - restart nginx
 - name: Start service nginx
-  ansible.builtin.service:
+  service:
     name: nginx
     state: started

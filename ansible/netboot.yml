@@ -1,0 +1,11 @@
+
+---
+- name: Netboot server
+  hosts: netboot
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - jwfh-set-facts
+    - base
+    - pxeboot

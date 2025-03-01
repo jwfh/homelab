@@ -1,0 +1,12 @@
+
+---
+- name: SSH bastion
+  hosts: bastion
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - jwfh-set-facts
+    - base
+    - bastion
+    - user-server

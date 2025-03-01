@@ -1,0 +1,16 @@
+
+---
+- name: Public software mirror
+  hosts: mirror
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  vars:
+    nginx_autoindex: true
+    webroot_nfs_server: ritchie
+    webroot_nfs_prefix: /mnt/default/mirror
+    webroot_local_dir: /mirror
+  roles:
+    - jwfh-set-facts
+    - base
+    - static-webserver

@@ -1,0 +1,15 @@
+
+---
+- name: Personal website
+  hosts: homepage
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  vars:
+    webroot_nfs_server: ritchie
+    webroot_nfs_prefix: /mnt/default/services/homepage
+    webroot_local_dir: /homepage
+  roles:
+    - jwfh-set-facts
+    - base
+    - static-webserver

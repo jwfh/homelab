@@ -1,0 +1,22 @@
+
+---
+- name: External HAProxy reverse proxy server
+  hosts: external_haproxy
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  vars:
+    haproxy_is_external: true
+    haproxy_backend_services:
+      homepage:
+        mode: http
+        balance: roundrobin
+        port: 80
+        domain_name: jwfh.ca
+        servers: 
+          - scooby.lemarchant.jacobhouse.ca
+          - bowser.lemarchant.jacobhouse.ca
+  roles:
+    - jwfh-set-facts
+    - base
+    - haproxy

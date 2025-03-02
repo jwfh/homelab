@@ -1,0 +1,42 @@
+---
+- name: Create .ssh directory for certificate-reader key
+  file:
+    name: /root/.ssh
+    state: directory
+    owner: root
+    group: '{{ wheel }}'
+    mode: '700'
+- name: Create certificate-reader SSH key in root's $HOME
+  copy: content="{{ ssm_parameters['certificate-reader-ssh-private-key'] }}" dest=/root/.ssh/acme-ro mode=600
+- name: Install cert server public key so we can SSH
+  known_hosts:
+    name: '{{ certificate_server }}'
+    key: '{{ item }}'
+    path: /etc/ssh/ssh_known_hosts
+    state: present
+  with_items: "{{ certificate_server_ssh_fingerprints }}"
+- name: Write sync-certificate script
+  template:
+    src: sync-certificate.sh.j2
+    dest: /usr/local/sbin/sync-certificate
+    owner: root
+    group: '{{ wheel }}'
+    mode: '700'
+- name: Check if certificate exists
+  stat:
+    path: "{{ certificates_local_dir }}/{{ certificate_cn }}.pem"
+  register: cert_file
+- name: Install certificate
+  shell: /usr/local/sbin/sync-certificate 'acme/{{ certificate_cn }}_ecc/{{ certificate_cn }}.pem'
+  when:
+    - 'not cert_file.stat.exists'
+- name: Configure automatic updating of certificate
+  cron:
+    name: Install certificate once every 24 hours to ensure it is up to date
+    job: /usr/local/sbin/sync-certificate 'acme/{{ certificate_cn }}_ecc/{{ certificate_cn }}.pem'
+    user: root
+    minute: 0
+    hour: 0
+    day: '*'
+    month: '*'
+    weekday: '*'

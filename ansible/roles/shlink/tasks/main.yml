@@ -1,0 +1,42 @@
+---
+- name: Install PHP and other dependencies
+  pkgng:
+    name: 
+      - php84
+      - php84-curl
+      - php84-bcmath
+      - php84-gd
+      - php84-intl
+      - php84-pdo
+      - php84-pdo_pgsql
+      - unzip
+    state: present
+- name: Ensure the Shlink directory exists
+  file:
+    path: /usr/local/shlink
+    state: directory
+    owner: root
+    group: '{{ wheel }}'
+    mode: '0755'
+- name: Check if Shlink installation exists
+  stat:
+    path: /usr/local/shlink/public/index.php
+  register: shlink_index
+- name: Unarchive a file that needs to be downloaded (added in 2.0)
+  block:
+    - name: Download Shlink release
+      shell: fetch -o /tmp/shlink.zip https://github.com/shlinkio/shlink/releases/download/v4.4.4/shlink4.4.4_php8.4_dist.zip 
+    - name: Extract Shlink release
+      shell: tar -xf /tmp/shlink.zip -s'|[^/]*/||' -C /usr/local/shlink
+    - name: Clean up Slink release
+      file:
+        path: /tmp/shlink.zip
+        state: absent
+  when: 'not shlink_index.stat.exists'
+- name: Write Shlink configuration file
+  template:
+    src: shlink/generated_config.php.j2
+    dest: /usr/local/shlink/config/params/generated_config.php
+    owner: root
+    group: wheel
+    mode: '0640'

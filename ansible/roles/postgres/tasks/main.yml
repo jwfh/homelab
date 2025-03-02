@@ -6,6 +6,13 @@
       - postgresql17-client
       - postgresql17-contrib
     state: present
+- name: Check if the Postgres data directory exists
+  stat:
+    path: /var/db/postgres/data17
+  register: postgres_data
+- name: Initialize Postgres
+  shell: service postgresql initdb
+  when: 'not postgres_data.stat.exists'
 - name: Enable Postgres 17 service
   service:
     name: postgresql
@@ -14,8 +21,19 @@
   service:
     name: postgresql
     state: started
+# - name: Create Postgres users and databases
+#   block:
+#     - name: Debug SSM params
+#       debug: msg="{{ item }}"
+#       with_items: "{{ 
+#         ssm_parameter_names | 
+#         select('search', '^.*-database-credentials$') |
+#         list }}"
 - name: Create Postgres databases
   postgresql_db:
-    name: "{{ item }}"
+    name: "{{ ssm_parameters[item] | from_json |  community.general.json_query('database')  }}"
     state: present
-  with_items: '{{ pg_database_names }}'
+  with_items: "{{ 
+    ssm_parameter_names | 
+    select('search', '^.*-database-credentials$') |
+    list }}"

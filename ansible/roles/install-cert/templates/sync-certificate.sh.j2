@@ -1,0 +1,36 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]; then
+    echo "Expected one argument: ${0} CERTIFICATE-LEAF"
+    exit 1
+fi
+
+certificate_leaf="${1}"
+certificate_source="{{ certificates_prefix }}/certificates/${certificate_leaf}"
+certificate_destination="{{ certificates_local_dir }}/$(basename "${certificate_leaf}")"
+
+if [ ! -d "{{ certificates_local_dir }}" ]; then
+    mkdir -p "{{ certificates_local_dir }}"
+fi
+
+if [ -f "${certificate_destination}" ]; then
+    certificate_hash="$(md5sum "${certificate_destination}" | awk '{ print $1 }')"
+else
+    certificate_hash="none"
+fi
+
+rsync -Pav \
+    -e "ssh -i $HOME/.ssh/acme-ro" \
+    "acme-ro@{{ certificate_server }}:${certificate_source}" \
+    "${certificate_destination}"
+chown {{ web_server_user }} "${certificate_destination}"
+chgrp {{ web_server_group }} "${certificate_destination}"
+chmod 640 "${certificate_destination}"
+
+new_certificate_hash="$(md5sum "${certificate_destination}" | awk '{ print $1 }')"
+
+if [ "${certificate_hash}" != "${new_certificate_hash}" ]; then
+{% for web_service in web_services %}
+    service {{ web_service }} reload
+{% endfor %}
+fi

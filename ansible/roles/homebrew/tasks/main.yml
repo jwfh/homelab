@@ -1,0 +1,51 @@
+- name: Ensuring Homebrew Is Installed
+  stat:
+    path: /usr/local/bin/brew
+  register: homebrew_check
+- name: Fail If Homebrew Is Not Installed and install_homebrew_if_missing Is False
+  fail:
+    msg: Homebrew is missing...Install from http://brew.sh/
+  when:
+    - not homebrew_check.stat.exists
+    - not install_homebrew_if_missing
+- name: Instal Homebrew
+  block:
+    - name: Check if Homebrew user package list exists
+      stat:
+        path: /var/tmp/.homebrew_pkg_user
+    - name: Create Homebrew package list
+      shell: defaults write /var/tmp/.homebrew_pkg_user HOMEBREW_PKG_USER $SUDO_USER
+    - name: Download Homebrew .pkg installer
+      shell: curl -sSfL -o /tmp/homebrew.pkg https://github.com/Homebrew/brew/releases/download/4.4.22/Homebrew-4.4.22.pkg
+    - name: Install Homebrew package
+      shell: sudo installer -pkg /tmp/homebrew.pkg -target /
+    - name: Clean up Homebrew installer package
+      file:
+        path: /tmp/homebrew.pkg
+        state: absent
+  when:
+    - not homebrew_check.stat.exists
+    - install_homebrew_if_missing
+
+- block:
+  - name: Updating Homebrew
+    homebrew:
+      update_homebrew: true
+  - name: Upgrading Homebrew Packages
+    homebrew:
+      upgrade_all: "{{ upgrade_homebrew_packages }}"
+    register: result
+    until: result is successful
+  - name: Installing Homebrew Cask Packages
+    homebrew_cask:
+      name: "{{ brew_cask_packages }}"
+      state: present
+    register: result
+    until: result is successful
+  - name: Installing Homebrew Packages
+    homebrew:
+      name: "{{ brew_packages }}"
+      state: present
+    register: result
+    until: result is successful
+  become: no

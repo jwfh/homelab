@@ -23,16 +23,16 @@
       }) }}"
   loop: "{{ ssm_parameter_names }}"
 - include_tasks: tasks/hostname.yml
-  when: '{{ manage_hostname }}'
+  when: manage_hostname
 - include_tasks: tasks/hosts.yml
-  when: '{{ manage_hosts_file }}'
+  when: manage_hosts_file
 - include_tasks: tasks/users.yml
-  when: '{{ manage_users }}'
+  when: manage_users
 - include_tasks: tasks/os/{{ansible_os_family}}.yml
 - include_tasks: tasks/packages.yml
-  when: '{{ manage_base_packages }}'
+  when: manage_base_packages
 - include_tasks: tasks/services.yml
-  when: '{{ manage_services }}'
+  when: manage_services
 - include_tasks: tasks/qemu.yml
   when: 
     - "'QEMU' in ansible_facts.processor | join(' ')"

@@ -9,11 +9,30 @@
         - default.yml
       paths:
         - 'vars'
+- name: Load facts from SSM parameter store
+  set_fact:
+    ssm_parameters: "{{ ssm_parameters 
+      | default({}) 
+      | combine({
+        item:  lookup(
+          'amazon.aws.aws_ssm', 
+          '/homelab/{{ ansible_site }}/{{ item }}', 
+          region=aws_ssm_parameter_region, 
+          profile=aws_ssm_parameter_profile
+        )
+      }) }}"
+  loop: "{{ ssm_parameter_names }}"
 - include_tasks: tasks/hostname.yml
+  when: '{{ manage_hostname }}'
 - include_tasks: tasks/hosts.yml
+  when: '{{ manage_hosts_file }}'
 - include_tasks: tasks/users.yml
-- include_tasks: tasks/packages.yml
-- include_tasks: tasks/services.yml
-- include_tasks: tasks/qemu.yml
-  when: "'QEMU' in ansible_facts.processor | join(' ')"
+  when: '{{ manage_users }}'
 - include_tasks: tasks/os/{{ansible_os_family}}.yml
+- include_tasks: tasks/packages.yml
+  when: '{{ manage_base_packages }}'
+- include_tasks: tasks/services.yml
+  when: '{{ manage_services }}'
+- include_tasks: tasks/qemu.yml
+  when: 
+    - "'QEMU' in ansible_facts.processor | join(' ')"

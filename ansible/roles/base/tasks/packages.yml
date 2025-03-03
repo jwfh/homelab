@@ -1,11 +1,7 @@
 ---
 - name: Install required base packages
   package:
-    name: 
-      - sudo
-      - vim
-      - htop
-      - rsync
+    name: '{{ base_packages | default([]) }}'
     state: latest
 - name: Configure sudo for wheel
   template:

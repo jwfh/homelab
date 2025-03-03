@@ -1,1 +1,14 @@
+manage_hostname: true
+manage_hosts_file: true
+manage_users: true
+manage_base_packages: true
+manage_services: true
+
 sudoers_dir: /etc/sudoers.d
+wheel: sudo
+
+base_packages:
+  - sudo
+  - vim
+  - htop
+  - rsync

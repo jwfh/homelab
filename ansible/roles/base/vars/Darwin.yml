@@ -1,0 +1,16 @@
+manage_hostname: false
+manage_hosts_file: false
+manage_users: false
+manage_base_packages: true
+manage_services: false
+
+install_homebrew_if_missing: true
+upgrade_homebrew_packages: false
+
+sudoers_dir: /private/etc/sudoers.d
+wheel: admin
+
+base_packages:
+  - vim
+  - htop
+  - rsync

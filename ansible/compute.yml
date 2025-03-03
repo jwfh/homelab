@@ -6,7 +6,6 @@
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
   roles:
-    - jwfh-set-facts
     - base
     - user-server
     - generic-compute

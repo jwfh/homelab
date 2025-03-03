@@ -10,6 +10,5 @@
     webroot_nfs_prefix: /mnt/default/services/homepage
     webroot_local_dir: /homepage
   roles:
-    - jwfh-set-facts
     - base
     - static-webserver

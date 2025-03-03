@@ -38,6 +38,5 @@
         servers: 
           - muffin.lemarchant.jacobhouse.ca
   roles:
-    - jwfh-set-facts
     - base
     - haproxy

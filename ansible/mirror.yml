@@ -11,6 +11,5 @@
     webroot_nfs_prefix: /mnt/default/mirror
     webroot_local_dir: /mirror
   roles:
-    - jwfh-set-facts
     - base
     - static-webserver

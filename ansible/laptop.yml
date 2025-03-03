@@ -43,5 +43,4 @@
       - texlive
       - bmake
   roles:
-    - jwfh-set-facts
     - homebrew

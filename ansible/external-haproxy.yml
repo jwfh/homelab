@@ -17,6 +17,5 @@
           - scooby.lemarchant.jacobhouse.ca
           - bowser.lemarchant.jacobhouse.ca
   roles:
-    - jwfh-set-facts
     - base
     - haproxy

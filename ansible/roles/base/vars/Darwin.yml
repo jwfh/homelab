@@ -6,6 +6,7 @@ manage_services: false
 
 install_homebrew_if_missing: true
 upgrade_homebrew_packages: false
+package_manager_become: false
 
 sudoers_dir: /private/etc/sudoers.d
 wheel: admin

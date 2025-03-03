@@ -3,6 +3,7 @@
   package:
     name: '{{ base_packages | default([]) }}'
     state: latest
+  become: '{{ package_manager_become }}'
 - name: Configure sudo for wheel
   template:
     src: sudoers/wheel.j2

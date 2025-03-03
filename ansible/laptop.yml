@@ -44,3 +44,4 @@
       - bmake
   roles:
     - base
+    - user-terminal

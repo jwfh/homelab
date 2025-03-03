@@ -1,0 +1,5 @@
+user_terminal_base_packages:
+  - zsh
+  - fish
+  - vim
+  - htop

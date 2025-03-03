@@ -1,0 +1,12 @@
+---
+- name: Install standard user terminal packages
+  package:
+    name: '{{ user_terminal_base_packages + user_terminal_packages }}'
+    state: latest
+  become: '{{ package_manager_become }}'
+- name: Personalize user experience
+  block:
+    - name: Include owner's personal settings
+      include_tasks: 'users/{{ owner }}.yml'
+  when:
+    - 'owner is defined'

@@ -8,4 +8,4 @@
   roles:
     - base
     - bastion
-    - user-server
+    - user-terminal

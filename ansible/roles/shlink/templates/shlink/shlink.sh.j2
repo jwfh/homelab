@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# PROVIDE: shlink
+# REQUIRE: LOGIN network
+# BEFORE:  DAEMON
+# KEYWORD: shutdown
+
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
+. /etc/rc.subr
+
+name="shlink"
+rcvar="shlink_enable"
+command="./bin/rr"
+command_args="serve -c config/roadrunner/.rr.yml"
+pidfile="/var/run/${name}.pid"
+start_precmd="shlink_prestart"
+stop_postcmd="shlink_poststop"
+
+load_rc_config $name
+
+shlink_prestart() {
+    # Change to /usr/local/shlink directory before starting the application
+    cd /usr/local/shlink || exit 1
+}
+
+shlink_poststop() {
+    # Actions after stopping the service (if needed)
+    return 0
+}
+
+# Default settings
+: ${shlink_enable:="NO"}
+: ${shlink_restart_sec:="30"}
+: ${shlink_timeout_stop_sec:="30"}
+
+# Start the service in the background
+start_cmd="nohup ${command} ${command_args} & echo \$! > ${pidfile}"
+stop_cmd="kill -TERM $(cat ${pidfile})"
+
+run_rc_command "$1"

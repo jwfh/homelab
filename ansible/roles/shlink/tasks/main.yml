@@ -42,7 +42,7 @@
     src: shlink/generated_config.php.j2
     dest: /usr/local/shlink/config/params/generated_config.php
     owner: root
-    group: wheel
+    group: '{{ wheel }}'
     mode: '0640'
 - name: Install RoadRunner
   shell: 
@@ -52,6 +52,13 @@
 - name: Make RoadRunner executable
   file:
     path: /usr/local/shlink/bin/rr
+    owner: root
+    group: '{{ wheel }}'
+    mode: '0755'
+- name: Install Shlink rc script
+  template:
+    src: shlink/shlink.sh.j2
+    dest: /usr/local/etc/rc.d/shlink
     owner: root
     group: '{{ wheel }}'
     mode: '0755'

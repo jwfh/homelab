@@ -14,7 +14,7 @@
     ssm_parameters: "{{ ssm_parameters 
       | default({}) 
       | combine({
-        item:  lookup(
+        item: lookup(
           'amazon.aws.aws_ssm', 
           '/homelab/{{ ansible_site }}/{{ item }}', 
           region=aws_ssm_parameter_region, 

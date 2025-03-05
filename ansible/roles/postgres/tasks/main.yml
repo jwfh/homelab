@@ -21,19 +21,25 @@
   service:
     name: postgresql
     state: started
-# - name: Create Postgres users and databases
-#   block:
-#     - name: Debug SSM params
-#       debug: msg="{{ item }}"
-#       with_items: "{{ 
-#         ssm_parameter_names | 
-#         select('search', '^.*-database-credentials$') |
-#         list }}"
-- name: Create Postgres databases
-  postgresql_db:
-    name: "{{ ssm_parameters[item] | from_json |  community.general.json_query('database')  }}"
-    state: present
-  with_items: "{{ 
-    ssm_parameter_names | 
-    select('search', '^.*-database-credentials$') |
-    list }}"
+- name: Gather Postgres configuration
+  set_fact:
+    database_config: "{{ 
+      ssm_parameters.items() 
+      | selectattr('0', 'match', '^.*-database-credentials$') 
+      | map(attribute='1') 
+      | map('from_json') 
+      | selectattr('host', 'equalto', ansible_fqdn) 
+      | list 
+    }}"
+  no_log: true
+- name: Debug database config
+  debug: msg='{{ database_config }}'
+
+# - name: Create Postgres databases
+#   postgresql_db:
+#     name: "{{ ssm_parameters[item] | from_json |  community.general.json_query('database')  }}"
+#     state: present
+#   with_items: "{{ 
+#     ssm_parameter_names | 
+#     select('search', '^.*-database-credentials$') |
+#     list }}"

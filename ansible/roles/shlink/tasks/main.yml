@@ -5,13 +5,12 @@
       - php84
       - php84-curl
       - php84-bcmath
+      - php84-extensions
       - php84-gd
-      - php84-iconv
       - php84-intl
       - php84-pdo
       - php84-pdo_pgsql
-      - php84-phar
-      - php84-tokenizer
+      - php84-sockets
       - php84-zlib
       - unzip
     state: present
@@ -31,7 +30,7 @@
     - name: Download Shlink release
       shell: fetch -o /tmp/shlink.zip https://github.com/shlinkio/shlink/releases/download/v4.4.4/shlink4.4.4_php8.4_dist.zip 
     - name: Extract Shlink release
-      shell: tar -xf /tmp/shlink.zip -s'|[^/]*/||' -C /usr/local/shlink
+      shell: tar --no-same-owner --no-same-permissions -xf /tmp/shlink.zip -s'|[^/]*/||' -C /usr/local/shlink
     - name: Clean up Slink release
       file:
         path: /tmp/shlink.zip
@@ -44,6 +43,13 @@
     owner: root
     group: '{{ wheel }}'
     mode: '0640'
+- name: Set permissions for Shlink data directory
+  file: 
+    path: /usr/local/shlink/data
+    owner: root 
+    group: '{{ wheel }}'
+    mode: u=rwX,g=rX,o=rX
+    recurse: true
 - name: Install RoadRunner
   shell: 
     cmd: php ./vendor/bin/rr get --no-interaction --location bin/
@@ -62,3 +68,18 @@
     owner: root
     group: '{{ wheel }}'
     mode: '0755'
+- name: Check if Shlink has been initialized
+  stat:
+    path: /usr/local/shlink/data/.ansbile-init-complete
+  register: shlink_init_flag
+- name: Initialize Shlink
+  shell: 
+    cmd: ./vendor/bin/shlink-installer init
+    chdir: /usr/local/shlink
+  when: 
+    - 'not shlink_init_flag.stat.exists'
+  register: shlink_init
+- name: Write init flag file
+  shell: 'date -u "+%Y-%m-%dT%H:%M:%SZ" > /usr/local/shlink/data/.ansbile-init-complete'
+  when:
+    - shlink_init.changed

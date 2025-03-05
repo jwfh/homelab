@@ -43,13 +43,22 @@
       list 
     }}"
   no_log: true
+- name: Install pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: /var/db/postgres/data16/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  notify: 
+    - reload postgresql
 - name: Create database users
   postgresql_user:
     name: '{{ item.user }}'
     encrypted: true
     password: '{{ item.password }}'
   loop: '{{ database_config }}'
-  no_log: true
+  # no_log: true
 - name: Create databases
   postgresql_db:
     name: '{{ item }}'

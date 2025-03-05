@@ -27,7 +27,7 @@ shlink_prestart() {
 }
 
 shlink_poststop() {
-    # Actions after stopping the service (if needed)
+    rm "${pidfile}"
     return 0
 }
 

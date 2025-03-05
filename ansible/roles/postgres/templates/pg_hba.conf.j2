@@ -3,10 +3,10 @@
 {% endfor %}
 
 # TYPE  DATABASE        USER            ADDRESS                 METHOD
-local   all             all                                     peer
+local   all             all                                     trust
 host    all             all             127.0.0.1/32            ident
 host    all             all             ::1/128                 ident
 local   replication     all                                     peer
 host    replication     all             127.0.0.1/32            ident
 host    replication     all             ::1/128                 ident
-host    shlink          shlink          10.174.12.0/22          ident
+host    shlink          shlink          0.0.0.0/0          scram-sha-256

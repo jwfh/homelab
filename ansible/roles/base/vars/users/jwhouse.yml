@@ -1,0 +1,76 @@
+username: jwhouse
+fullname: Jacob House
+uid: 222830
+groups:
+  - '{{ wheel }}'
+preferences:
+  Darwin:
+    homebrew_casks:
+      - spotify
+      - visual-studio-code
+      - google-chrome
+      - openvpn-connect
+      - iterm2
+      - aerial
+      - anki
+      - arc
+      - burp-suite
+      - corretto
+      - discord
+      - ghidra
+      - google-drive
+      - intellij-idea-ce
+      - jellyfin-media-player
+      - karabiner-elements
+      - messenger
+      - nextcloud-vfs
+      - nordvpn
+      - notion
+      - nperf
+      - plex
+      - qbittorrent
+      - slack
+      - telegram
+      - tor-browser
+      - vlc
+      - vnc-viewer
+      - zoom
+    homebrew_formulae:
+      - coreutils
+      - htop
+      - vim
+      - fish
+      - texlive
+      - bmake
+    defaults:
+      - domain: com.apple.controlcenter
+        key: BatteryShowPercentage
+        current_host: true
+        type: int
+        value: 1
+      - domain: com.apple.menuextra.clock
+        key: DateFormat
+        type: string
+        value: "EEE d MMM HH:mm:ss"
+      - domain: com.apple.menuextra.clock
+        key: IsAnalog
+        type: int
+        value: 0
+      - domain: com.apple.menuextra.clock
+        key: ShowDate
+        type: int
+        value: 1
+      - domain: com.apple.menuextra.clock
+        key: ShowDayOfWeek
+        type: int
+        value: 1
+      - domain: com.apple.menuextra.clock
+        key: ShowSeconds
+        type: int
+        value: 1
+      - domain: com.apple.finder
+        key: FXPreferredViewStyle
+        type: string
+        value: clmv
+  Debian:
+  FreeBSD:

@@ -1,3 +1,67 @@
 ---
-- include_tasks: users/jwhouse.yml
-- include_tasks: users/ngallant.yml
+- block:
+    - name: Load user metadata
+      include_vars:
+        name: _user_vars
+        file: "{{ item }}"
+      loop: "{{ q('fileglob', 'vars/users/*') }}"
+      register: user_vars_include
+    - name: Format user metadata
+      set_fact:
+        users: "{{ user_vars_include.results | map(attribute='ansible_facts._user_vars') }}"
+- name: Manage users
+  block:
+    - name: Create user primary group
+      group:
+        name: '{{ item.username }}'
+        state: present
+        gid: '{{ item.uid }}'
+      loop: '{{ users }}'
+      loop_control:
+        label: '{{ item.username }}'
+    - name: Create user
+      user:
+        name: '{{ item.username }}'
+        comment: '{{ item.fullname }}'
+        shell: '{{ item.shell | default("/bin/sh") }}'
+        group: '{{ item.username }}'
+        groups: '{{ item.groups }}'
+        append: false
+        home: '{{ item.home | default("/home/" + item.username) }}'
+        create_home: yes
+        uid: '{{ item.uid }}'
+        password: '*************'
+      loop: '{{ users }}'
+      loop_control:
+        label: '{{ item.username }}'
+    - name: Set home directory permissions
+      file:
+        path: '{{ item.home | default("/home/" + item.username) }}'
+        state: directory
+        mode: '0700'
+        owner: '{{ item.username }}'
+        group: '{{ item.username }}'
+      loop: '{{ users }}'
+      loop_control:
+        label: '{{ item.username }}'
+    - name: Add users' authorized keys
+      authorized_key:
+        user: '{{ item.username }}'
+        state: present
+        manage_dir: true
+        key: '{{ item.key }}'
+      loop: >-
+        {%- set results = [] -%}
+        {%- for user in users -%}
+        {%- for keyfile in query("fileglob", "public_keys/" + user.username + "/*") -%}
+        {%- set _ = results.append({
+            "username": user["username"],
+            "keyfile": (keyfile | basename),
+            "key": lookup("file", keyfile)
+          }) %}
+        {%- endfor -%}
+        {%- endfor -%}
+        {{ results }}
+      loop_control:
+        label: '{{ item | ansible.utils.remove_keys(target=["key"]) }}'
+  when: manage_users

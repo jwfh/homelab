@@ -1,3 +1,7 @@
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
 global
     log /dev/log local1
     user haproxy

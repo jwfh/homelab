@@ -1,4 +1,3 @@
-
 ---
 - name: External HAProxy reverse proxy server
   hosts: external_haproxy

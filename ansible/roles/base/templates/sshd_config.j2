@@ -1,3 +1,7 @@
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
 Port 22
 AddressFamily any
 ListenAddress 0.0.0.0

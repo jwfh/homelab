@@ -1,5 +1,9 @@
 #!/bin/sh
 
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
 if [ $# -ne 1 ]; then
     echo "Expected one argument: ${0} CERTIFICATE-LEAF"
     exit 1

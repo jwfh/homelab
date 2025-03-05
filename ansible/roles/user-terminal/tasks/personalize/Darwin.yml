@@ -1,0 +1,32 @@
+---
+- block:
+    - name: Install personalized Homebrew casks
+      homebrew_cask:
+        name: '{{ preferences.homebrew_casks }}'
+        state: present
+      when: 'preferences.homebrew_casks | d(False)'
+      register: result
+      until: result is successful
+    - name: Install personalized Homebrew formulae
+      homebrew:
+        name: '{{ preferences.homebrew_formulae }}'
+        state: present
+      when: 'preferences.homebrew_formulae | d(False)'
+      register: result
+      until: result is successful
+  become: '{{ package_manager_become }}'
+- name: Configure Darwin defaults for {{ owner }}
+  community.general.osx_defaults:
+    domain: '{{ item.domain }}'
+    host: '{{ "currentHost" if item.get("current_host") else omit }}'
+    key: '{{ item.key }}'
+    type: '{{ item.type }}'
+    value: '{{ item.value }}'
+    state: present
+  become: true
+  become_user: '{{ owner }}'
+  loop: '{{ preferences.defaults }}' # TODO filter to non-system defaults
+  loop_control:
+    label: '{{ item | ansible.utils.keep_keys(target=["domain", "key"] + (["current_host"] if item.get("current_host") else [])) }}'
+  when: 'preferences.defaults | d(False)'
+# TODO add another copy of above for system level defaults with normal `become`

@@ -1,4 +1,3 @@
-
 ---
 - name: ACME certificate server
   hosts: certbox

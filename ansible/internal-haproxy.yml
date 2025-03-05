@@ -1,4 +1,3 @@
-
 ---
 - name: Internal HAProxy reverse proxy server
   hosts: internal_haproxy

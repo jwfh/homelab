@@ -22,17 +22,23 @@
         )
       }) }}"
   loop: "{{ ssm_parameter_names }}"
-- include_tasks: tasks/hostname.yml
+- name: Include tasks/hostname.yml
+  include_tasks: tasks/hostname.yml
   when: manage_hostname
-- include_tasks: tasks/hosts.yml
+- name: Include tasks/hosts.yml
+  include_tasks: tasks/hosts.yml
   when: manage_hosts_file
-- include_tasks: tasks/users.yml
-  when: manage_users
-- include_tasks: tasks/os/{{ansible_os_family}}.yml
-- include_tasks: tasks/packages.yml
+- name: Include tasks/users.yml
+  include_tasks: tasks/users.yml
+- name: Include tasks/os/{{ansible_os_family}}.yml
+  include_tasks: tasks/os/{{ansible_os_family}}.yml
+- name: Include tasks/packages.yml
+  include_tasks: tasks/packages.yml
   when: manage_base_packages
-- include_tasks: tasks/services.yml
+- name: Include tasks/services.yml
+  include_tasks: tasks/services.yml
   when: manage_services
-- include_tasks: tasks/qemu.yml
+- name: Include tasks/qemu.yml
+  include_tasks: tasks/qemu.yml
   when: 
     - "'QEMU' in ansible_facts.processor | join(' ')"

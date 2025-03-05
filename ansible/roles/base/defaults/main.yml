@@ -1,2 +1,7 @@
 ssm_parameter_names: []
 package_manager_become: true
+warning_comment:
+  - THIS FILE IS MANAGED BY ANSIBLE. CE FICHIER EST GÉRÉ PAR ANSIBLE.
+  - 
+  - Any modifications to this file will be overwritten.
+  - Toute modification apportée à ce fichier sera écrasée.

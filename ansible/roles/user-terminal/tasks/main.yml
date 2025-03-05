@@ -4,9 +4,14 @@
     name: '{{ user_terminal_base_packages + user_terminal_packages }}'
     state: latest
   become: '{{ package_manager_become }}'
-- name: Personalize user experience
-  block:
-    - name: Include owner's personal settings
-      include_tasks: 'users/{{ owner }}.yml'
+- name: Personalize user experience for {{ owner | default("owner") }} on {{ ansible_os_family }}
+  include_tasks: 'personalize/{{ ansible_os_family }}.yml'
   when:
-    - 'owner is defined'
+    - 'preferences | d(False)'
+  vars:
+    preferences: '{{ users | 
+      selectattr("username", "equalto", owner) | 
+      map(attribute="preferences") | 
+      map(attribute=ansible_os_family) |
+      first |
+      d(None) }}'

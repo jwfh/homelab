@@ -1,5 +1,9 @@
 #!/bin/sh
 
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
 if [ $# -ne 2 ]; then
     echo "Expected 2 arguments: ${0} ASN FILE"
     exit 1

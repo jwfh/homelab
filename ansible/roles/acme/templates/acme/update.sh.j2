@@ -1,5 +1,9 @@
 #!/bin/sh
 
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
 /usr/local/sbin/acme.sh --cron
 
 cp -R /var/db/acme/certs/ "{{ certificates_local_dir }}/acme/"

@@ -1,13 +1,14 @@
 ---
 - name: Install required base packages
   package:
-    name: '{{ base_packages | default([]) }}'
+    name: '{{ base_packages }}'
     state: latest
   become: '{{ package_manager_become }}'
+  when: 'base_packages | default([]) | list | length > 0'
 - name: Configure sudo for wheel
   template:
     src: sudoers/wheel.j2
     dest: '{{ sudoers_dir }}/{{ wheel }}'
     owner: root
     group: '{{ wheel }}'
-    mode: '0600'
+    mode: '0440'

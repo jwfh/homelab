@@ -1,4 +1,9 @@
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
 127.0.0.1	localhost.{{ ansible_site }}.{{ ansible_root_domain }}		localhost
-{% for item in (groups.all | sort) %}
-{{ hostvars[item].ansible_host }}	{{ item }}.{{ hostvars[item].ansible_site }}.{{ hostvars[item].ansible_root_domain }}	    {{ item }}
+
+{% for fqdn in (all_hostnames.keys() | sort) %}
+{{ all_hostnames[fqdn].ip }}	{{ fqdn }}		{{ all_hostnames[fqdn].aliases | default([]) | join(' ') }}
 {% endfor %}

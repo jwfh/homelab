@@ -40,7 +40,12 @@
 - name: Configure extra steps for external host requirements
   block:
     - name: Create download-asn-range script
-      copy: src=download-asn-range.sh dest=//usr/local/sbin/download-asn-range mode=700
+      template:
+        src: download-asn-range.sh.j2
+        dest: /usr/local/sbin/download-asn-range
+        owner: root
+        group: '{{ wheel }}'
+        mode: '0700'
     - name: Check if CloudFlare ASN range list exists
       stat:
         path: /usr/local/share/AS13335.dat

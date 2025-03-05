@@ -3,45 +3,7 @@
   hosts: laptop
   become: true
   vars_files:
-    - "inventory/host_variables/{{ ansible_host }}.yml"
-  vars:
-    brew_cask_packages:
-      - spotify
-      - visual-studio-code
-      - google-chrome
-      - openvpn-connect
-      - iterm2
-      - aerial
-      - anki
-      - arc
-      - burp-suite
-      - corretto
-      - discord
-      - ghidra
-      - google-drive
-      - intellij-idea-ce
-      - jellyfin-media-player
-      - karabiner-elements
-      - messenger
-      - nextcloud-vfs
-      - nordvpn
-      - notion
-      - nperf
-      - plex
-      - qbittorrent
-      - slack
-      - telegram
-      - tor-browser
-      - vlc
-      - vnc-viewer
-      - zoom
-    brew_packages:
-      - coreutils
-      - htop
-      - vim
-      - fish
-      - texlive
-      - bmake
+    - "inventory/host_variables/{{ inventory_hostname }}.yml"
   roles:
     - base
     - user-terminal

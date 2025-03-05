@@ -1,23 +1,24 @@
 ---
-- name: Install Postgres 17
+- name: Install Postgres
   package:
     name: 
-      - postgresql17-server 
-      - postgresql17-client
-      - postgresql17-contrib
+      - 'py{{ ansible_python_version.split(".")[:2] | join("") }}-psycopg2'
+      - postgresql16-server 
+      - postgresql16-client
+      - postgresql16-contrib
     state: present
 - name: Check if the Postgres data directory exists
   stat:
-    path: /var/db/postgres/data17
+    path: /var/db/postgres/data16
   register: postgres_data
 - name: Initialize Postgres
   shell: service postgresql initdb
   when: 'not postgres_data.stat.exists'
-- name: Enable Postgres 17 service
+- name: Enable Postgres service
   service:
     name: postgresql
     enabled: true
-- name: Start Postgres 17 service
+- name: Start Postgres service
   service:
     name: postgresql
     state: started
@@ -32,14 +33,69 @@
       | list 
     }}"
   no_log: true
-- name: Debug database config
-  debug: msg='{{ database_config }}'
-
-# - name: Create Postgres databases
-#   postgresql_db:
-#     name: "{{ ssm_parameters[item] | from_json |  community.general.json_query('database')  }}"
-#     state: present
-#   with_items: "{{ 
-#     ssm_parameter_names | 
-#     select('search', '^.*-database-credentials$') |
-#     list }}"
+- name: Set non-sensitive Postgres config
+  set_fact:
+    nonsensitive_database_config: "{{ 
+      database_config | 
+      map('dict2items') | 
+      map('selectattr', 'key', '!=', 'password') | 
+      map('items2dict') | 
+      list 
+    }}"
+  no_log: true
+- name: Create database users
+  postgresql_user:
+    name: '{{ item.user }}'
+    encrypted: true
+    password: '{{ item.password }}'
+  loop: '{{ database_config }}'
+  no_log: true
+- name: Create databases
+  postgresql_db:
+    name: '{{ item }}'
+    state: present
+    owner: postgres
+  loop: '{{ nonsensitive_database_config | map(attribute="database") }}'
+- name: Grant all privileges on database to user
+  postgresql_privs:
+    database: "{{ item.database }}"
+    type: database
+    roles: "{{ item.user }}"
+    privs: ALL
+  loop: '{{ nonsensitive_database_config }}'
+- name: Set default privileges for tables
+  postgresql_privs:
+    database: "{{ item.database }}"
+    schema: public
+    type: default_privs
+    role: postgres
+    target_roles: "{{ item.user }}"
+    privs: ALL
+    objs: TABLES
+  loop: '{{ nonsensitive_database_config }}'
+- name: Set default privileges for sequences
+  postgresql_privs:
+    database: "{{ item.database }}"
+    schema: public
+    type: default_privs
+    role: postgres
+    target_roles: "{{ item.user }}"
+    privs: ALL
+    objs: SEQUENCES
+  loop: '{{ nonsensitive_database_config }}'
+- name: Grant schema usage
+  postgresql_privs:
+    database: "{{ item.database }}"
+    type: schema
+    roles: "{{ item.user }}"
+    privs: USAGE
+    objs: public
+  loop: '{{ nonsensitive_database_config }}'
+- name: Ensure user can create objects in public schema
+  postgresql_privs:
+    database: "{{ item.database }}"
+    type: schema
+    roles: "{{ item.user }}"
+    privs: CREATE
+    objs: public
+  loop: '{{ nonsensitive_database_config }}'

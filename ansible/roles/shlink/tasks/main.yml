@@ -6,9 +6,13 @@
       - php84-curl
       - php84-bcmath
       - php84-gd
+      - php84-iconv
       - php84-intl
       - php84-pdo
       - php84-pdo_pgsql
+      - php84-phar
+      - php84-tokenizer
+      - php84-zlib
       - unzip
     state: present
 - name: Ensure the Shlink directory exists
@@ -40,3 +44,14 @@
     owner: root
     group: wheel
     mode: '0640'
+- name: Install RoadRunner
+  shell: 
+    cmd: php ./vendor/bin/rr get --no-interaction --location bin/
+    chdir: /usr/local/shlink
+    creates: /usr/local/shlink/bin/rr
+- name: Make RoadRunner executable
+  file:
+    path: /usr/local/shlink/bin/rr
+    owner: root
+    group: '{{ wheel }}'
+    mode: '0755'

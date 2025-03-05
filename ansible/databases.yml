@@ -1,0 +1,9 @@
+---
+- name: PostgreSQL database
+  hosts: postgres
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+    - postgres

@@ -26,7 +26,7 @@
   set_fact:
     database_config: "{{ 
       ssm_parameters.items() 
-      | selectattr('0', 'match', '^.*-database-credentials$') 
+      | selectattr('0', 'match', '^.*-database-credentials$')
       | map(attribute='1') 
       | map('from_json') 
       | selectattr('host', 'equalto', ansible_fqdn) 
@@ -43,6 +43,15 @@
       list 
     }}"
   no_log: true
+- name: Install postgresql.conf
+  template:
+    src: postgresql.conf.j2
+    dest: /var/db/postgres/data16/postgresql.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  notify: 
+    - restart postgresql
 - name: Install pg_hba.conf
   template:
     src: pg_hba.conf.j2
@@ -58,7 +67,7 @@
     encrypted: true
     password: '{{ item.password }}'
   loop: '{{ database_config }}'
-  # no_log: true
+  no_log: true
 - name: Create databases
   postgresql_db:
     name: '{{ item }}'

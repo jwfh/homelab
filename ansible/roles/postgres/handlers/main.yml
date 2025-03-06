@@ -4,4 +4,4 @@
 
 - name: reload postgresql
   service: name=postgresql state=reloaded
-  when: postgresql_service_state == "started"
+  #when: postgresql_service_state == "started"

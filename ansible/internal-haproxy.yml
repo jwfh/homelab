@@ -5,6 +5,7 @@
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
   vars:
+    certificate_cn: jwfh.ca
     haproxy_is_external: false
     haproxy_backend_services:
       homepage:
@@ -36,6 +37,20 @@
         domain_name: mirror.jwfh.ca
         servers: 
           - muffin.lemarchant.jacobhouse.ca
+      shlink:
+        mode: http
+        balance: roundrobin
+        port: 8080
+        domain_name: go.jwfh.ca
+        servers:
+          - impulse.lemarchant.jacobhouse.ca
+      shlink_admin:
+        mode: http
+        balance: roundrobin
+        port: 80
+        domain_name: go-admin.jwfh.ca
+        servers:
+          - impulse.lemarchant.jacobhouse.ca
   roles:
     - base
     - haproxy

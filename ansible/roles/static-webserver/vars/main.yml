@@ -1,3 +1,0 @@
-services_nfs_server: ritchie
-services_nfs_prefix: /mnt/default/services
-certificates_local_dir: /usr/local/share/certificates

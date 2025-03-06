@@ -12,13 +12,6 @@
   service:
     name: nginx
     enabled: true
-- name: Mount an NFS volume
-  ansible.posix.mount:
-    src: "{{ webroot_nfs_server }}:{{ webroot_nfs_prefix }}"
-    path: "{{ webroot_local_dir }}"
-    opts: rw,nosuid
-    state: mounted
-    fstype: nfs
 - name: Create custom error pages
   copy: src='{{ item }}' dest='/usr/local/www/nginx/{{ item | basename }}' mode=0644
   with_fileglob:
@@ -31,6 +24,36 @@
     web_server_group: www
     web_services:
       - nginx
+- name: Create sites directories
+  file:
+    path: '/usr/local/www/sites/{{ item.domain_name }}/www'
+    state: directory
+    owner: root
+    group: '{{ wheel }}'
+    mode: '0755'
+  loop: '{{ nginx_sites }}'
+  loop_control:
+    label: '{{ item.domain_name }}'
+- name: Mount sites directories (NFS)
+  ansible.posix.mount:
+    src: "{{ item.mount.server }}:{{ item.mount.path }}"
+    path: '/usr/local/www/sites/{{ item.domain_name }}/www'
+    opts: '{{ "rw" if item.get("mount", {}).get("mode") in ["rw", "readwrite"] else "ro" }},nosuid'
+    state: mounted
+    fstype: nfs
+  loop: '{{ nginx_sites 
+    | selectattr("mount", "defined")
+    | selectattr("mount.type", "equalto", "nfs") }}'
+  loop_control:
+    label: '{{ item.domain_name }}'
+- name: Configure site directory syncs
+  debug: msg='{{ item }}' # TODO implement
+  loop: '{{ nginx_sites | selectattr("sync", "defined")}}'
+  loop_control:
+    label: '{{ item.domain_name }}'
+
+
+
 - name: Configure nginx
   template:
     src: nginx/nginx.conf.j2

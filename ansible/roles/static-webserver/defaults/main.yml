@@ -1,2 +1,1 @@
-nginx_autoindex: false
-nginx_all_errors_403: true
+nginx_sites: []

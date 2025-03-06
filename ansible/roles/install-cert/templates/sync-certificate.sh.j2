@@ -35,6 +35,8 @@ new_certificate_hash="$(md5sum "${certificate_destination}" | awk '{ print $1 }'
 
 if [ "${certificate_hash}" != "${new_certificate_hash}" ]; then
 {% for web_service in web_services %}
-    service {{ web_service }} reload
+    if service {{ web_service }} status 2>&1 >/dev/null; then
+        service {{ web_service }} reload
+    fi
 {% endfor %}
 fi

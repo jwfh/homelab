@@ -9,26 +9,70 @@ events {
 }
 
 http {
+    # MIME type mapping
     include       mime.types;
     default_type  application/octet-stream;
 
-    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-    #                  '$status $body_bytes_sent "$http_referer" '
-    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+    # Logging format definitions
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
 
-    sendfile on;
-    keepalive_timeout 65;
-    gzip on;
+    # Global logging settings
+    access_log  /var/log/nginx/access.log  main;
 
+    # Performance and connection handling
+    sendfile        on;
+    tcp_nopush      on;
+    tcp_nodelay     on;
+
+    # Keepalive settings
+    keepalive_timeout  65;
+
+    # Compression
+    gzip  on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+    # Performance tuning
+    client_max_body_size 50M;
+    client_body_buffer_size 128k;
+
+    # Security settings
+    server_tokens off;
+
+    # Default 403 server for unmatched domains
+    server {
+        listen 80 default_server;
+        server_name _;
+        return 403;
+    }
+
+{% for site in nginx_sites %}
     server {
         listen 80;
-        server_name "{{ inventory_hostname }}.{{ ansible_site }}.{{ ansible_root_domain }}";
-        server_tokens off;
+        server_name "{{ site.domain_name }}";
+
+        root /usr/local/www/sites/{{ site.domain_name }}/www;
+        
+        # Explicitly defined index files
+        index index.html index.htm;
+
+        access_log /var/log/nginx/{{ site.domain_name }}.access.log;
+        error_log /var/log/nginx/{{ site.domain_name }}.error.log;
+
+        # Security headers
+        add_header X-Frame-Options "SAMEORIGIN";
+        add_header X-XSS-Protection "1; mode=block";
+        add_header X-Content-Type-Options "nosniff";
 
         location / {
-            root {{ webroot_local_dir }}/www;
-            index index.html index.htm;
-{% if nginx_autoindex %}
+            # Only serve explicitly existing files
+{% if site.all_errors_403 | d(True) %}
+            try_files $uri =403;
+{% else %}
+            try_files $uri =404;
+{% endif %}
+{% if site.autoindex | d(False) %}
             autoindex on;
 {% else %}
             autoindex off;
@@ -36,7 +80,7 @@ http {
         }
 
         error_page 403 /403.hml;
-{% if nginx_all_errors_403 %}
+{% if site.all_errors_403 | d(True) %}
         error_page 404 =403 /403.html;
         error_page 500 =403 /403.html;
         error_page 502 =403 /403.html;
@@ -56,26 +100,5 @@ http {
             deny  all;
         }
     }
-
-    # HTTPS server
-    #
-    #server {
-    #    listen       443 ssl;
-    #    server_name  localhost;
-
-    #    ssl_certificate      cert.pem;
-    #    ssl_certificate_key  cert.key;
-
-    #    ssl_session_cache    shared:SSL:1m;
-    #    ssl_session_timeout  5m;
-
-    #    ssl_ciphers  HIGH:!aNULL:!MD5;
-    #    ssl_prefer_server_ciphers  on;
-
-    #    location / {
-    #        root   html;
-    #        index  index.html index.htm;
-    #    }
-    #}
-
+{% endfor %}
 }

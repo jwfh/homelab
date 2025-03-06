@@ -5,6 +5,7 @@
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
   vars:
+    certificate_cn: jwfh.ca
     haproxy_is_external: true
     haproxy_backend_services:
       homepage:
@@ -15,6 +16,13 @@
         servers: 
           - scooby.lemarchant.jacobhouse.ca
           - bowser.lemarchant.jacobhouse.ca
+      shlink:
+        mode: http
+        balance: roundrobin
+        port: 8080
+        domain_name: go.jwfh.ca
+        servers:
+          - impulse.lemarchant.jacobhouse.ca
   roles:
     - base
     - haproxy

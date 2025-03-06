@@ -83,7 +83,7 @@
     mode: '0644'
   notify: 
     - reload haproxy
-- name: Start service HAProxy
-  ansible.builtin.service:
+- name: Start HAProxy service
+  service:
     name: haproxy
     state: started

@@ -1,0 +1,9 @@
+---
+- name: Mail server
+  hosts: mailer
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+    - postfix

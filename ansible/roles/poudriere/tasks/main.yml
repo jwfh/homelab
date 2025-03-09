@@ -1,0 +1,38 @@
+---
+- name: Install Poudriere packages
+  pkgng:
+    name:
+      - poudriere
+      - portmaster
+      - git-lite
+      - ccache
+    state: latest
+- name: Create Poudriere distfiles directory
+  file:
+    state: directory
+    path: /usr/ports/distfiles
+    owner: root
+    group: '{{ wheel }}'
+    mode: '0755'
+# - name: Check if ports tree has been cloned
+#   stat:
+#     path: /usr/local/poudriere/ports/default/Makefile
+#   register: ports_tree
+# - name: Clone Poudriere ports tree
+#   shell:
+#     cmd: poudriere ports -c -p default
+#   when: 'not ports_tree.stat.exists'
+
+
+
+- name: Create poudriere.conf
+  template:
+    src: poudriere.conf.j2
+    dest: /usr/local/etc/poudriere.conf
+    owner: root
+    group: '{{ wheel }}'
+    mode: '0644'
+
+# - name: Include vbotka.freebsd_poudriere
+#   include_role:
+#     name: vbotka.freebsd_poudriere

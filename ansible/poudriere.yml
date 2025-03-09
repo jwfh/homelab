@@ -1,0 +1,9 @@
+---
+- name: Poudriere build server
+  hosts: poudriere
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+    - poudriere

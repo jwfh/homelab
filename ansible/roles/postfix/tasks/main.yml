@@ -1,5 +1,5 @@
 ---
-- name: Install Postfix
+- name: Install Postfix with LDAP support
   pkgng:
-    name: postfix
+    name: postfix-ldap
     state: present

@@ -1,0 +1,3 @@
+postgres_allowed_subnets:
+  dev: []
+  prod: []

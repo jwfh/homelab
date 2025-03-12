@@ -42,6 +42,7 @@ preferences:
       - fish
       - texlive
       - bmake
+      - pipx
     defaults:
       - domain: com.apple.controlcenter
         key: BatteryShowPercentage

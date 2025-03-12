@@ -43,6 +43,8 @@ preferences:
       - texlive
       - bmake
       - pipx
+      - pyenv
+      - ansible
     defaults:
       - domain: com.apple.controlcenter
         key: BatteryShowPercentage

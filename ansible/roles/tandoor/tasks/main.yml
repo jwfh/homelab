@@ -1,0 +1,40 @@
+---
+- name: Install Tandoor dependencies
+  pkgng:
+    name: 
+      - python3
+      - git-lite
+      - rust
+      - py311-pipx
+      - libxslt
+      - libxml2 
+      - postgresql16-client
+      - pkgconf
+      - xmlsec1
+      - openldap26-client
+    state: present
+- name: Check if virtualenv is installed
+  stat:
+    path: /opt/pipx/venvs/virtualenv
+  register: virtualenv
+- name: Install virtualenv
+  shell:
+    cmd: pipx install --global virtualenv
+  when: 'not virtualenv.stat.exists'
+- name: Check if Tandoor virtual environment exists
+  stat:
+    path: '{{ tandoor_dir }}/venv'
+  register: tandoor_venv
+- name: Create Tandoor virtual environment
+  shell:
+    cmd: virtualenv '{{ tandoor_dir }}/venv'
+  when: 'not tandoor_venv.stat.exists'
+- name: Clone Tandoor
+  git:
+    repo: 'https://github.com/jwfh/tandoor-recipes.git'
+    dest: '{{ tandoor_dir }}/recipes'
+    version: '{{ tandoor_version }}'
+- name: Install Tandoor Python dependencies in virtual environment
+  pip:
+    requirements: '{{ tandoor_dir }}/recipes/requirements.txt'
+    virtualenv: '{{ tandoor_dir }}/venv'

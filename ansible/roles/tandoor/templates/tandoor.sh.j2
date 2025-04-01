@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. /etc/rc.subr
+
+name="tandoor"
+rcvar=tandoor_enable
+
+load_rc_config $name
+
+: ${tandoor_enable:="NO"}
+: ${tandoor_user:="www"}
+: ${tandoor_group:="www"}
+: ${tandoor_command:="/opt/tandoor/venv/bin/gunicorn"}
+: ${tandoor_flags:="--workers 3 --bind unix:/opt/tandoor/recipes.sock recipes.wsgi:application"}
+
+pidfile="/var/run/${name}.pid"
+command="/usr/sbin/daemon"
+command_args="-f -p ${pidfile} ${tandoor_command} ${tandoor_flags}"
+
+run_rc_command "$1"

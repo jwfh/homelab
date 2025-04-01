@@ -45,6 +45,7 @@ preferences:
       - pipx
       - pyenv
       - ansible
+      - gsed
     defaults:
       - domain: com.apple.controlcenter
         key: BatteryShowPercentage

@@ -1,6 +1,8 @@
 ---
-- name: Laptop
-  hosts: laptop
+- name: Laptop and Desktop setup
+  hosts: 
+    - laptop
+    - user_terminals
   become: true
   vars_files:
     - "inventory/host_variables/{{ inventory_hostname }}.yml"

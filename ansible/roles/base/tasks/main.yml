@@ -30,6 +30,7 @@
   when: manage_hosts_file
 - name: Include tasks/users.yml
   include_tasks: tasks/users.yml
+  when: manage_users
 - name: Include tasks/os/{{ansible_os_family}}.yml
   include_tasks: tasks/os/{{ansible_os_family}}.yml
 - name: Include tasks/packages.yml

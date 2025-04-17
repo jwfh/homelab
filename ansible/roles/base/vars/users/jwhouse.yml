@@ -48,6 +48,10 @@ preferences:
       - gsed
       - awscli
     defaults:
+      - domain: "Apple Global Domain"
+        key: com.apple.trackpad.scaling
+        type: float
+        value: 1.5
       - domain: com.apple.controlcenter
         key: BatteryShowPercentage
         current_host: true
@@ -77,5 +81,6 @@ preferences:
         key: FXPreferredViewStyle
         type: string
         value: clmv
+      - 
   Debian:
   FreeBSD:

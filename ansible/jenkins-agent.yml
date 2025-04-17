@@ -1,0 +1,9 @@
+---
+- name: Jenkins agents
+  hosts: cicd_agent
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+  

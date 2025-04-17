@@ -1,0 +1,19 @@
+---
+- name: Install dependencies
+  package:
+    name:
+      - python3
+      - py311-pipx
+      - libxslt
+      - libxml2 
+      - postgresql16-client
+      - rust
+    state: present
+- name: Check if poetry is installed
+  stat:
+    path: /opt/pipx/venvs/poetry
+  register: poetry
+- name: Install poetry
+  shell:
+    cmd: pipx install --global poetry
+  when: 'not poetry.stat.exists'

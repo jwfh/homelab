@@ -1,0 +1,10 @@
+---
+- name: Expense Analysis application
+  hosts: expense_analysis_app
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+    - expense-analysis-app
+  

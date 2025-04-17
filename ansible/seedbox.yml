@@ -1,0 +1,9 @@
+---
+- name: Seedbox P2P server
+  hosts: seedbox
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+    - seedbox

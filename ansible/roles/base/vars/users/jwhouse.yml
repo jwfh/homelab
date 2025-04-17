@@ -46,6 +46,7 @@ preferences:
       - pyenv
       - ansible
       - gsed
+      - awscli
     defaults:
       - domain: com.apple.controlcenter
         key: BatteryShowPercentage

@@ -1,0 +1,23 @@
+---
+- name: Enable iSCSI
+  service:
+    name: iscsid
+    state: started
+    enabled: true
+- name: Enable iSCSI initiator
+  service:
+    name: iscsictl
+    state: started
+    enabled: true
+- name: Mount iSCSI disk
+  block:
+    - name: Create mountpoint
+      file:
+        path: /mnt/seedbox
+        state: directory
+    - name: Mount iSCSI disk
+      mount:
+        path: /mnt/seedbox
+        src: /dev/da1p1
+        fstype: ufs
+        state: mounted

@@ -1,0 +1,5 @@
+username: jenkins
+fullname: Jenkins Agent
+uid: 818
+hosts:
+  - cicd_agent

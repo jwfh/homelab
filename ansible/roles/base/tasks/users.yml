@@ -6,9 +6,13 @@
         file: "{{ item }}"
       loop: "{{ q('fileglob', 'vars/users/*') }}"
       register: user_vars_include
-    - name: Format user metadata
+    - name: Format and filter user metadata 
       set_fact:
-        users: "{{ user_vars_include.results | map(attribute='ansible_facts._user_vars') }}"
+        users: >-
+          {{- user_vars_include.results |
+              map(attribute='ansible_facts._user_vars') |
+              select('json_query', '[?hosts[?contains(@, `all`) || @ == `' + group_names | join('`) || @ == `') + '`]]') |
+              list -}}
 - name: Manage users
   block:
     - name: Create user primary group
@@ -25,7 +29,7 @@
         comment: '{{ item.fullname }}'
         shell: '{{ item.shell | default("/bin/sh") }}'
         group: '{{ item.username }}'
-        groups: '{{ item.groups }}'
+        groups: '{{ item.groups | default([]) }}'
         append: false
         home: '{{ item.home | default("/home/" + item.username) }}'
         create_home: yes

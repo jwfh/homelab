@@ -1,6 +1,8 @@
 username: jwhouse
 fullname: Jacob House
 uid: 222830
+hosts:
+  - all
 groups:
   - '{{ wheel }}'
 preferences:

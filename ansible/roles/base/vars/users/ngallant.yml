@@ -1,5 +1,7 @@
 username: ngallant
 fullname: Noah Gallant
 uid: 213815
+hosts:
+  - granite
 groups:
   - '{{ wheel }}'

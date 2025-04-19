@@ -11,21 +11,7 @@
         users: >-
           {{- user_vars_include.results |
               map(attribute='ansible_facts._user_vars') |
-              selectattr('hosts', 'defined') |
-              selectattr('hosts', 'selectattr', 'contains', 'all') |
-              union(
-                user_vars_include.results |
-                map(attribute='ansible_facts._user_vars') |
-                selectattr('hosts', 'defined') |
-                selectattr('hosts', 'selectattr', 'contains', inventory_hostname)
-              ) |
-              union(
-                user_vars_include.results |
-                map(attribute='ansible_facts._user_vars') |
-                selectattr('hosts', 'defined') |
-                selectattr('hosts', 'selectattr', 'intersect', group_names) |
-                list
-              ) |
+              select('match', 'all|{{ inventory_hostname }}|{{ group_names | join("|") }}') |
               list -}}
 - name: Manage users
   block:

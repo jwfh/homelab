@@ -12,6 +12,13 @@
       http_access allow allowed_subnet
       http_access deny all
       http_port 3128
+      
+      {% if squid_detailed_logging %}
+      # Detailed access logging configuration
+      logformat squid %ts.%03tu %6tr %>a %Ss/%03>Hs %<st %rm %ru %[un %Sh/%<a %mt
+      access_log /var/log/squid/access.log squid
+      debug_options ALL,1
+      {% endif %}
   notify: Restart squid
 
 - name: Ensure squid cache directory is initialized

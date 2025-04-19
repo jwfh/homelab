@@ -1,5 +1,26 @@
 ---
-- name: Install squid
+- name: Install squid on FreeBSD
   package:
     name: squid
     state: present
+
+- name: Configure squid to allow only specific subnet
+  copy:
+    dest: /usr/local/etc/squid/squid.conf
+    content: |
+      acl allowed_subnet src 10.174.0.0/23
+      http_access allow allowed_subnet
+      http_access deny all
+      http_port 3128
+  notify: Restart squid
+
+- name: Ensure squid cache directory is initialized
+  command: squid -z
+  args:
+    creates: /usr/local/squid/cache
+
+- name: Enable and start squid service
+  service:
+    name: squid
+    enabled: yes
+    state: started

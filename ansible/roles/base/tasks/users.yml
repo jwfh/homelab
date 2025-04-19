@@ -13,22 +13,24 @@
               map(attribute='ansible_facts._user_vars') |
               select('defined') |
               select('extract', 'hosts') |
-              select('contains', 'all') |
+              selectattr('hosts', 'contains', 'all') |
+              list |
               union(
                 user_vars_include.results |
                 map(attribute='ansible_facts._user_vars') |
                 select('defined') |
                 select('extract', 'hosts') |
-                select('contains', inventory_hostname)
+                selectattr('hosts', 'contains', inventory_hostname) |
+                list
               ) |
               union(
                 user_vars_include.results |
                 map(attribute='ansible_facts._user_vars') |
                 select('defined') |
                 select('extract', 'hosts') |
-                select('intersect', group_names)
-              ) |
-              list -}}
+                selectattr('hosts', 'intersect', group_names) |
+                list
+              ) -}}
 - name: Manage users
   block:
     - name: Create user primary group

@@ -12,12 +12,25 @@
       http_access allow allowed_subnet
       http_access deny all
       http_port 3128
-  notify: Restart squid
+        notify: Restart squid
+
+- name: Check if squid is running
+  shell: pgrep squid || true
+  register: squid_process
+  changed_when: false
+  check_mode: false
+
+- name: Check if cache directory exists
+  stat:
+    path: /usr/local/squid/cache
+  register: cache_dir
+  check_mode: false
 
 - name: Ensure squid cache directory is initialized
   command: squid -z
-  args:
-    creates: /usr/local/squid/cache
+  when: 
+    - not cache_dir.stat.exists
+    - squid_process.stdout == ""
 
 - name: Enable and start squid service
   service:

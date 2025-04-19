@@ -6,12 +6,26 @@
         file: "{{ item }}"
       loop: "{{ q('fileglob', 'vars/users/*') }}"
       register: user_vars_include
-    - name: Format and filter user metadata 
+    - name: Format and filter user metadata
       set_fact:
         users: >-
           {{- user_vars_include.results |
               map(attribute='ansible_facts._user_vars') |
-              select('json_query', '[?hosts[?contains(@, `all`) || @ == `' + group_names | join('`) || @ == `') + '`]]') |
+              selectattr('hosts', 'defined') |
+              selectattr('hosts', 'selectattr', 'contains', 'all') |
+              union(
+                user_vars_include.results |
+                map(attribute='ansible_facts._user_vars') |
+                selectattr('hosts', 'defined') |
+                selectattr('hosts', 'selectattr', 'contains', inventory_hostname)
+              ) |
+              union(
+                user_vars_include.results |
+                map(attribute='ansible_facts._user_vars') |
+                selectattr('hosts', 'defined') |
+                selectattr('hosts', 'selectattr', 'intersect', group_names) |
+                list
+              ) |
               list -}}
 - name: Manage users
   block:

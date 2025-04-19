@@ -11,21 +11,21 @@
         users: >-
           {{- user_vars_include.results |
               map(attribute='ansible_facts._user_vars') |
-              select('defined', 'hosts') |
-              map('extract', 'hosts') |
+              select('defined') |
+              select('extract', 'hosts') |
               select('contains', 'all') |
               union(
                 user_vars_include.results |
                 map(attribute='ansible_facts._user_vars') |
-                select('defined', 'hosts') |
-                map('extract', 'hosts') |
+                select('defined') |
+                select('extract', 'hosts') |
                 select('contains', inventory_hostname)
               ) |
               union(
                 user_vars_include.results |
                 map(attribute='ansible_facts._user_vars') |
-                select('defined', 'hosts') |
-                map('extract', 'hosts') |
+                select('defined') |
+                select('extract', 'hosts') |
                 select('intersect', group_names)
               ) |
               list -}}

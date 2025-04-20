@@ -20,7 +20,7 @@ load_rc_config $name
 : ${shlink_enable:="NO"}
 command="/usr/sbin/daemon"
 command_args="-f -P ${pidfile} -r"
-procname="/usr/local/shlink/bin/rr"
+procname="/usr/sbin/daemon"
 
 # Command to run under daemon
 _program="/usr/local/shlink/bin/rr"

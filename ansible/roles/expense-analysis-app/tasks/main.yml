@@ -76,3 +76,11 @@
   environment:
     PATH: /opt/pyenv/versions/{{ python_version }}/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
     CFLAGS: -O0
+
+- name: Install rc script
+  template:
+    src: expense-analysis.sh.j2
+    dest: /usr/local/etc/rc.d/expense_analysis
+    mode: '0755'
+    owner: root
+    group: '{{ wheel }}'

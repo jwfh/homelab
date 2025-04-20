@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# PROVIDE: expense_analysis
+# REQUIRE: LOGIN network
+# BEFORE:  DAEMON
+# KEYWORD: shutdown
+
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
+. /etc/rc.subr
+
+name="expense_analysis"
+rcvar="expense_analysis_enable"
+pidfile="/var/run/${name}.pid"
+
+load_rc_config $name
+
+: ${expense_analysis_enable:="NO"}
+: ${expense_analysis_logfile:="/var/log/expense-analysis/server.log"}
+: ${expense_analysis_dir:="{{ expense_analysis_dir }}"}
+: ${expense_analysis_user:="{{ expense_analysis_user }}"}
+: ${expense_analysis_group:="{{ expense_analysis_group }}"}
+: ${expense_analysis_subprocess:="poetry"}
+: ${expense_analysis_subprocess_flags:="run python -m expense_analysis.app"}
+
+command="/usr/sbin/daemon"
+command_args="-f -p ${pidfile} -o ${expense_analysis_logfile} -u ${expense_analysis_user} -- ${expense_analysis_subprocess} ${expense_analysis_subprocess_flags}"
+procname="${expense_analysis_subprocess}"
+
+start_precmd="expense_analysis_prestart"
+
+expense_analysis_prestart() {
+    cd ${expense_analysis_dir}/backend || exit 1
+
+    # Ensure log directory exists
+    mkdir -p "$(dirname "${expense_analysis_logfile}")"
+    return 0
+}
+
+run_rc_command "$1"

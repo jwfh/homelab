@@ -18,16 +18,13 @@ pidfile="/var/run/${name}.pid"
 load_rc_config $name
 
 : ${shlink_enable:="NO"}
+: ${shlink_logfile:="/var/log/shlink.log"}
+: ${shlink_subprocess:="/usr/local/shlink/bin/rr"}
+: ${shlink_subprocess_flags:="serve -c /usr/local/shlink/config/roadrunner/.rr.yml"}
+
 command="/usr/sbin/daemon"
-command_args="-f -P ${pidfile} -r"
-procname="/usr/sbin/daemon"
-
-# Command to run under daemon
-_program="/usr/local/shlink/bin/rr"
-_program_flags="serve -c /usr/local/shlink/config/roadrunner/.rr.yml"
-
-# Let rc.subr append flags to command_args
-command_args="$command_args -- ${_program} ${_program_flags}"
+command_args="-f -p ${pidfile} -o ${shlink_logfile} -- ${shlink_subprocess} ${shlink_subprocess_flags}"
+procname="${shlink_subprocess}"
 
 start_precmd="shlink_prestart"
 

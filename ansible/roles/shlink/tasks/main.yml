@@ -61,6 +61,19 @@
     owner: root
     group: '{{ wheel }}'
     mode: '0755'
+- name: Get full path to PHP binary
+  shell: 
+    cmd: which php 2>/dev/null
+  register: php_bin_cmd
+- name: Install RoadRunner configuration file
+  template:
+    src: shlink/rr.yml.j2
+    dest: /usr/local/shlink/config/roadrunner/.rr.yml
+    owner: root
+    group: '{{ wheel }}'
+    mode: '0640'
+  vars:
+    php_bin: '{{ php_bin_cmd.stdout }}'
 - name: Install Shlink rc script
   template:
     src: shlink/shlink.sh.j2

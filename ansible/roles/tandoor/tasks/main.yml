@@ -12,6 +12,8 @@
       - pkgconf
       - xmlsec1
       - openldap26-client
+      - libjpeg-turbo
+      - py311-pillow
     state: present
 - name: Check if virtualenv is installed
   stat:
@@ -38,3 +40,4 @@
   pip:
     requirements: '{{ tandoor_dir }}/recipes/requirements.txt'
     virtualenv: '{{ tandoor_dir }}/venv'
+    extra_args: --global-option="-I/usr/local/include"

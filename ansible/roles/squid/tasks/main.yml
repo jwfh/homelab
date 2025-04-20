@@ -12,7 +12,7 @@
       http_access allow allowed_subnet
       http_access deny all
       http_port 3128
-        notify: Restart squid
+  notify: Restart squid
 
 - name: Check if squid is running
   shell: pgrep squid || true

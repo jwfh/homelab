@@ -11,7 +11,26 @@
         users: >-
           {{- user_vars_include.results |
               map(attribute='ansible_facts._user_vars') |
-              list -}}
+              select('defined') |
+              select('extract', 'hosts') |
+              selectattr('hosts', 'contains', 'all') |
+              list |
+              union(
+                user_vars_include.results |
+                map(attribute='ansible_facts._user_vars') |
+                select('defined') |
+                select('extract', 'hosts') |
+                selectattr('hosts', 'contains', inventory_hostname) |
+                list
+              ) |
+              union(
+                user_vars_include.results |
+                map(attribute='ansible_facts._user_vars') |
+                select('defined') |
+                select('extract', 'hosts') |
+                selectattr('hosts', 'intersect', group_names) |
+                list
+              ) -}}
 - name: Manage users
   block:
     - name: Create user primary group

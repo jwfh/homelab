@@ -13,14 +13,19 @@
 
 name="shlink"
 rcvar="shlink_enable"
-command="/usr/local/shlink/bin/rr"
-command_args="serve -c /usr/local/shlink/config/roadrunner/.rr.yml"
 pidfile="/var/run/${name}.pid"
+
+load_rc_config $name
+
+: ${shlink_enable:="NO"}
+: ${shlink_command:="/usr/local/shlink/bin/rr"}
+: ${shlink_flags:="serve -c /usr/local/shlink/config/roadrunner/.rr.yml"}
+
+command="/usr/sbin/daemon"
+command_args="-f -p ${pidfile} ${shlink_command} ${shlink_flags}"
 procname="/usr/local/shlink/bin/rr"
 
 start_precmd="shlink_prestart"
-
-load_rc_config $name
 
 shlink_prestart() {
     cd /usr/local/shlink || exit 1

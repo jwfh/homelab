@@ -8,6 +8,7 @@
       - libxml2 
       - postgresql16-client
       - rust
+      - pyenv
     state: present
 - name: Check if poetry is installed
   stat:
@@ -17,3 +18,11 @@
   shell:
     cmd: pipx install --global poetry
   when: 'not poetry.stat.exists'
+- name: Check if Python is installed by pyenv
+  stat:
+    path: /opt/pyenv/versions/{{ python_version }}
+  register: pyenv_python
+- name: Install Python by pyenv
+  shell:
+    cmd: '`pyenv which python-build` {{ python_version }} /opt/pyenv/versions/{{ python_version }}'
+  when: 'not pyenv_python.stat.exists'

@@ -14,6 +14,7 @@
       - openldap26-client
       - libjpeg-turbo
       - py311-pillow
+      - pyenv
     state: present
 - name: Check if virtualenv is installed
   stat:

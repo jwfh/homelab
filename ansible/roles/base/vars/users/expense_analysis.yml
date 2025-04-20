@@ -1,0 +1,5 @@
+username: expense_analysis
+fullname: Expense Analysis Application
+uid: 120001
+hosts:
+  - expense_analysis_app

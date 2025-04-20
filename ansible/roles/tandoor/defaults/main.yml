@@ -1,2 +1,3 @@
 tandoor_dir: /usr/local/share/tandoor
 tandoor_version: 1.5.33
+python_version: 3.12.7

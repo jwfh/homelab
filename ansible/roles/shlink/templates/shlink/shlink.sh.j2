@@ -27,8 +27,7 @@ _program="/usr/local/shlink/bin/rr"
 _program_flags="serve -c /usr/local/shlink/config/roadrunner/.rr.yml"
 
 # Let rc.subr append flags to command_args
-command_args="$command_args -- ${_program}"
-: ${shlink_flags:="${_program_flags}"}
+command_args="$command_args -- ${_program} ${_program_flags}"
 
 start_precmd="shlink_prestart"
 

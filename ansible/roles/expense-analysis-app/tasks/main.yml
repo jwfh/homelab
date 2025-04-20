@@ -30,26 +30,21 @@
 - name: Check if Python is sane
   shell:
     cmd: /opt/pyenv/versions/{{ python_version }}/bin/python3 -c 'import sysconfig; print(sysconfig.get_path("platlib"))'
-- name: Create .ssh directory for {{ expense_analysis_user }}
+- name: Create .ssh directory for certificate-reader key
   file:
-    path: /home/{{ expense_analysis_user }}/.ssh
+    name: /root/.ssh
     state: directory
-    owner: '{{ expense_analysis_user }}'
-    group: '{{ expense_analysis_group }}'
-    mode: '0700'
-- name: Create expense-analysis-deployer SSH key in {{ expense_analysis_user }}'s $HOME
-  copy: 
-    content: "{{ ssm_parameters['expense-analysis-deployer-ssh-private-key'] }}" 
-    dest: /home/{{ expense_analysis_user }}/.ssh/expense-analysis-deployer
-    owner: '{{ expense_analysis_user }}'
-    group: '{{ expense_analysis_group }}'
-    mode: '0600'
+    owner: root
+    group: '{{ wheel }}'
+    mode: '700'
+- name: Create certificate-reader SSH key in root's $HOME
+  copy: content="{{ ssm_parameters['expense-analysis-deployer-ssh-private-key'] }}" dest=/root/.ssh/expense-analysis-deployer mode=600
 - name: Create application directory
   file:
     path: '{{ expense_analysis_dir }}'
     state: directory
-    owner: '{{ expense_analysis_user }}'
-    group: '{{ expense_analysis_group }}'
+    owner: 'root'
+    group: '{{ wheel }}'
     mode: '0755'
 - name: Mark application directory as safe
   copy:
@@ -66,15 +61,18 @@
     dest: '{{ expense_analysis_dir }}'
     version: '{{ expense_analysis_git_ref }}'
     accept_hostkey: true
-    key_file: /home/{{ expense_analysis_user }}/.ssh/expense-analysis-deployer
+    key_file: /root/.ssh/expense-analysis-deployer
     ssh_opts: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
     clone: true
     update: true
     force: true
-- name: Fix permissions on application directory
-  file: 
-    path: '{{ expense_analysis_dir }}'
-    owner: '{{ expense_analysis_user }}'
-    group: '{{ expense_analysis_group }}'
-    mode: u=rwX,g=rX,o=rX
-    recurse: true
+- name: Run Poetry install
+  shell: |-
+    poetry config virtualenvs.create true
+    poetry config virtualenvs.in-project true
+    poetry install --only=main
+  args:
+    chdir: '{{ expense_analysis_dir }}/backend'
+  environment:
+    PATH: /opt/pyenv/versions/{{ python_version }}/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+    CFLAGS: -O0

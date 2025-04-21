@@ -54,14 +54,14 @@
       expense_analysis:
         mode: http
         balance: sticky
-        port: 5001
+        port: 80
         domain_name: expense-analysis.jwfh.ca
         servers:
           - shadow.lemarchant.jacobhouse.ca
       expense_analysis_dev:
         mode: http
         balance: sticky
-        port: 5001
+        port: 80
         domain_name: expense-analysis-dev.jwfh.ca
         servers:
           - storm.lemarchant.jacobhouse.ca

@@ -22,13 +22,13 @@ load_rc_config $name
 : ${expense_analysis_dir:="{{ expense_analysis_dir }}"}
 
 _expense_analysis_subprocess_user="{{ expense_analysis_user }}"
-_expense_analysis_subprocess="poetry"
-_expense_analysis_subprocess_flags="run python -m expense_analysis.app"
+_expense_analysis_subprocess="{{ expense_analysis_dir }}/backend/.venv/bin/gunicorn"
+_expense_analysis_subprocess_flags="expense_analysis.app:app --workers 4 --bind 127.0.0.1:{{ expense_analysis_api_port }} --access-logfile ${expense_analysis_logfile} --error-logfile ${expense_analysis_logfile}.error"
 _expense_analysis_subprocess_env_file="{{ expense_analysis_env_file }}"
 
 command="/usr/sbin/daemon"
-command_args="-f -p ${pidfile} -o ${expense_analysis_logfile} -u ${_expense_analysis_subprocess_user} -- ${_expense_analysis_subprocess} ${_expense_analysis_subprocess_flags}"
-procname="${expense_analysis_dir}/backend/.venv/bin/python"
+command_args="-f -p ${pidfile} -u ${_expense_analysis_subprocess_user} -- ${_expense_analysis_subprocess} ${_expense_analysis_subprocess_flags}"
+procname="${_expense_analysis_subprocess}"
 
 start_precmd="expense_analysis_prestart"
 

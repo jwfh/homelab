@@ -76,6 +76,48 @@
   environment:
     PATH: /opt/pyenv/versions/{{ python_version }}/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
     CFLAGS: -O0
+
+- name: Install Nginx
+  pkgng:
+    name: nginx
+    state: present
+
+- name: Create Nginx log directory
+  file:
+    path: /var/log/nginx
+    state: directory
+    mode: '0755'
+
+- name: Enable Nginx service
+  service:
+    name: nginx
+    enabled: true
+
+- name: Create Nginx configuration directory
+  file:
+    path: /usr/local/etc/nginx/conf.d
+    state: directory
+    mode: '0755'
+
+- name: Configure Nginx
+  template:
+    src: nginx/expense-analysis.conf.j2
+    dest: /usr/local/etc/nginx/conf.d/expense-analysis.conf
+    mode: '0644'
+  notify: reload nginx
+
+- name: Configure main Nginx config
+  template:
+    src: nginx/nginx.conf.j2
+    dest: /usr/local/etc/nginx/nginx.conf
+    mode: '0644'
+  notify: reload nginx
+
+- name: Start Nginx service
+  service:
+    name: nginx
+    state: started
+
 - name: Write environment configuration file
   template:
     src: expense-analysis.env.j2

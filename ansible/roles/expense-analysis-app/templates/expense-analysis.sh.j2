@@ -18,26 +18,29 @@ pidfile="/var/run/${name}.pid"
 load_rc_config $name
 
 : ${expense_analysis_enable:="NO"}
-: ${expense_analysis_logfile:="/var/log/expense-analysis/server.log"}
+: ${expense_analysis_logdir:="/var/log/expense-analysis"}
 : ${expense_analysis_dir:="{{ expense_analysis_dir }}"}
 
 _expense_analysis_subprocess_user="{{ expense_analysis_user }}"
+_expense_analysis_subprocess_group="{{ expense_analysis_group }}"
 _expense_analysis_subprocess="{{ expense_analysis_dir }}/backend/.venv/bin/gunicorn"
-_expense_analysis_subprocess_flags="expense_analysis.app:app --workers 4 --bind 127.0.0.1:{{ expense_analysis_api_port }} --access-logfile ${expense_analysis_logfile} --error-logfile ${expense_analysis_logfile}.error"
+_expense_analysis_subprocess_flags="expense_analysis.app:app --workers 4 --bind 127.0.0.1:{{ expense_analysis_api_port }} --access-logfile ${expense_analysis_logdir}/access.log --error-logfile ${expense_analysis_logdir}/error.log"
 _expense_analysis_subprocess_env_file="{{ expense_analysis_env_file }}"
 
 command="/usr/sbin/daemon"
-command_args="-f -p ${pidfile} -u ${_expense_analysis_subprocess_user} -- ${_expense_analysis_subprocess} ${_expense_analysis_subprocess_flags}"
-procname="${_expense_analysis_subprocess}"
+command_args="-f -p ${pidfile} -u ${_expense_analysis_subprocess_user} -o ${expense_analysis_logdir}/daemon.log -- ${_expense_analysis_subprocess} ${_expense_analysis_subprocess_flags}"
+procname="{{ expense_analysis_dir }}/backend/.venv/bin/python"
 
 start_precmd="expense_analysis_prestart"
 
 expense_analysis_prestart() {
     cd ${expense_analysis_dir}/backend || exit 1
 
-    # Ensure log directory exists
-    mkdir -p "$(dirname "${expense_analysis_logfile}")"
-    chmod u+rw,go+r "${expense_analysis_logfile}"
+    mkdir -p "${expense_analysis_logdir}"
+    chown -R "${_expense_analysis_subprocess_user}" "${expense_analysis_logdir}"
+    chgrp -R "${_expense_analysis_subprocess_group}" "${expense_analysis_logdir}"
+    chmod -R u+rwX,go+rX "${expense_analysis_logdir}"
+
     return 0
 }
 

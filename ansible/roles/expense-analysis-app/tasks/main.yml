@@ -76,7 +76,26 @@
   environment:
     PATH: /opt/pyenv/versions/{{ python_version }}/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
     CFLAGS: -O0
-
+- name: Write environment configuration file
+  template:
+    src: expense-analysis.env.j2
+    dest: '/home/{{ expense_analysis_user }}/.env'
+    mode: '0600'
+    owner: '{{ expense_analysis_user }}'
+    group: '{{ expense_analysis_group }}'
+  vars:
+    expense_analysis_env_vars:
+      DATABASE_HOST: '{{ ssm_parameters[database_credentials_paramter_name] | from_json | community.general.json_query("host") }}'
+      DATABASE_PORT: '{{ ssm_parameters[database_credentials_paramter_name] | from_json | community.general.json_query("port") }}'
+      DATABASE_NAME: '{{ ssm_parameters[database_credentials_paramter_name] | from_json | community.general.json_query("database") }}'
+      DATABASE_USER: '{{ ssm_parameters[database_credentials_paramter_name] | from_json | community.general.json_query("user") }}'
+      DATABASE_PASSWORD: '{{ ssm_parameters[database_credentials_paramter_name] | from_json | community.general.json_query("password") }}'
+      S3_BUCKET_NAME: '{{ ssm_parameters[app_configuration_paramter_name] | from_json | community.general.json_query("bucket") }}'
+      AWS_ACCESS_KEY_ID: '{{ ssm_parameters[app_configuration_paramter_name] | from_json | community.general.json_query("aws_access_key_id") }}'
+      AWS_SECRET_ACCESS_KEY: '{{ ssm_parameters[app_configuration_paramter_name] | from_json | community.general.json_query("aws_secret_access_key") }}'
+      AWS_REGION: '{{ ssm_parameters[app_configuration_paramter_name] | from_json | community.general.json_query("aws_region") }}'
+      AWS_ROLE_NAME: '{{ ssm_parameters[app_configuration_paramter_name] | from_json | community.general.json_query("aws_role_name") }}'
+      SECRET_KEY: '{{ ssm_parameters[app_configuration_paramter_name] | from_json | community.general.json_query("secret_key") }}'
 - name: Install rc script
   template:
     src: expense-analysis.sh.j2
@@ -84,3 +103,5 @@
     mode: '0755'
     owner: root
     group: '{{ wheel }}'
+  vars:
+    expense_analysis_env_file: '/home/{{ expense_analysis_user }}/.env'

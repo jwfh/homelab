@@ -24,10 +24,11 @@ load_rc_config $name
 _expense_analysis_subprocess_user="{{ expense_analysis_user }}"
 _expense_analysis_subprocess="poetry"
 _expense_analysis_subprocess_flags="run python -m expense_analysis.app"
+_expense_analysis_subprocess_env_file="{{ expense_analysis_env_file }}"
 
 command="/usr/sbin/daemon"
 command_args="-f -p ${pidfile} -o ${expense_analysis_logfile} -u ${_expense_analysis_subprocess_user} -- ${_expense_analysis_subprocess} ${_expense_analysis_subprocess_flags}"
-procname="${_expense_analysis_subprocess}"
+procname="${expense_analysis_dir}/backend/.venv/bin/python"
 
 start_precmd="expense_analysis_prestart"
 
@@ -36,7 +37,10 @@ expense_analysis_prestart() {
 
     # Ensure log directory exists
     mkdir -p "$(dirname "${expense_analysis_logfile}")"
+    chmod u+rw,go+r "${expense_analysis_logfile}"
     return 0
 }
+
+export ENV_FILE="${_expense_analysis_subprocess_env_file}"
 
 run_rc_command "$1"

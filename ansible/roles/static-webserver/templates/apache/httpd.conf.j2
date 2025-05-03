@@ -9,15 +9,20 @@ ServerAdmin webmaster@localhost
 ServerTokens Prod
 ServerSignature Off
 
-# Worker configuration
-StartServers 1
-MinSpareServers 1
-MaxSpareServers 3
-MaxRequestWorkers 10
-MaxConnectionsPerChild 0
-
-# MPM Configuration - using event as it's the most efficient
+# Load MPM first as it's required for operation
 LoadModule mpm_event_module libexec/apache24/mod_mpm_event.so
+
+# Event MPM configuration
+<IfModule mpm_event_module>
+    StartServers             1
+    ServerLimit             10
+    MinSpareThreads         25
+    MaxSpareThreads         75
+    ThreadLimit             64
+    ThreadsPerChild         25
+    MaxRequestWorkers      150
+    MaxConnectionsPerChild   0
+</IfModule>
 
 # Core functionality modules
 LoadModule authn_core_module libexec/apache24/mod_authn_core.so

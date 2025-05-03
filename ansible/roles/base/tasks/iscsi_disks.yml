@@ -1,0 +1,120 @@
+---
+# Debian/Ubuntu iSCSI
+- name: Install open-iscsi package (Debian)
+  ansible.builtin.package:
+    name: open-iscsi
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Discover iSCSI targets (Debian)
+  community.general.open_iscsi:
+    target: "{{ item.target }}"
+    portal: "{{ item.portal }}"
+    login: true
+    state: present
+  loop: "{{ iscsi_disks }}"
+  loop_control:
+    label: "{{ item.target }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure partition exists on iSCSI device (Debian)
+  community.general.parted:
+    device: "{{ item.device }}"
+    number: 1
+    state: present
+    part_type: primary
+    fs_type: "{{ item.fstype | default('ext4') }}"
+  loop: "{{ iscsi_disks }}"
+  loop_control:
+    label: "{{ item.device }}"
+  when: ansible_os_family == 'Debian' and item.device is defined
+
+- name: Format partition if needed (Debian)
+  ansible.builtin.filesystem:
+    fstype: "{{ item.fstype | default('ext4') }}"
+    dev: "{{ item.device }}1"
+  loop: "{{ iscsi_disks }}"
+  loop_control:
+    label: "{{ item.device }}1"
+  when: ansible_os_family == 'Debian' and item.device is defined
+
+- name: Mount iSCSI disks (Debian)
+  ansible.posix.mount:
+    src: "{{ item.device }}1"
+    path: "{{ item.local_path }}"
+    fstype: "{{ item.fstype | default('ext4') }}"
+    opts: "{{ item.options | default('defaults') }}"
+    state: mounted
+  loop: "{{ iscsi_disks }}"
+  loop_control:
+    label: "{{ item.local_path }}"
+  when: ansible_os_family == 'Debian' and item.device is defined
+
+# FreeBSD iSCSI
+- name: Template /etc/iscsi.conf for iSCSI (FreeBSD)
+  ansible.builtin.template:
+    src: iscsi.conf.j2
+    dest: /etc/iscsi.conf
+    owner: root
+    group: wheel
+    mode: '0600'
+  when: ansible_os_family == 'FreeBSD'
+
+- name: Ensure iscsid service is running (FreeBSD)
+  ansible.builtin.service:
+    name: iscsid
+    state: started
+    enabled: true
+  when: ansible_os_family == 'FreeBSD'
+
+- name: Attach all iSCSI targets from config (FreeBSD)
+  ansible.builtin.command: iscsictl -Aa
+  when: ansible_os_family == 'FreeBSD'
+
+- name: Get iSCSI target to device mapping (FreeBSD)
+  ansible.builtin.command: iscsictl -L
+  register: iscsi_list_output
+  changed_when: false
+  when: ansible_os_family == 'FreeBSD'
+
+- name: Build iSCSI target to device map (FreeBSD)
+  set_fact:
+    iscsi_target_device_map: >-
+      {{ dict(
+        iscsi_list_output.stdout_lines[2:] | map('regex_search', '^(?P<target>\S+)\s+\S+\s+Connected: (?P<device>\S+)', '\g<target>:\g<device>') | select('string') | map('split', ':') | list
+      ) }}
+  when: ansible_os_family == 'FreeBSD'
+
+- name: Ensure partition exists on iSCSI device (FreeBSD)
+  ansible.builtin.shell: |
+    gpart show {{ iscsi_target_device_map[item.target] }} || gpart create -s GPT /dev/{{ iscsi_target_device_map[item.target] }} && gpart add -t freebsd-ufs /dev/{{ iscsi_target_device_map[item.target] }}
+  args:
+    warn: false
+  loop: "{{ iscsi_disks }}"
+  loop_control:
+    label: "{{ item.target }}"
+  when: ansible_os_family == 'FreeBSD' and iscsi_target_device_map[item.target] is defined
+
+- name: Format partition if needed (FreeBSD)
+  ansible.builtin.shell: |
+    if ! file -s /dev/{{ iscsi_target_device_map[item.target] }}p1 | grep -q '{{ item.fstype | default('ufs') }}'; then
+      newfs -U /dev/{{ iscsi_target_device_map[item.target] }}p1
+    fi
+  args:
+    warn: false
+  loop: "{{ iscsi_disks }}"
+  loop_control:
+    label: "{{ item.target }}"
+  when: ansible_os_family == 'FreeBSD' and iscsi_target_device_map[item.target] is defined
+
+- name: Mount iSCSI disks (FreeBSD)
+  ansible.posix.mount:
+    src: "/dev/{{ iscsi_target_device_map[item.target] }}p1"
+    path: "{{ item.local_path }}"
+    fstype: "{{ item.fstype | default('ufs') }}"
+    opts: "{{ item.options | default('rw') }}"
+    state: mounted
+  loop: "{{ iscsi_disks }}"
+  loop_control:
+    label: "{{ item.local_path }}"
+  when: ansible_os_family == 'FreeBSD' and iscsi_target_device_map[item.target] is defined

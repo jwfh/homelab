@@ -1,0 +1,32 @@
+---
+# Debian/Ubuntu NFS
+- name: Ensure NFS packages are installed (Debian)
+  ansible.builtin.package:
+    name: nfs-common
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Mount NFS shares (Debian)
+  ansible.posix.mount:
+    src: "{{ item.server }}:{{ item.remote_path }}"
+    path: "{{ item.local_path }}"
+    fstype: nfs
+    opts: "{{ item.options | default('defaults') }}"
+    state: mounted
+  loop: "{{ nfs_mounts }}"
+  loop_control:
+    label: "{{ item.local_path }}"
+  when: ansible_os_family == 'Debian'
+
+# FreeBSD NFS
+- name: Mount NFS shares (FreeBSD)
+  ansible.posix.mount:
+    src: "{{ item.server }}:{{ item.remote_path }}"
+    path: "{{ item.local_path }}"
+    fstype: nfs
+    opts: "{{ item.options | default('rw') }}"
+    state: mounted
+  loop: "{{ nfs_mounts }}"
+  loop_control:
+    label: "{{ item.local_path }}"
+  when: ansible_os_family == 'FreeBSD'

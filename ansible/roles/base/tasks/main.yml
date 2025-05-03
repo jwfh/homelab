@@ -42,3 +42,10 @@
   include_tasks: tasks/qemu.yml
   when: 
     - "'QEMU' in ansible_facts.processor | join(' ')"
+- name: Include tasks/nfs_mounts.yml
+  include_tasks: tasks/nfs_mounts.yml
+  when: nfs_mounts is defined and nfs_mounts | length > 0
+
+- name: Include tasks/iscsi_disks.yml
+  include_tasks: tasks/iscsi_disks.yml
+  when: iscsi_disks is defined and iscsi_disks | length > 0

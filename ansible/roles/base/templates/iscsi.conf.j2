@@ -1,0 +1,20 @@
+# /etc/iscsi.conf Jinja2 template for FreeBSD iSCSI
+#
+# Example:
+# target1 {
+#   targetaddress = 192.168.1.20:3260,1
+#   targetname = iqn.2023-01.com.example:storage.disk1
+#   authmethod = CHAP
+#   chapIName = user
+#   chapSecret = password
+# }
+#
+{% for disk in iscsi_disks %}
+{{ disk.name | default('target' + loop.index|string) }} {
+  targetaddress = {{ disk.portal }}
+  targetname = {{ disk.target }}
+  {% if disk.authmethod is defined %}authmethod = {{ disk.authmethod }}{% endif %}
+  {% if disk.chapIName is defined %}chapIName = {{ disk.chapIName }}{% endif %}
+  {% if disk.chapSecret is defined %}chapSecret = {{ disk.chapSecret }}{% endif %}
+}
+{% endfor %}

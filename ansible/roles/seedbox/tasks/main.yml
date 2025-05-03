@@ -1,23 +1,48 @@
 ---
-- name: Enable iSCSI
+- name: Install transmission daemon and remote CLI
+  pkgng:
+    name: 
+      - transmission-daemon
+      - transmission-cli
+    state: present
+
+- name: Create download directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ transmission_user | default('transmission') }}"
+    group: "{{ transmission_group | default('transmission') }}"
+    mode: '0755'
+  loop:
+    - "{{ transmission_download_dir | default('/var/db/transmission/downloads') }}"
+    - "{{ transmission_incomplete_dir | default('/var/db/transmission/incomplete') }}"
+    - "{{ transmission_watch_dir | default('/var/db/transmission/watch') }}"
+
+- name: Create transmission settings directory
+  file:
+    path: /var/db/transmission/home
+    state: directory
+    owner: "{{ transmission_user | default('transmission') }}"
+    group: "{{ transmission_group | default('transmission') }}"
+    mode: '0755'
+
+- name: Configure transmission settings
+  template:
+    src: settings.json.j2
+    dest: /var/db/transmission/home/settings.json
+    owner: "{{ transmission_user | default('transmission') }}"
+    group: "{{ transmission_group | default('transmission') }}"
+    mode: '0600'
+  notify: restart transmission
+
+- name: Create transmission-remote helper script
+  template:
+    src: add-magnet.sh.j2
+    dest: /usr/local/bin/add-magnet
+    mode: '0755'
+
+- name: Enable and start transmission service
   service:
-    name: iscsid
-    state: started
+    name: transmission
     enabled: true
-- name: Enable iSCSI initiator
-  service:
-    name: iscsictl
     state: started
-    enabled: true
-- name: Mount iSCSI disk
-  block:
-    - name: Create mountpoint
-      file:
-        path: /mnt/seedbox
-        state: directory
-    - name: Mount iSCSI disk
-      mount:
-        path: /mnt/seedbox
-        src: /dev/da1p1
-        fstype: ufs
-        state: mounted

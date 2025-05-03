@@ -96,7 +96,26 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
         Require all granted
 
         {% if site.autoindex | d(False) %}
+        # Custom index display configuration
+        HeaderName /header.html
+        ReadmeName /footer.html
         IndexOptions {{ apache_index_options | join(' ') }}
+        IndexOrderDefault Ascending Name
+        
+        # Format specification for dates and sizes
+        IndexHeadInsert '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        IndexStyleSheet "/style.css"
+        
+        # Time format similar to the example
+        IndexTimeFormat "%-d-%b-%Y %H:%M"
+        
+        # File type icons and classes
+        AddIcon (DIR,/icons/folder.gif) ^^DIRECTORY^^
+        AddIcon (PARENTDIR,/icons/folder.gif) ..
+        AddIconByType (TXT,/icons/text.gif) text/*
+        AddIconByType (IMG,/icons/image.gif) image/*
+        AddIconByType (SND,/icons/sound.gif) audio/*
+        AddIconByType (VID,/icons/movie.gif) video/*
         {% endif %}
 
         {% if not site.autoindex | d(False) %}
@@ -106,6 +125,12 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
         {% endif %}
         {% endif %}
     </Directory>
+
+    {% if site.autoindex | d(False) %}
+    # Alias for index customization files
+    Alias /header.html /usr/local/www/apache24/autoindex/header.html
+    Alias /footer.html /usr/local/www/apache24/autoindex/footer.html
+    {% endif %}
 
     # Error pages
     ErrorDocument 403 /403.html

@@ -8,6 +8,13 @@ sites: []
 # Apache-specific configuration
 apache_index_options:
   - FancyIndexing
-  - NameWidth=*
   - HTMLTable
+  - NameWidth=*
   - SuppressDescription
+  - SuppressRules
+  - FoldersFirst
+  - IgnoreCase
+  - IconsAreLinks
+  - VersionSort
+  - Charset=UTF-8
+  - SuppressIcon

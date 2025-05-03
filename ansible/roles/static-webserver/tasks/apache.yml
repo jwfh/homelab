@@ -23,6 +23,21 @@
   with_fileglob:
     - error_pages/*
 
+- name: Create autoindex directory
+  file:
+    path: /usr/local/www/apache24/autoindex
+    state: directory
+    mode: 0755
+
+- name: Copy autoindex templates
+  copy:
+    src: "apache/{{ item }}"
+    dest: "/usr/local/www/apache24/autoindex/{{ item }}"
+    mode: 0644
+  with_items:
+    - header.html
+    - footer.html
+
 - name: Install TLS certificate
   include_role: 
     name: install-cert

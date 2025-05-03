@@ -5,8 +5,8 @@
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
   vars:
-    nginx_autoindex: true
-    nginx_sites:
+    web_server: apache
+    sites:
       - domain_name: mirror.jwfh.ca
         autoindex: true
         all_errors_403: true

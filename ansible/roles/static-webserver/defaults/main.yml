@@ -11,6 +11,3 @@ apache_index_options:
   - NameWidth=*
   - HTMLTable
   - SuppressDescription
-
-# Variables for backward compatibility
-nginx_sites: "{{ sites }}"

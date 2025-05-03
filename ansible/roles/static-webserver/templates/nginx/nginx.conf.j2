@@ -47,7 +47,7 @@ http {
         return 403;
     }
 
-{% for site in nginx_sites %}
+{% for site in sites %}
     server {
         listen 80;
         server_name "{{ site.domain_name }}";

@@ -6,7 +6,7 @@
     - "inventory/host_variables/{{ ansible_host }}.yml"
   vars:
     shlink_web_client_dir: /usr/local/www/sites/go-admin.jwfh.ca/www
-    nginx_sites:
+    sites:
       - domain_name: 'go-admin.jwfh.ca'
         autoindex: false
         all_errors_403: true

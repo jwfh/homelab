@@ -16,30 +16,40 @@ MaxSpareServers 3
 MaxRequestWorkers 10
 MaxConnectionsPerChild 0
 
-# Load required modules
-LoadModule authn_file_module libexec/apache24/mod_authn_file.so
+# MPM Configuration - using event as it's the most efficient
+LoadModule mpm_event_module libexec/apache24/mod_mpm_event.so
+
+# Core functionality modules
 LoadModule authn_core_module libexec/apache24/mod_authn_core.so
-LoadModule authz_host_module libexec/apache24/mod_authz_host.so
-LoadModule authz_groupfile_module libexec/apache24/mod_authz_groupfile.so
-LoadModule authz_user_module libexec/apache24/mod_authz_user.so
 LoadModule authz_core_module libexec/apache24/mod_authz_core.so
-LoadModule access_compat_module libexec/apache24/mod_access_compat.so
-LoadModule auth_basic_module libexec/apache24/mod_auth_basic.so
+LoadModule unixd_module libexec/apache24/mod_unixd.so
 LoadModule reqtimeout_module libexec/apache24/mod_reqtimeout.so
-LoadModule filter_module libexec/apache24/mod_filter.so
-LoadModule mime_module libexec/apache24/mod_mime.so
+
+# Basic authentication modules
+LoadModule authn_file_module libexec/apache24/mod_authn_file.so
+LoadModule authz_host_module libexec/apache24/mod_authz_host.so
+LoadModule authz_user_module libexec/apache24/mod_authz_user.so
+LoadModule auth_basic_module libexec/apache24/mod_auth_basic.so
+LoadModule access_compat_module libexec/apache24/mod_access_compat.so
+
+# Logging and environment modules
 LoadModule log_config_module libexec/apache24/mod_log_config.so
 LoadModule env_module libexec/apache24/mod_env.so
-LoadModule headers_module libexec/apache24/mod_headers.so
 LoadModule setenvif_module libexec/apache24/mod_setenvif.so
 LoadModule version_module libexec/apache24/mod_version.so
-LoadModule unixd_module libexec/apache24/mod_unixd.so
-LoadModule status_module libexec/apache24/mod_status.so
-LoadModule autoindex_module libexec/apache24/mod_autoindex.so
+
+# Content handling modules
+LoadModule mime_module libexec/apache24/mod_mime.so
 LoadModule dir_module libexec/apache24/mod_dir.so
 LoadModule alias_module libexec/apache24/mod_alias.so
-LoadModule rewrite_module libexec/apache24/mod_rewrite.so
+LoadModule filter_module libexec/apache24/mod_filter.so
 LoadModule deflate_module libexec/apache24/mod_deflate.so
+LoadModule headers_module libexec/apache24/mod_headers.so
+
+# Optional feature modules
+LoadModule status_module libexec/apache24/mod_status.so
+LoadModule autoindex_module libexec/apache24/mod_autoindex.so
+LoadModule rewrite_module libexec/apache24/mod_rewrite.so
 
 # Main configuration
 TypesConfig etc/apache24/mime.types

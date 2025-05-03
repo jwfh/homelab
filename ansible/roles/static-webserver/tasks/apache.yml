@@ -53,7 +53,7 @@
   notify: 
     - restart apache
 
-- name: Start service apache
+- name: Start Apache service
   service:
     name: apache24
     state: started

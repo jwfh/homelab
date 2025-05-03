@@ -67,14 +67,14 @@ http {
 
         location / {
             # Only serve explicitly existing files
+{% if site.autoindex | d(False) %}
+            autoindex on;
+{% else %}
 {% if site.all_errors_403 | d(True) %}
             try_files $uri =403;
 {% else %}
             try_files $uri =404;
 {% endif %}
-{% if site.autoindex | d(False) %}
-            autoindex on;
-{% else %}
             autoindex off;
 {% endif %}
         }

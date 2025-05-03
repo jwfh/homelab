@@ -6,9 +6,15 @@
     - "inventory/host_variables/{{ ansible_host }}.yml"
   vars:
     nginx_autoindex: true
-    webroot_nfs_server: ritchie
-    webroot_nfs_prefix: /mnt/default/mirror
-    webroot_local_dir: /mirror
+    nginx_sites:
+      - domain_name: mirror.jwfh.ca
+        autoindex: true
+        all_errors_403: true
+    nfs_mounts:
+      - server: ritchie
+        remote_path: /mnt/default/mirror/www
+        local_path: /usr/local/www/sites/mirror.jwfh.ca/www
+        mode: ro
   roles:
     - base
     - static-webserver

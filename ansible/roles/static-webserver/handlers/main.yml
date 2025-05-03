@@ -1,11 +1,28 @@
 ---
+# Nginx handlers
 - name: restart nginx
   service: name=nginx state=restarted
+  when: web_server == 'nginx'
 
 - name: validate nginx configuration
   command: nginx -t -c /usr/local/etc/nginx/nginx.conf
   changed_when: false
+  when: web_server == 'nginx'
 
 - name: reload nginx
   service: name=nginx state=reloaded
-  when: nginx_service_state == "started"
+  when: web_server == 'nginx'
+
+# Apache handlers
+- name: restart apache
+  service: name=apache24 state=restarted
+  when: web_server == 'apache'
+
+- name: validate apache configuration
+  command: apachectl configtest
+  changed_when: false
+  when: web_server == 'apache'
+
+- name: reload apache
+  service: name=apache24 state=reloaded
+  when: web_server == 'apache'

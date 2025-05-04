@@ -15,4 +15,3 @@ apache_index_options:
   - VersionSort
   - Charset=UTF-8
   - 'ScanHTMLTitles'
-  - 'TimeFormat="%-d-%b-%Y %H:%M"'

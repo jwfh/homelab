@@ -1,11 +1,6 @@
 ---
-# Choose which web server to use: 'nginx' or 'apache'
-web_server: 'nginx'
-
-# Sites configuration
 sites: []
 
-# Apache-specific configuration
 apache_index_options:
   - Charset=UTF-8
   - FoldersFirst

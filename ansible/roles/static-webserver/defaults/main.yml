@@ -15,3 +15,4 @@ apache_index_options:
   - FancyIndexing
   - HTMLTable
   - NameWidth=*
+  - SuppressHTMLPreamble

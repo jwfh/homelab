@@ -35,7 +35,8 @@
     dest: "/usr/local/www/apache24/autoindex/{{ item }}"
     mode: 0644
   with_items:
-    - style.css
+    - header.html
+    - footer.html
     
 - name: Install TLS certificate
   include_role: 

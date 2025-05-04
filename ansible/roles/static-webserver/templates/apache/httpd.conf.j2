@@ -101,7 +101,8 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
 
         {% if site.autoindex | d(False) %}
         # Custom index display configuration
-        IndexStyleSheet /style.css
+        HeaderName /header.html
+        ReadmeName /footer.html
         {% for option in apache_index_options %}
         IndexOptions {{ option }}
         {% endfor %}
@@ -115,11 +116,6 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
         {% endif %}
         {% endif %}
     </Directory>
-
-    # Alias for style.css
-    {% if site.autoindex | d(False) %}
-    Alias /style.css /usr/local/www/apache24/autoindex/style.css
-    {% endif %}
 
     # Error pages
     ErrorDocument 403 /403.html
@@ -137,10 +133,14 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
     ErrorDocument 504 /50x.html
     {% endif %}
 
-    # Error pages directory
+    # Error pages and autoindex files directory
     Alias /403.html /usr/local/www/apache24/403.html
     Alias /404.html /usr/local/www/apache24/404.html
     Alias /50x.html /usr/local/www/apache24/50x.html
+    {% if site.autoindex | d(False) %}
+    Alias /header.html /usr/local/www/apache24/autoindex/header.html
+    Alias /footer.html /usr/local/www/apache24/autoindex/footer.html
+    {% endif %}
 
     <Files ~ "^\.ht">
         Require all denied

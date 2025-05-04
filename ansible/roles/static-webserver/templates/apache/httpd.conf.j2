@@ -9,6 +9,10 @@ ServerAdmin webmaster@localhost
 ServerTokens Prod
 ServerSignature Off
 
+# Disable HTTP Accept Filter since we don't load accf_http kernel module
+AcceptFilter http none
+AcceptFilter https none
+
 # Load MPM first as it's required for operation
 LoadModule mpm_event_module libexec/apache24/mod_mpm_event.so
 

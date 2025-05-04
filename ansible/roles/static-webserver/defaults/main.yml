@@ -13,6 +13,7 @@ apache_index_options:
   - SuppressIcon
   - SuppressDescription
   - FancyIndexing
-  - HTMLTable
   - NameWidth=*
   - SuppressHTMLPreamble
+  - XHTML
+  - SuppressRules

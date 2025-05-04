@@ -12,8 +12,10 @@ apache_index_options:
   - VersionSort
   - SuppressIcon
   - SuppressDescription
-  - FancyIndexing
   - NameWidth=*
   - SuppressHTMLPreamble
+  - HTMLTable
   - XHTML
   - SuppressRules
+  - IconHeight=* 
+  - IconWidth=*

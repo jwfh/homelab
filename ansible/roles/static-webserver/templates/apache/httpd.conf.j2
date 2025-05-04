@@ -103,20 +103,14 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
         # Custom index display configuration
         HeaderName /header.html
         ReadmeName /footer.html
+        IndexStyleSheet none
         IndexOptions {{ apache_index_options | join(' ') }}
         IndexOrderDefault Ascending Name
-        
-        # Format specification for dates and sizes
-        IndexHeadInsert '<meta name="viewport" content="width=device-width, initial-scale=1">'
-        IndexStyleSheet "/style.css"
-        
-        # File type icons and classes
-        AddIcon (DIR,/icons/folder.gif) ^^DIRECTORY^^
-        AddIcon (PARENTDIR,/icons/folder.gif) ..
-        AddIconByType (TXT,/icons/text.gif) text/*
-        AddIconByType (IMG,/icons/image.gif) image/*
-        AddIconByType (SND,/icons/sound.gif) audio/*
-        AddIconByType (VID,/icons/movie.gif) video/*
+
+        # Customize columns display order
+        IndexOptions +NameWidth=* +SuppressDescription
+        IndexOptions +SuppressHTMLPreamble
+        IndexOptions +FancyIndexing +HTMLTable
         {% endif %}
 
         {% if not site.autoindex | d(False) %}

@@ -7,12 +7,12 @@ sites: []
 
 # Apache-specific configuration
 apache_index_options:
-  - FancyIndexing
-  - HTMLTable
-  - NameWidth=*
-  - SuppressDescription
+  - Charset=UTF-8
   - FoldersFirst
   - VersionSort
-  - Charset=UTF-8
-  #- ScanHTMLTitles
   - SuppressIcon
+  - SuppressRules
+  - SuppressDescription
+  - SuppressHTMLPreamble
+  - SuppressColumnSorting
+  - 'TimeFormat="%-d-%b-%Y %H:%M"'

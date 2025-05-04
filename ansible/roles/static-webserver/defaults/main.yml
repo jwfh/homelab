@@ -18,3 +18,4 @@ apache_index_options:
   - VersionSort
   - Charset=UTF-8
   - SuppressIcon
+  - 'TimeFormat="%d-%b-%Y %H:%M"'

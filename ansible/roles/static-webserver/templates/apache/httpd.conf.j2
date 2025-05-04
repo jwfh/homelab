@@ -101,16 +101,11 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
 
         {% if site.autoindex | d(False) %}
         # Custom index display configuration
-        HeaderName /header.html
-        ReadmeName /footer.html
-        IndexStyleSheet none
-        IndexOptions {{ apache_index_options | join(' ') }}
+        IndexStyleSheet /style.css
+        {% for option in apache_index_options %}
+        IndexOptions {{ option }}
+        {% endfor %}
         IndexOrderDefault Ascending Name
-
-        # Customize columns display order
-        IndexOptions +NameWidth=* +SuppressDescription
-        IndexOptions +SuppressHTMLPreamble
-        IndexOptions +FancyIndexing +HTMLTable
         {% endif %}
 
         {% if not site.autoindex | d(False) %}
@@ -121,10 +116,9 @@ LogFormat "%h %l %u %t \"%r\" %>s %b" common
         {% endif %}
     </Directory>
 
+    # Alias for style.css
     {% if site.autoindex | d(False) %}
-    # Alias for index customization files
-    Alias /header.html /usr/local/www/apache24/autoindex/header.html
-    Alias /footer.html /usr/local/www/apache24/autoindex/footer.html
+    Alias /style.css /usr/local/www/apache24/autoindex/style.css
     {% endif %}
 
     # Error pages

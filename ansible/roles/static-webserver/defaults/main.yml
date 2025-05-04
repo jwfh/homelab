@@ -11,8 +11,6 @@ apache_index_options:
   - FoldersFirst
   - VersionSort
   - SuppressIcon
-  - SuppressRules
   - SuppressDescription
-  - SuppressHTMLPreamble
-  - SuppressColumnSorting
-  - 'TimeFormat="%-d-%b-%Y %H:%M"'
+  - FancyIndexing
+  - HTMLTable

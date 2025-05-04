@@ -11,11 +11,8 @@ apache_index_options:
   - HTMLTable
   - NameWidth=*
   - SuppressDescription
-  - SuppressRules
   - FoldersFirst
-  - IgnoreCase
-  - IconsAreLinks
   - VersionSort
   - Charset=UTF-8
-  - SuppressIcon
-  - 'TimeFormat="%d-%b-%Y %H:%M"'
+  - 'ScanHTMLTitles'
+  - 'TimeFormat="%-d-%b-%Y %H:%M"'

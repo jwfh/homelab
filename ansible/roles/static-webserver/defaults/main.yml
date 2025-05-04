@@ -14,3 +14,4 @@ apache_index_options:
   - SuppressDescription
   - FancyIndexing
   - HTMLTable
+  - NameWidth=*

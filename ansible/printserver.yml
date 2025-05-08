@@ -1,0 +1,8 @@
+---
+- name: Print server
+  hosts: printserver
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base

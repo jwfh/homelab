@@ -1,0 +1,94 @@
+---
+- name: Install required packages
+  package:
+    name:
+      - cups  # Base CUPS package
+      - samba413  # FreeBSD Samba package
+      - avahi-app  # For AirPrint support
+      - py39-cups  # Python CUPS bindings for FreeBSD
+    state: present
+
+- name: Create CUPS admin group
+  group:
+    name: "{{ cups_admin_group }}"
+    state: present
+
+- name: Configure CUPS
+  template:
+    src: cupsd.conf.j2
+    dest: /usr/local/etc/cups/cupsd.conf
+    owner: root
+    group: wheel
+    mode: '0644'
+  notify: restart cupsd
+
+- name: Configure Samba for printer sharing
+  template:
+    src: smb.conf.j2
+    dest: /usr/local/etc/smb4.conf
+    owner: root
+    group: wheel
+    mode: '0644'
+  notify: restart samba
+
+- name: Configure Avahi daemon
+  template:
+    src: avahi-daemon.conf.j2
+    dest: /usr/local/etc/avahi/avahi-daemon.conf
+    owner: root
+    group: wheel
+    mode: '0644'
+  notify: restart avahi
+
+- name: Enable required services in rc.conf
+  sysrc:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - { name: 'cupsd_enable', value: 'YES' }
+    - { name: 'samba_server_enable', value: 'YES' }
+    - { name: 'avahi_daemon_enable', value: 'YES' }
+
+- name: Start required services
+  service:
+    name: "{{ item }}"
+    state: started
+  loop:
+    - cupsd
+    - samba
+    - avahi-daemon
+
+- name: Configure printers
+  block:
+    - name: Add printers
+      cups_lpadmin:
+        name: "{{ item.name }}"
+        uri: "{{ item.uri }}"
+        enabled: "{{ item.enabled | default(true) }}"
+        shared: "{{ item.shared | default(true) }}"
+        info: "{{ item.description | default(item.name) }}"
+        location: "{{ item.location | default('') }}"
+        model: "{{ item.driver | default('everywhere') }}"
+        options: "{{ item.options | default({}) }}"
+      loop: "{{ cups_printers }}"
+      when: cups_printers is defined
+
+    - name: Create Avahi services directory
+      file:
+        path: /usr/local/etc/avahi/services
+        state: directory
+        owner: root
+        group: wheel
+        mode: '0755'
+
+    - name: Deploy AirPrint service definitions
+      template:
+        src: airprint.service.j2
+        dest: "/usr/local/etc/avahi/services/airprint-{{ item.name }}.service"
+        owner: root
+        group: wheel
+        mode: '0644'
+      loop: "{{ cups_printers }}"
+      when: cups_printers is defined and item.airprint | default(true)
+      notify: restart avahi
+  become: yes

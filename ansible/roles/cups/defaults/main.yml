@@ -1,0 +1,25 @@
+---
+# CUPS server configuration
+cups_port: 631
+cups_interface: "*:631"
+cups_admin_group: lpadmin
+cups_allow_remote: true
+
+# Samba configuration for printer sharing
+cups_samba_workgroup: WORKGROUP
+cups_samba_server_string: "CUPS Print Server"
+
+# Define printers
+cups_printers:
+  # Example printer configuration (uncomment and modify as needed)
+  # - name: Office_Printer
+  #   description: "Main Office Printer"
+  #   uri: "ipp://192.168.1.100"
+  #   location: "Main Office"
+  #   driver: "everywhere"  # Using driverless IPP everywhere
+  #   shared: true
+  #   enabled: true
+  #   airprint: true  # Enable AirPrint for this printer
+  #   options:
+  #     media: A4
+  #     sides: two-sided-long-edge

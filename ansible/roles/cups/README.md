@@ -31,6 +31,7 @@ cups_port: 631                      # CUPS server port
 cups_interface: "*:631"             # Interface to listen on
 cups_admin_group: lpadmin          # Admin group for CUPS
 cups_allow_remote: true            # Allow remote access
+cups_allowed_subnets: []           # List of subnets to allow web access from, e.g. ["10.0.0.0/8", "192.168.0.0/16"]
 
 # Samba configuration
 cups_samba_workgroup: WORKGROUP

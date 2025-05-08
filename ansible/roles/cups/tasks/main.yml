@@ -31,14 +31,14 @@
     mode: '0644'
   notify: restart samba
 
-- name: Configure Avahi daemon
-  template:
-    src: avahi-daemon.conf.j2
-    dest: /usr/local/etc/avahi/avahi-daemon.conf
-    owner: root
-    group: wheel
-    mode: '0644'
-  notify: restart avahi
+# - name: Configure Avahi daemon
+#   template:
+#     src: avahi-daemon.conf.j2
+#     dest: /usr/local/etc/avahi/avahi-daemon.conf
+#     owner: root
+#     group: wheel
+#     mode: '0644'
+#   notify: restart avahi
 
 - name: Enable required services in rc.conf
   sysrc:
@@ -47,7 +47,7 @@
   loop:
     - { name: 'cupsd_enable', value: 'YES' }
     - { name: 'samba_server_enable', value: 'YES' }
-    - { name: 'avahi_daemon_enable', value: 'YES' }
+    # - { name: 'avahi_daemon_enable', value: 'YES' }
 
 - name: Start required services
   service:
@@ -56,39 +56,39 @@
   loop:
     - cupsd
     - samba
-    - avahi-daemon
+    # - avahi-daemon
 
-- name: Configure printers
-  block:
-    - name: Add printers
-      cups_lpadmin:
-        name: "{{ item.name }}"
-        uri: "{{ item.uri }}"
-        enabled: "{{ item.enabled | default(true) }}"
-        shared: "{{ item.shared | default(true) }}"
-        info: "{{ item.description | default(item.name) }}"
-        location: "{{ item.location | default('') }}"
-        model: "{{ item.driver | default('everywhere') }}"
-        options: "{{ item.options | default({}) }}"
-      loop: "{{ cups_printers }}"
-      when: cups_printers is defined
+# - name: Configure printers
+#   block:
+#     - name: Add printers
+#       cups_lpadmin:
+#         name: "{{ item.name }}"
+#         uri: "{{ item.uri }}"
+#         enabled: "{{ item.enabled | default(true) }}"
+#         shared: "{{ item.shared | default(true) }}"
+#         info: "{{ item.description | default(item.name) }}"
+#         location: "{{ item.location | default('') }}"
+#         model: "{{ item.driver | default('everywhere') }}"
+#         options: "{{ item.options | default({}) }}"
+#       loop: "{{ cups_printers }}"
+#       when: cups_printers is defined
 
-    - name: Create Avahi services directory
-      file:
-        path: /usr/local/etc/avahi/services
-        state: directory
-        owner: root
-        group: wheel
-        mode: '0755'
+#     - name: Create Avahi services directory
+#       file:
+#         path: /usr/local/etc/avahi/services
+#         state: directory
+#         owner: root
+#         group: wheel
+#         mode: '0755'
 
-    - name: Deploy AirPrint service definitions
-      template:
-        src: airprint.service.j2
-        dest: "/usr/local/etc/avahi/services/airprint-{{ item.name }}.service"
-        owner: root
-        group: wheel
-        mode: '0644'
-      loop: "{{ cups_printers }}"
-      when: cups_printers is defined and item.airprint | default(true)
-      notify: restart avahi
-  become: yes
+#     - name: Deploy AirPrint service definitions
+#       template:
+#         src: airprint.service.j2
+#         dest: "/usr/local/etc/avahi/services/airprint-{{ item.name }}.service"
+#         owner: root
+#         group: wheel
+#         mode: '0644'
+#       loop: "{{ cups_printers }}"
+#       when: cups_printers is defined and item.airprint | default(true)
+#       notify: restart avahi
+#   become: yes

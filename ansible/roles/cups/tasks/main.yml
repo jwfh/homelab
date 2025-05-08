@@ -31,32 +31,24 @@
     mode: '0644'
   notify: restart samba
 
-# - name: Configure Avahi daemon
-#   template:
-#     src: avahi-daemon.conf.j2
-#     dest: /usr/local/etc/avahi/avahi-daemon.conf
-#     owner: root
-#     group: wheel
-#     mode: '0644'
-#   notify: restart avahi
+- name: Configure Avahi daemon
+  template:
+    src: avahi-daemon.conf.j2
+    dest: /usr/local/etc/avahi/avahi-daemon.conf
+    owner: root
+    group: wheel
+    mode: '0644'
+  notify: restart avahi
 
-- name: Enable required services in rc.conf
-  sysrc:
-    name: "{{ item.name }}"
-    value: "{{ item.value }}"
-  loop:
-    - { name: 'cupsd_enable', value: 'YES' }
-    - { name: 'samba_server_enable', value: 'YES' }
-    # - { name: 'avahi_daemon_enable', value: 'YES' }
-
-- name: Start required services
+- name: Enable and start required services
   service:
     name: "{{ item }}"
     state: started
+    enabled: true
   loop:
     - cupsd
     - samba
-    # - avahi-daemon
+    - avahi-daemon
 
 # - name: Configure printers
 #   block:

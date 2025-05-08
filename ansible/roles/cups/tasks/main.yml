@@ -2,10 +2,12 @@
 - name: Install required packages
   package:
     name:
-      - cups  # Base CUPS package
-      - samba413  # FreeBSD Samba package
-      - avahi-app  # For AirPrint support
-      - py39-cups  # Python CUPS bindings for FreeBSD
+      - cups
+      - cups-filters
+      - cups-pdf
+      - samba420
+      - avahi-app
+      - py311-cups
     state: present
 
 - name: Create CUPS admin group

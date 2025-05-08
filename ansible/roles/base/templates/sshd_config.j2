@@ -21,9 +21,9 @@ MaxSessions 10
 
 PubkeyAuthentication yes
 AuthorizedKeysFile	.ssh/authorized_keys
-PasswordAuthentication no
+PasswordAuthentication {{ 'yes' if ssh_allow_password_auth else 'no' }}
 PermitEmptyPasswords no
-KbdInteractiveAuthentication no
+KbdInteractiveAuthentication {{ 'yes' if ssh_allow_password_auth else 'no' }}
 KerberosAuthentication no
 GSSAPIAuthentication no
 UsePAM no

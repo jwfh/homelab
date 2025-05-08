@@ -21,3 +21,5 @@ iscsi_disks: []
 #   local_path: /mnt/iscsi1
 #   fstype: ext4
 #   options: defaults
+
+ssh_allow_password_auth: false

@@ -2,9 +2,9 @@
 # {{ line }}
 {% endfor %}
 
-#ZPOOL=poudriere
-NO_ZFS=yes
-#ZROOTFS=/poudriere
+ZPOOL=poudriere
+ZROOTFS=/poudriere
+NO_ZFS=no
 FREEBSD_HOST=https://download.freebsd.org
 RESOLV_CONF=/etc/resolv.conf
 BASEFS=/usr/local/poudriere
@@ -13,7 +13,8 @@ USE_PORTLINT=no
 USE_TMPFS=yes
 DISTFILES_CACHE=/usr/ports/distfiles
 PKG_REPO_SIGNING_KEY=/usr/local/etc/ssl/private/poudriere-sk.key
-URL_BASE=http://10.174.12.146
+URL_BASE=http://10.174.12.145
 CHECK_CHANGED_OPTIONS=verbose
 CHECK_CHANGED_DEPS=yes
 RESTRICT_NETWORKING=yes
+LOGS=/usr/local/poudriere/logs/

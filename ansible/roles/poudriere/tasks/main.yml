@@ -14,16 +14,42 @@
     owner: root
     group: '{{ wheel }}'
     mode: '0755'
-# - name: Check if ports tree has been cloned
-#   stat:
-#     path: /usr/local/poudriere/ports/default/Makefile
-#   register: ports_tree
-# - name: Clone Poudriere ports tree
-#   shell:
-#     cmd: poudriere ports -c -p default
-#   when: 'not ports_tree.stat.exists'
 
+- name: Ensure default ports tree exists
+  stat:
+    path: /usr/local/poudriere/ports/default/Makefile
+  register: ports_tree
 
+- name: Create default ports tree if missing
+  shell: poudriere ports -c -p default
+  when: not ports_tree.stat.exists
+
+- name: Ensure jail for FreeBSD 14.2 amd64 exists
+  stat:
+    path: /usr/local/poudriere/jails/142amd64
+  register: jail_142
+
+- name: Create jail for FreeBSD 14.2 amd64 if missing
+  shell: poudriere jail -c -j 142amd64 -v 14.2-RELEASE -a amd64
+  when: not jail_142.stat.exists
+
+- name: Ensure jail for FreeBSD 14.3 amd64 exists
+  stat:
+    path: /usr/local/poudriere/jails/143amd64
+  register: jail_143
+
+- name: Create jail for FreeBSD 14.3 amd64 if missing
+  shell: poudriere jail -c -j 143amd64 -v 14.3-RELEASE -a amd64
+  when: not jail_143.stat.exists
+
+- name: Ensure poudriere weekly build cron job exists
+  cron:
+    name: "Poudriere weekly bulk build"
+    user: root
+    job: "poudriere bulk -j 142amd64 -p default -f /usr/local/etc/poudriere.d/pkglist || true; poudriere bulk -j 143amd64 -p default -f /usr/local/etc/poudriere.d/pkglist || true"
+    minute: 0
+    hour: 3
+    weekday: 0
 
 - name: Create poudriere.conf
   template:
@@ -32,7 +58,3 @@
     owner: root
     group: '{{ wheel }}'
     mode: '0644'
-
-# - name: Include vbotka.freebsd_poudriere
-#   include_role:
-#     name: vbotka.freebsd_poudriere

@@ -7,7 +7,8 @@
       - cups-pdf
       - samba420
       - avahi-app
-      - py311-cups
+      - py311-pycups # Needed for CUPS Python bindings used by Ansible
+      - hplip
     state: present
 
 - name: Create CUPS admin group

@@ -1,6 +1,6 @@
 ---
-- name: Plex Media Server
-  hosts: plex
+- name: Jellyfin server
+  hosts: jellyfin
   become: true
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
@@ -16,4 +16,4 @@
         mode: ro
   roles:
     - base
-    - plex
+    - generic-compute

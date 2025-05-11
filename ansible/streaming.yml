@@ -1,6 +1,6 @@
 ---
-- name: Plex Media Server
-  hosts: plex
+- name: Media Streaming Server
+  hosts: streaming
   become: true
   vars_files:
     - "inventory/host_variables/{{ ansible_host }}.yml"
@@ -17,3 +17,4 @@
   roles:
     - base
     - plex
+    - jellyfin

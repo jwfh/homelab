@@ -1,0 +1,13 @@
+---
+- name: Install Jellyfin
+  pkgng:
+    name: jellyfin
+    state: present
+- name: Enable Jellyfin service
+  ansible.builtin.service:
+    name: jellyfin
+    enabled: true
+- name: Start Jellyfin service
+  ansible.builtin.service:
+    name: jellyfin
+    state: started

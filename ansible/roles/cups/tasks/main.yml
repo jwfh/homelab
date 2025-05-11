@@ -50,8 +50,8 @@
     enabled: true
   loop:
     - cupsd
-    - samba
-    - avahi-daemon
+      #- samba_server
+      #- avahi-daemon
 
 # - name: Configure printers
 #   block:

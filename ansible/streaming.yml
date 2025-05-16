@@ -14,6 +14,14 @@
         remote_path: /mnt/default/media/tv
         local_path: /mnt/default/media/tv
         mode: ro
+      - server: ritchie
+        remote_path: /mnt/default/services/jellyfin/cache
+        local_path: /var/cache/jellyfin
+        mode: ro
+      - server: ritchie
+        remote_path: /mnt/default/services/jellyfin/db
+        local_path: /var/db/jellyfin
+        mode: ro
   roles:
     - base
     - plex

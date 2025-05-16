@@ -23,6 +23,13 @@
         domain_name: plex.jwfh.ca
         servers: 
           - pixel.lemarchant.jacobhouse.ca
+      jellyfin:
+        mode: http
+        balance: sticky
+        port: 8096
+        domain_name: jellyfin.jwfh.ca
+        servers:
+          - pixel.lemarchant.jacobhouse.ca
       jenkins:
         mode: http
         balance: sticky

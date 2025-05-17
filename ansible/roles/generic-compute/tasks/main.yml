@@ -1,4 +1,6 @@
 ---
-- include_tasks: tasks/docker.yml
+- name: Include Docker role
+  import_role:
+    name: docker
   when:
     - ansible_facts['distribution'] == "Debian"

@@ -13,7 +13,6 @@
         balance: roundrobin
         port: 9443
         ssl: true
-        ssl_verify: true
         check_sni: true
         domain_name: auth.jwfh.ca
         servers:

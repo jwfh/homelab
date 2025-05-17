@@ -8,6 +8,13 @@
     certificate_cn: jwfh.ca
     haproxy_is_external: false
     haproxy_backend_services:
+      authentik:
+        mode: http
+        balance: roundrobin
+        port: 9443
+        domain_name: auth.jwfh.ca
+        servers:
+          - jet.lemarchant.jacobhouse.ca
       homepage:
         mode: http
         balance: roundrobin

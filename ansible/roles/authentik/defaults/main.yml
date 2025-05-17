@@ -1,0 +1,10 @@
+---
+authentik_admin_email: "noreply@{{ ansible_site }}.{{ ansible_root_domain }}"
+authentik_http_port: 9000
+authentik_https_port: 9443
+authentik_image: "ghcr.io/goauthentik/server"
+authentik_image_tag: "2025.4.0"
+postgresql_image: "docker.io/library/postgres"
+postgresql_image_tag: "16-alpine"
+redis_image: "docker.io/library/redis"
+redis_image_tag: "alpine"

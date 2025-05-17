@@ -1,0 +1,40 @@
+---
+- name: Gather Authentik configuration
+  set_fact:
+    authentik_config: "{{ ssm_parameters['authentik-configuration'] | from_json }}"
+  no_log: true
+
+- name: Create Authentik directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0750'
+    owner: root
+    group: '{{ wheel }}'
+  with_items:
+    - /opt/authentik/certs
+    - /opt/authentik/postgresql
+    - /opt/authentik/redis
+    - /opt/authentik/media
+
+- name: Install certificate
+  include_role:
+    name: install-cert
+  vars:
+    certificate_cn: "{{ authentik_domain.split('.', 1)[1:] | join('.') }}"
+    certificates_local_dir: /opt/authentik/certs
+    web_server_user: root
+    web_server_group: '{{ wheel }}'
+    web_services: []
+
+- name: Copy docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/authentik/docker-compose.yml
+    mode: '0640'
+
+- name: Start Authentik services
+  docker_compose:
+    project_src: /opt/authentik
+    state: present
+    pull: yes

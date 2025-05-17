@@ -33,10 +33,17 @@ chmod 640 "${certificate_destination}"
 
 new_certificate_hash="$(md5sum "${certificate_destination}" | awk '{ print $1 }')"
 
+{% if web_services %}
 if [ "${certificate_hash}" != "${new_certificate_hash}" ]; then
 {% for web_service in web_services %}
     if service {{ web_service }} status 2>&1 >/dev/null; then
         service {{ web_service }} reload
     fi
 {% endfor %}
+fi
+{% endif %}
+if [ "${certificate_hash}" != "${new_certificate_hash}" ]; then
+    echo "Certificate ${certificate_leaf} updated"
+else
+    echo "Certificate ${certificate_leaf} not updated"
 fi

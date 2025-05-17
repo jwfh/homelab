@@ -60,9 +60,9 @@ backend {{ vhost }}
     option {{ option }}
 {% endfor %}
 {% for server in details.servers %}
-    server {{ server }} {{ server }}:{{ details.port }} check
+    server {{ server }} {{ server }}:{{ details.port }} check {{ "ssl" if (details.ssl | d(false)) else "" }} {{ "verify required" if (details.ssl_verify | d(false)) else "" }} {{ "check-sni " + details.domain_name if (details.check_sni | d(false)) else "" }} {{ "send-proxy-v2" if (details.send_proxy | d(false)) else "" }}
 {% endfor %}
-{% endfor %}    
+{% endfor %}
 backend err_404
     mode http
     errorfile 404 /usr/local/share/examples/haproxy/errorfiles/403.http

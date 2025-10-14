@@ -10,7 +10,11 @@
       - domain_name: 'go-admin.jwfh.ca'
         autoindex: false
         all_errors_403: true
+        spa_mode: true
+        owner: root
+        group: wheel
   roles:
     - base
     - static-webserver
     - shlink
+    - postgres

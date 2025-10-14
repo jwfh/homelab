@@ -1,0 +1,75 @@
+#!/bin/sh
+
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
+# PostgreSQL Full Backup Script for Major Version Upgrade
+# Run as postgres user: sudo -u postgres bash /path/to/this/script.sh
+
+set -e
+
+# Configuration
+BACKUP_DIR="/var/db/postgres/backup"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_SUBDIR="$BACKUP_DIR/backup_$TIMESTAMP"
+
+# Create backup directory
+mkdir -p "$BACKUP_SUBDIR"
+
+echo "Starting PostgreSQL backup at $(date)"
+echo "Backup directory: $BACKUP_SUBDIR"
+
+# Dump all globals (roles, tablespaces, etc.)
+echo "Dumping global objects (roles, tablespaces, etc.)..."
+pg_dumpall -g > "$BACKUP_SUBDIR/globals.sql"
+
+# Get list of all databases (excluding templates)
+DATABASES=$(psql -t -A -c "SELECT datname FROM pg_database WHERE datname NOT IN ('template0', 'template1', 'postgres') ORDER BY datname;")
+
+if [ -z "$DATABASES" ]; then
+    echo "No user databases found. Only dumping globals."
+else
+    # Dump each database in tar format
+    echo "Dumping individual databases..."
+    for db in $DATABASES; do
+        echo "  Backing up database: $db"
+        pg_dump -Ft "$db" > "$BACKUP_SUBDIR/${db}.tar"
+        if [ $? -eq 0 ]; then
+            echo "    ✓ Successfully backed up $db"
+        else
+            echo "    ✗ Failed to backup $db" >&2
+        fi
+    done
+fi
+
+# Create a manifest file with backup details
+echo "Creating manifest file..."
+cat > "$BACKUP_SUBDIR/MANIFEST.txt" << EOF
+PostgreSQL Backup Manifest
+==========================
+Backup Date: $(date)
+Backup Directory: $BACKUP_SUBDIR
+PostgreSQL Version: $(psql --version)
+
+Contents:
+- globals.sql: Contains all roles, tablespaces, and cluster-level settings
+- [database].tar: Individual database dumps in tar format
+
+Restoration Instructions:
+1. Install the new PostgreSQL version
+2. Initialize the new database cluster
+3. Restore globals: psql -f globals.sql
+4. Restore each database: pg_restore -d [dbname] [database].tar
+
+Files:
+$(ls -lh "$BACKUP_SUBDIR" | tail -n +2)
+
+Total Size: $(du -sh "$BACKUP_SUBDIR" | cut -f1)
+EOF
+
+echo ""
+echo "Backup completed successfully!"
+echo "Total backup size: $(du -sh "$BACKUP_SUBDIR" | cut -f1)"
+echo "Backup location: $BACKUP_SUBDIR"
+echo "Manifest: $BACKUP_SUBDIR/MANIFEST.txt"

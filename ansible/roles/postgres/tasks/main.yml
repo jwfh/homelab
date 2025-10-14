@@ -3,13 +3,13 @@
   package:
     name: 
       - 'py{{ ansible_python_version.split(".")[:2] | join("") }}-psycopg2'
-      - postgresql16-server 
-      - postgresql16-client
-      - postgresql16-contrib
+      - postgresql17-server 
+      - postgresql17-client
+      - postgresql17-contrib
     state: present
 - name: Check if the Postgres data directory exists
   stat:
-    path: /var/db/postgres/data16
+    path: /var/db/postgres/data17
   register: postgres_data
 - name: Initialize Postgres
   shell: service postgresql initdb
@@ -46,7 +46,7 @@
 - name: Install postgresql.conf
   template:
     src: postgresql.conf.j2
-    dest: /var/db/postgres/data16/postgresql.conf
+    dest: /var/db/postgres/data17/postgresql.conf
     owner: postgres
     group: postgres
     mode: '0600'
@@ -55,12 +55,29 @@
 - name: Install pg_hba.conf
   template:
     src: pg_hba.conf.j2
-    dest: /var/db/postgres/data16/pg_hba.conf
+    dest: /var/db/postgres/data17/pg_hba.conf
     owner: postgres
     group: postgres
     mode: '0600'
   notify: 
     - reload postgresql
+- name: Create backup directory
+  file:
+    path: /var/db/postgres/backup
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+- name: Install backup and restore scripts
+  template:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    owner: postgres
+    group: postgres
+    mode: '0750'
+  loop:
+    - { src: 'backup.sh.j2', dest: '/var/db/postgres/backup/backup.sh' }
+    - { src: 'restore.sh.j2', dest: '/var/db/postgres/backup/restore.sh' }
 - name: Create database users
   postgresql_user:
     name: '{{ item.user }}'

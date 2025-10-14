@@ -66,10 +66,14 @@ http {
         add_header X-Content-Type-Options "nosniff";
 
         location / {
-            # Only serve explicitly existing files
-{% if site.autoindex | d(False) %}
+{% if site.spa_mode | d(False) %}
+            # SPA mode: fallback to index.html for client-side routing
+            try_files $uri $uri/ /index.html;
+{% elif site.autoindex | d(False) %}
+            # Directory listing enabled
             autoindex on;
 {% else %}
+            # Only serve explicitly existing files
 {% if site.all_errors_403 | d(True) %}
             try_files $uri =403;
 {% else %}

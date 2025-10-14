@@ -1,0 +1,101 @@
+#!/bin/sh
+
+{% for line in warning_comment %}
+# {{ line }}
+{% endfor %}
+
+# PostgreSQL Full Restore Script for Major Version Upgrade
+# Run as postgres user: sudo -u postgres sh /path/to/this/script.sh
+
+set -e
+
+# Configuration
+BACKUP_DIR="${1:-}"
+
+# Validate backup directory argument
+if [ -z "$BACKUP_DIR" ]; then
+    echo "Usage: $0 /path/to/backup/directory"
+    echo ""
+    echo "Example: sudo -u postgres sh $0 /var/lib/postgresql/backups/backup_20250113_143022"
+    exit 1
+fi
+
+# Check if backup directory exists
+if [ ! -d "$BACKUP_DIR" ]; then
+    echo "Error: Backup directory does not exist: $BACKUP_DIR"
+    exit 1
+fi
+
+# Check if globals.sql exists
+if [ ! -f "$BACKUP_DIR/globals.sql" ]; then
+    echo "Error: globals.sql not found in $BACKUP_DIR"
+    echo "This does not appear to be a valid backup directory"
+    exit 1
+fi
+
+echo "Starting PostgreSQL restore at $(date)"
+echo "Backup directory: $BACKUP_DIR"
+echo ""
+
+# Confirm before proceeding
+echo "WARNING: This will restore all databases and roles from the backup."
+echo "Any existing data will be overwritten."
+read -p "Continue with restore? (yes/no): " confirm
+
+if [ "$confirm" != "yes" ]; then
+    echo "Restore cancelled."
+    exit 0
+fi
+
+echo ""
+echo "Restoring global objects (roles, tablespaces, etc.)..."
+psql -f "$BACKUP_DIR/globals.sql" > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "  Successfully restored globals"
+else
+    echo "  Failed to restore globals" >&2
+    exit 1
+fi
+
+echo ""
+echo "Restoring individual databases..."
+
+# Find all tar files in the backup directory
+for tar_file in "$BACKUP_DIR"/*.tar; do
+    if [ -f "$tar_file" ]; then
+        # Extract database name from filename
+        db_name=$(basename "$tar_file" .tar)
+        
+        echo "  Restoring database: $db_name"
+        
+        # Check if database already exists and drop it if necessary
+        db_exists=$(psql -t -A -c "SELECT datname FROM pg_database WHERE datname = '$db_name';" 2>/dev/null)
+        
+        if [ -n "$db_exists" ]; then
+            echo "    Database $db_name already exists, dropping it..."
+            psql -c "DROP DATABASE IF EXISTS \"$db_name\";" > /dev/null 2>&1
+        fi
+        
+        # Create the database
+        echo "    Creating database $db_name..."
+        psql -c "CREATE DATABASE \"$db_name\";" > /dev/null 2>&1
+        
+        # Restore from tar file
+        echo "    Restoring data into $db_name..."
+        pg_restore -d "$db_name" "$tar_file"
+        
+        if [ $? -eq 0 ]; then
+            echo "    Successfully restored $db_name"
+        else
+            echo "    Failed to restore $db_name" >&2
+        fi
+    fi
+done
+
+echo ""
+echo "Restore completed at $(date)"
+echo ""
+echo "Next steps:"
+echo "1. Verify restored databases: psql -l"
+echo "2. Connect to each database and verify data integrity"
+echo "3. Check application connectivity"

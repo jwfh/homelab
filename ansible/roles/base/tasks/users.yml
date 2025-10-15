@@ -11,19 +11,97 @@
         users: "{{ user_vars_include.results | filter_users_by_host(inventory_hostname, group_names) }}"
 - name: Manage users
   block:
+    - name: Read available shells from /etc/shells
+      slurp:
+        src: /etc/shells
+      register: etc_shells_content
+    
+    - name: Parse available shells
+      set_fact:
+        available_shells: "{{ (etc_shells_content['content'] | b64decode).split('\n') | map('trim') | select('match', '^/') | list }}"
+    
+    - name: Debug raw /etc/shells content
+      debug:
+        msg: "Raw /etc/shells: {{ etc_shells_content['content'] | b64decode }}"
+        verbosity: 1
+    
+    - name: Debug available shells
+      debug:
+        msg: "Available shells in /etc/shells: {{ available_shells }}"
+    
+    - name: Debug user shells before resolution
+      debug:
+        msg: "User: {{ item.username }}, Requested shell: {{ item.shell | default('not specified') }}"
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
+    
+    - name: Test shell basename extraction
+      debug:
+        msg: "Shell path: {{ item }}, Basename: {{ item.split('/') | last }}"
+      loop: "{{ available_shells }}"
+      loop_control:
+        label: "{{ item }}"
+      when: false
+    
+    - name: Build shell name to path mapping
+      set_fact:
+        shell_map: >-
+          {%- set mapping = {} -%}
+          {%- for shell_path in available_shells -%}
+            {%- set shell_name = shell_path.split('/') | last -%}
+            {%- set _ = mapping.update({shell_name: shell_path}) -%}
+          {%- endfor -%}
+          {{ mapping }}
+    
+    - name: Debug shell mapping
+      debug:
+        msg: "Shell mapping: {{ shell_map }}"
+    
+    - name: Resolve shell paths for users
+      set_fact:
+        users_with_resolved_shells: >-
+          {%- set results = [] -%}
+          {%- for user in users -%}
+          {%- set shell_name = user.shell | default("sh") -%}
+          {%- set resolved_shell = "/bin/sh" -%}
+          {%- set match_found = false -%}
+          {%- if shell_name.startswith('/') -%}
+            {%- if shell_name in available_shells -%}
+              {%- set resolved_shell = shell_name -%}
+              {%- set match_found = true -%}
+            {%- endif -%}
+          {%- else -%}
+            {%- if shell_name in shell_map -%}
+              {%- set resolved_shell = shell_map[shell_name] -%}
+              {%- set match_found = true -%}
+            {%- endif -%}
+          {%- endif -%}
+          {%- set _ = results.append(user | combine({'resolved_shell': resolved_shell, 'shell_match_found': match_found, 'shell_requested': shell_name})) -%}
+          {%- endfor -%}
+          {{ results }}
+    
+    - name: Debug resolved shells
+      debug:
+        msg: "User: {{ item.username }}, Requested: '{{ item.shell_requested }}', Match found: {{ item.shell_match_found }}, Resolved: '{{ item.resolved_shell }}', Available: {{ available_shells }}"
+      loop: "{{ users_with_resolved_shells }}"
+      loop_control:
+        label: "{{ item.username }}"
+    
     - name: Create user primary group
       group:
         name: '{{ item.username }}'
         state: present
         gid: '{{ item.uid }}'
-      loop: '{{ users }}'
+      loop: '{{ users_with_resolved_shells }}'
       loop_control:
         label: '{{ item.username }}'
+    
     - name: Create user
       user:
         name: '{{ item.username }}'
         comment: '{{ item.fullname }}'
-        shell: '{{ item.shell | default("/bin/sh") }}'
+        shell: '{{ item.resolved_shell }}'
         group: '{{ item.username }}'
         groups: '{{ item.groups | default([]) }}'
         append: false
@@ -31,7 +109,7 @@
         create_home: yes
         uid: '{{ item.uid }}'
         password: '*************'
-      loop: '{{ users }}'
+      loop: '{{ users_with_resolved_shells }}'
       loop_control:
         label: '{{ item.username }}'
     - name: Set home directory permissions
@@ -41,7 +119,7 @@
         mode: '0700'
         owner: '{{ item.username }}'
         group: '{{ item.username }}'
-      loop: '{{ users }}'
+      loop: '{{ users_with_resolved_shells }}'
       loop_control:
         label: '{{ item.username }}'
     - name: Add users' authorized keys

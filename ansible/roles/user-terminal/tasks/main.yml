@@ -7,7 +7,8 @@
 - name: Personalize user experience for {{ owner | default("owner") }} on {{ ansible_os_family }}
   include_tasks: 'personalize/{{ ansible_os_family }}.yml'
   when:
-    - 'preferences | d(False)'
+    - preferences is not none
+    - preferences != None
   vars:
     preferences: '{{ users | 
       selectattr("username", "equalto", owner) | 

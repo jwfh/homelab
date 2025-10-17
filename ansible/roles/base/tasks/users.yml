@@ -109,7 +109,7 @@
         label: '{{ item.username }}'
     - name: Find public keys for each user
       find:
-        paths: "public_keys/{{ item.username }}"
+        paths: "{{ role_path }}/files/public_keys/{{ item.username }}"
         file_type: file
       register: user_key_files
       loop: "{{ users }}"
@@ -126,5 +126,5 @@
         key: "{{ lookup('file', item.1.path) }}"
       loop: "{{ user_key_files.results | subelements('files', {'skip_missing': True}) }}"
       loop_control:
-        label: '{{ item.0.item.username }}'
+        label: '{{ item.0.item.username }} => {{ item.1.path }}'
   when: manage_users

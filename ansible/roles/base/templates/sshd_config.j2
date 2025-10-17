@@ -2,6 +2,10 @@
 # {{ line }}
 {% endfor %}
 
+{% if ansible_os_family == 'Debian' %}
+Include /etc/ssh/sshd_config.d/*.conf
+
+{% endif %}
 Port 22
 AddressFamily any
 ListenAddress 0.0.0.0
@@ -26,7 +30,7 @@ PermitEmptyPasswords no
 KbdInteractiveAuthentication {{ 'yes' if ssh_allow_password_auth else 'no' }}
 KerberosAuthentication no
 GSSAPIAuthentication no
-UsePAM no
+UsePAM {{ 'yes' if ansible_os_family in ['Debian', 'RedHat', 'Darwin'] else 'no' }}
 
 #AllowAgentForwarding yes
 #AllowTcpForwarding yes
@@ -43,6 +47,8 @@ UsePAM no
 #ClientAliveInterval 0
 #ClientAliveCountMax 3
 #UseDNS yes
+
+AcceptEnv LANG LC_* COLORTERM NO_COLOR
 #PidFile /var/run/sshd.pid
 #MaxStartups 10:30:100
 #PermitTunnel no
@@ -52,8 +58,3 @@ UsePAM no
 
 Banner none
 Subsystem	sftp	/usr/libexec/sftp-server
-
-Match User skylord
-	X11Forwarding no
-	AllowTcpForwarding no
-	PermitTTY no

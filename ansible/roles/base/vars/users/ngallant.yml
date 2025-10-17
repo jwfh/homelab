@@ -1,6 +1,7 @@
 username: ngallant
 fullname: Noah Gallant
 uid: 213815
+shell: fish
 hosts:
   - granite
 groups:

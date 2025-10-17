@@ -1,4 +1,18 @@
 ---
+- name: Create Docker config directory
+  file:
+    path: /etc/docker
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+- name: Copy Docker daemon config
+  copy:
+    src: docker/daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0644'
 - name: Install Docker
   package:
     name: docker.io

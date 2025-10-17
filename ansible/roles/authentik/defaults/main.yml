@@ -1,5 +1,6 @@
 ---
 authentik_admin_email: "noreply@{{ ansible_site }}.{{ ansible_root_domain }}"
+authentik_ldap_port: 636
 authentik_http_port: 9000
 authentik_https_port: 9443
 authentik_image: "ghcr.io/goauthentik/server"

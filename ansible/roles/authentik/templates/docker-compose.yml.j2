@@ -60,10 +60,13 @@ services:
       AUTHENTIK_POSTGRESQL__NAME: "{{ authentik_config.db_name | default('authentik') }}"
       AUTHENTIK_POSTGRESQL__PASSWORD: "{{ authentik_config.db_password }}"
       AUTHENTIK_ERROR_REPORTING__ENABLED: "{{ authentik_config.error_reporting | default('false') }}"
+      AUTHENTIK_OUTPOSTS_DOCKER__ENABLED: "true"
     volumes:
       - ./media:/media
       - ./custom-templates:/templates
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
+      - "{{ authentik_ldap_port }}:636"
       - "{{ authentik_http_port }}:9000"
       - "{{ authentik_https_port }}:9443"
     depends_on:
@@ -93,7 +96,10 @@ services:
       AUTHENTIK_BOOTSTRAP_EMAIL: "{{ authentik_config.bootstrap_email }}"
       AUTHENTIK_BOOTSTRAP_PASSWORD: "{{ authentik_config.bootstrap_password }}"
       AUTHENTIK_BOOTSTRAP_TOKEN: "{{ authentik_config.bootstrap_token }}"
+      AUTHENTIK_OUTPOSTS_DOCKER__ENABLED: "true"
+    user: root
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./media:/media
       - ./certs:/certs
       - ./custom-templates:/templates

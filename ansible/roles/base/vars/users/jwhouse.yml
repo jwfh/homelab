@@ -1,6 +1,7 @@
 username: jwhouse
 fullname: Jacob House
 uid: 222830
+shell: fish
 hosts:
   - all
 groups:

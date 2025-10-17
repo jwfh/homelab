@@ -4,10 +4,14 @@
 # Kubernetes namespace for Jenkins
 # namespace = "devops-tools"
 
-# Jenkins Docker image and version
-# jenkins_image = "jenkins/jenkins:lts"
-# jenkins_image = "jenkins/jenkins:2.426.1-lts"
-# jenkins_image = "jenkins/jenkins:lts-jdk17"
+# Jenkins Helm chart version
+# jenkins_chart_version = "5.0.0"
+# See available versions: https://github.com/jenkinsci/helm-charts/releases
+
+# Jenkins Docker image tag
+# jenkins_image_tag = "lts"
+# jenkins_image_tag = "2.426.1-lts"
+# jenkins_image_tag = "lts-jdk17"
 
 # Number of Jenkins controller replicas (should be 1 for stateful app)
 # jenkins_replicas = 1

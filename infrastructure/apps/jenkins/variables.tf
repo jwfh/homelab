@@ -4,10 +4,16 @@ variable "namespace" {
   default     = "devops-tools"
 }
 
-variable "jenkins_image" {
-  description = "Jenkins Docker image"
+variable "jenkins_chart_version" {
+  description = "Jenkins Helm chart version"
   type        = string
-  default     = "jenkins/jenkins:lts"
+  default     = "5.0.0"
+}
+
+variable "jenkins_image_tag" {
+  description = "Jenkins Docker image tag (lts, lts-jdk17, or specific version)"
+  type        = string
+  default     = "lts"
 }
 
 variable "jenkins_replicas" {

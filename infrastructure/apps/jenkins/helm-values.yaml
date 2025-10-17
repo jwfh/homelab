@@ -1,0 +1,160 @@
+# Jenkins Helm Chart Values
+# This file configures the Jenkins Helm chart with JCasC (Jenkins Configuration as Code)
+
+controller:
+  # Container image
+  image: "jenkins/jenkins"
+  tag: "lts"
+  imagePullPolicy: "Always"
+
+  # Number of controller replicas (should be 1 for stateful app)
+  replicas: 1
+
+  # Resource limits
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "500Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+  # Service Account
+  serviceAccount:
+    create: false
+    name: jenkins-admin
+
+  # JVM options
+  javaOpts: "-Djenkins.install.runSetupWizard=false"
+
+  # Install plugins
+  installPlugins:
+    - kubernetes:4029.v5712230ccb_f8
+    - workflow-aggregator:596.v8c21c963d92d
+    - git:5.2.1
+    - configuration-as-code:1775.v810dc950b_514
+    - blueocean:1.27.9
+    - credentials-binding:631.v861e8a_b_101a_b_
+    - docker-workflow:563.vd5d2e5c4007f
+    - pipeline-stage-view:2.34
+    - prometheus:2.3.1
+    - job-dsl:1.87
+
+  # Additional plugins (add more as needed)
+  additionalPlugins: []
+
+  # Jenkins Configuration as Code (JCasC)
+  JCasC:
+    defaultConfig: true
+    configScripts:
+      welcome-message: |
+        jenkins:
+          systemMessage: "Jenkins configured automatically by JCasC and Terraform"
+      
+      # Kubernetes cloud configuration for dynamic agents
+      kubernetes-cloud: |
+        jenkins:
+          clouds:
+            - kubernetes:
+                name: "kubernetes"
+                serverUrl: "https://kubernetes.default"
+                namespace: "devops-tools"
+                jenkinsUrl: "http://jenkins.devops-tools.svc.cluster.local:8080"
+                jenkinsTunnel: "jenkins-agent.devops-tools.svc.cluster.local:50000"
+                connectTimeout: 5
+                readTimeout: 15
+                containerCapStr: 10
+                maxRequestsPerHostStr: 32
+                retentionTimeout: 5
+                templates:
+                  - name: "jnlp-agent"
+                    label: "jenkins-agent"
+                    nodeUsageMode: NORMAL
+                    containers:
+                      - name: "jnlp"
+                        image: "jenkins/inbound-agent:latest"
+                        alwaysPullImage: true
+                        workingDir: "/home/jenkins/agent"
+                        ttyEnabled: true
+                        resourceRequestCpu: "250m"
+                        resourceRequestMemory: "256Mi"
+                        resourceLimitCpu: "500m"
+                        resourceLimitMemory: "512Mi"
+                    volumes:
+                      - emptyDirVolume:
+                          memory: false
+                          mountPath: "/tmp"
+                    idleMinutes: 5
+                    activeDeadlineSeconds: 3600
+      
+      # Security realm and authorization
+      security: |
+        jenkins:
+          securityRealm:
+            local:
+              allowsSignup: false
+          authorizationStrategy:
+            loggedInUsersCanDoAnything:
+              allowAnonymousRead: false
+
+  # Ingress configuration
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostName: ci.jwfh.ca
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    tls:
+      - secretName: jenkins-tls
+        hosts:
+          - ci.jwfh.ca
+
+# Persistence configuration
+persistence:
+  enabled: true
+  existingClaim: jenkins-pv-claim
+  storageClass: "nfs"
+  size: 10Gi
+  accessMode: ReadWriteMany
+
+# Agent configuration
+agent:
+  enabled: true
+  image: "jenkins/inbound-agent"
+  tag: "latest"
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+# Network Policy (optional, enable if needed)
+networkPolicy:
+  enabled: false
+
+# RBAC will be created separately in Terraform
+rbac:
+  create: false
+  readSecrets: true
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/"
+    prometheus.io/port: "8080"
+
+# Backup configuration (optional)
+backup:
+  enabled: false
+
+# Prometheus metrics
+prometheus:
+  enabled: true
+  serviceMonitorNamespace: "devops-tools"

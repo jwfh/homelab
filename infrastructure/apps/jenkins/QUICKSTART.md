@@ -1,4 +1,4 @@
-# Jenkins on Kubernetes - Quick Deployment Guide
+# Jenkins on Kubernetes - Quick Deployment Guide (Helm + JCasC)
 
 ## Prerequisites Checklist
 
@@ -38,7 +38,7 @@ export KUBECONFIG=~/.kube/k3s-config
 kubectl get nodes
 ```
 
-### 3. Configure Provider
+### 3. Configure Providers
 
 Create `provider.tf` from the example:
 
@@ -46,11 +46,34 @@ Create `provider.tf` from the example:
 cd infrastructure/apps/jenkins
 cp provider.tf.example provider.tf
 
-# Edit provider.tf and uncomment the option you want to use
+# Edit provider.tf and uncomment the option you want
 # For local development, use Option 1 with your kubeconfig path
 ```
 
-### 4. Deploy Jenkins
+Example `provider.tf`:
+
+```hcl
+provider "kubernetes" {
+  config_path = "~/.kube/k3s-config"
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/k3s-config"
+  }
+}
+```
+
+### 4. Review Helm Values (Optional)
+
+The Jenkins configuration is in `helm-values.yaml`. Review and customize:
+
+- **Plugins**: Pre-installed plugins list
+- **JCasC**: Jenkins Configuration as Code settings
+- **Resources**: CPU and memory limits
+- **Kubernetes Cloud**: Agent pod templates
+
+### 5. Deploy Jenkins
 
 Using Makefile (recommended):
 
@@ -79,21 +102,21 @@ terraform plan
 terraform apply
 ```
 
-### 5. Get Initial Admin Password
+### 6. Get Initial Admin Password
 
 ```bash
 # Using make
 make get-password
 
 # Or using kubectl
-kubectl exec -it deployment/jenkins -n devops-tools -- \
+kubectl exec -it -n devops-tools deployment/jenkins -- \
   cat /var/jenkins_home/secrets/initialAdminPassword
 
 # Or from NFS (if you have access to ritchie)
 cat /mnt/default/services/jenkins/secrets/initialAdminPassword
 ```
 
-### 6. Access Jenkins
+### 7. Access Jenkins
 
 Open your browser and navigate to: **https://ci.jwfh.ca**
 
@@ -102,29 +125,55 @@ The traffic flow is:
 Browser → HAProxy (ci.jwfh.ca with TLS cert) → Traefik Ingress → Jenkins Service → Jenkins Pod
 ```
 
-### 7. Initial Setup
+### 8. Initial Setup
 
-1. Enter the initial admin password
-2. Install suggested plugins (or select custom)
-3. Create your first admin user
-4. Configure Jenkins URL: `https://ci.jwfh.ca`
+**Note**: With JCasC and `runSetupWizard=false`, the setup wizard is skipped!
 
-### 8. Configure Kubernetes Plugin
+1. Log in with username `admin` and the initial password
+2. Jenkins is already configured via JCasC with:
+   - Pre-installed plugins (Kubernetes, Git, Pipeline, etc.)
+   - Kubernetes cloud for dynamic agents
+   - Security settings
+3. Create additional users or configure SSO if needed
 
-For dynamic Jenkins agents:
+### 9. Verify Kubernetes Plugin
 
 1. Go to: **Manage Jenkins** → **Manage Nodes and Clouds** → **Configure Clouds**
-2. Click **Add a new cloud** → **Kubernetes**
-3. Configure:
-   - **Name**: `kubernetes`
-   - **Kubernetes URL**: `https://kubernetes.default`
-   - **Kubernetes Namespace**: `devops-tools`
-   - **Credentials**: Add → Kubernetes Service Account
-   - **Jenkins URL**: `http://jenkins-service.devops-tools.svc.cluster.local:8080`
-   - **Jenkins tunnel**: `jenkins-service.devops-tools.svc.cluster.local:50000`
+2. You should see a **kubernetes** cloud already configured
+3. Test the connection (should show success)
 
-4. Test the connection
-5. Add a Pod Template for agents (optional, or configure in Jenkinsfile)
+### 10. Create Your First Pipeline
+
+Create a test pipeline:
+
+```groovy
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: shell
+    image: ubuntu:22.04
+    command: ['cat']
+    tty: true
+'''
+        }
+    }
+    stages {
+        stage('Test') {
+            steps {
+                container('shell') {
+                    sh 'echo "Hello from Kubernetes agent!"'
+                    sh 'hostname'
+                }
+            }
+        }
+    }
+}
+```
 
 ## Common Commands
 
@@ -144,16 +193,102 @@ make debug
 # Port forward to localhost
 make port-forward
 
+# Helm-specific commands
+make helm-status    # Show Helm release status
+make helm-values    # Show current Helm values
+
 # Destroy everything
 make destroy
+```
+
+## Customizing Jenkins Configuration
+
+### Add More Plugins
+
+Edit `helm-values.yaml`:
+
+```yaml
+controller:
+  installPlugins:
+    - kubernetes:4029.v5712230ccb_f8
+    - workflow-aggregator:596.v8c21c963d92d
+    - your-new-plugin:version
+```
+
+Then apply:
+
+```bash
+terraform apply
+```
+
+### Modify JCasC Settings
+
+Edit `helm-values.yaml` under `controller.JCasC.configScripts`:
+
+```yaml
+controller:
+  JCasC:
+    configScripts:
+      custom-config: |
+        jenkins:
+          systemMessage: "My Custom Jenkins Server"
+          numExecutors: 0  # Force all builds to agents
+```
+
+Apply changes:
+
+```bash
+terraform apply
+```
+
+### Change Resource Limits
+
+Edit `terraform.tfvars`:
+
+```hcl
+resource_limits_memory  = "4Gi"
+resource_limits_cpu     = "2000m"
+resource_requests_memory = "1Gi"
+resource_requests_cpu    = "1000m"
+```
+
+Apply:
+
+```bash
+terraform apply
+```
+
+## Upgrading Jenkins
+
+### Upgrade to Newer LTS Version
+
+```bash
+# Option 1: Edit variables.tf and change jenkins_image_tag
+# Option 2: Override on command line
+terraform apply -var="jenkins_image_tag=2.426.1-lts"
+```
+
+### Upgrade Helm Chart Version
+
+```bash
+# Option 1: Edit variables.tf and change jenkins_chart_version
+# Option 2: Override on command line
+terraform apply -var="jenkins_chart_version=5.1.0"
 ```
 
 ## Troubleshooting
 
 ### Pod not starting?
 ```bash
-kubectl describe pod -l app=jenkins-server -n devops-tools
-kubectl logs -l app=jenkins-server -n devops-tools
+kubectl describe pod -l app.kubernetes.io/component=jenkins-controller -n devops-tools
+kubectl logs -l app.kubernetes.io/component=jenkins-controller -n devops-tools
+```
+
+### Helm release failed?
+```bash
+make helm-status
+helm list -n devops-tools
+helm get manifest jenkins -n devops-tools
 ```
 
 ### NFS mount issues?
@@ -169,33 +304,63 @@ kubectl run -it --rm nfs-test --image=busybox --restart=Never -- sh
 ```bash
 # Check ingress
 kubectl get ingress -n devops-tools
+kubectl describe ingress jenkins -n devops-tools
 
 # Check Traefik
 kubectl logs -n kube-system -l app.kubernetes.io/name=traefik
 ```
 
+### JCasC not applying?
+```bash
+# View JCasC logs
+kubectl logs -n devops-tools deployment/jenkins | grep -i casc
+
+# Check current JCasC configuration
+kubectl exec -it -n devops-tools deployment/jenkins -- \
+  cat /var/jenkins_home/jenkins.yaml
+```
+
 ## Next Steps
 
-1. **Configure Jenkins**:
-   - Set up your first pipeline
-   - Configure credentials
-   - Install additional plugins
+1. **Configure Credentials**:
+   - Add GitHub/GitLab credentials
+   - Configure Docker registry access
+   - Set up cloud provider credentials
 
-2. **Secure Jenkins**:
-   - Enable CSRF protection
-   - Configure authorization strategy
-   - Set up audit logs
+2. **Set Up Pipelines**:
+   - Create your first CI/CD pipeline
+   - Configure webhooks for automatic builds
+   - Set up multi-branch pipelines
 
-3. **Set up Backups**:
-   - Schedule regular NFS backups
-   - Consider using Jenkins Configuration as Code (JCasC)
+3. **Configure Monitoring**:
+   - Enable Prometheus metrics (already configured)
+   - Set up Grafana dashboards
+   - Configure alerting
 
-4. **Configure Agents**:
-   - Create pod templates for different build environments
-   - Configure resource limits for agent pods
+4. **Enhance Security**:
+   - Configure LDAP/SSO authentication
+   - Set up matrix-based authorization
+   - Enable audit logging
+
+5. **Optimize Performance**:
+   - Fine-tune resource limits
+   - Configure build retention policies
+   - Set up build caching
+
+## Important Files
+
+- `helm-values.yaml` - Jenkins Helm chart configuration with JCasC
+- `provider.tf` - Kubernetes and Helm provider configuration
+- `variables.tf` - Terraform variables
+- `terraform.tfvars` - Your custom variable values (create from .example)
+- `helm.tf` - Helm release configuration
+- `storage.tf` - NFS PV and PVC configuration
+- `rbac.tf` - ServiceAccount and permissions
 
 ## Resources
 
-- [Jenkins Documentation](https://www.jenkins.io/doc/)
-- [Kubernetes Plugin](https://plugins.jenkins.io/kubernetes/)
+- [Jenkins Helm Chart Documentation](https://github.com/jenkinsci/helm-charts/tree/main/charts/jenkins)
 - [Jenkins Configuration as Code](https://www.jenkins.io/projects/jcasc/)
+- [JCasC Examples](https://github.com/jenkinsci/configuration-as-code-plugin/tree/master/demos)
+- [Kubernetes Plugin Documentation](https://plugins.jenkins.io/kubernetes/)
+- [Jenkins Pipeline Syntax](https://www.jenkins.io/doc/book/pipeline/syntax/)

@@ -51,7 +51,16 @@ logs: ## Show Jenkins logs
 
 get-password: ## Get Jenkins initial admin password
 	@echo "Getting Jenkins initial admin password..."
-	@kubectl exec -it deployment/jenkins -n devops-tools -- cat /var/jenkins_home/secrets/initialAdminPassword
+	@kubectl exec -it -n devops-tools deployment/jenkins -- cat /var/jenkins_home/secrets/initialAdminPassword
+
+helm-status: ## Show Helm release status
+	helm status jenkins -n devops-tools
+
+helm-values: ## Show current Helm values
+	helm get values jenkins -n devops-tools
+
+helm-upgrade: ## Upgrade Jenkins Helm release
+	helm upgrade jenkins jenkins/jenkins -n devops-tools -f helm-values.yaml
 
 restart: ## Restart Jenkins deployment
 	kubectl rollout restart deployment/jenkins -n devops-tools

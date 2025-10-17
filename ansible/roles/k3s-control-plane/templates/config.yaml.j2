@@ -1,0 +1,63 @@
+# {{ ansible_managed }}
+# K3s Server Configuration
+# https://docs.k3s.io/reference/server-config
+
+{% if k3s_tls_san | length > 0 %}
+tls-san:
+{% for san in k3s_tls_san %}
+  - {{ san }}
+{% endfor %}
+{% endif %}
+
+{% if k3s_disable_components | length > 0 %}
+disable:
+{% for component in k3s_disable_components %}
+  - {{ component }}
+{% endfor %}
+{% endif %}
+
+{% if k3s_embedded_etcd and k3s_datastore_endpoint is not defined %}
+cluster-init: true
+{% endif %}
+
+{% if k3s_datastore_endpoint is defined %}
+datastore-endpoint: {{ k3s_datastore_endpoint }}
+{% endif %}
+
+# Networking configuration
+cluster-cidr: {{ k3s_cluster_cidr }}
+service-cidr: {{ k3s_service_cidr }}
+cluster-dns: {{ k3s_cluster_dns }}
+flannel-backend: {{ k3s_flannel_backend }}
+
+{% if k3s_disable_cloud_controller %}
+disable-cloud-controller: true
+{% endif %}
+
+{% if k3s_disable_network_policy %}
+disable-network-policy: true
+{% endif %}
+
+# Kubeconfig permissions
+write-kubeconfig-mode: "{{ k3s_write_kubeconfig_mode }}"
+
+{% if k3s_node_labels | length > 0 %}
+node-label:
+{% for label in k3s_node_labels %}
+  - {{ label }}
+{% endfor %}
+{% endif %}
+
+{% if k3s_node_taints | length > 0 %}
+node-taint:
+{% for taint in k3s_node_taints %}
+  - {{ taint }}
+{% endfor %}
+{% endif %}
+
+{% if k3s_server_args | length > 0 %}
+# Additional server arguments
+{% for arg in k3s_server_args %}
+{{ arg }}
+{% endfor %}
+{% endif %}

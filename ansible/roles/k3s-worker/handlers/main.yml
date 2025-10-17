@@ -1,0 +1,12 @@
+---
+- name: restart k3s-agent
+  service:
+    name: k3s-agent
+    state: restarted
+  listen: restart k3s-agent
+
+- name: reload k3s-agent
+  service:
+    name: k3s-agent
+    state: reloaded
+  listen: reload k3s-agent

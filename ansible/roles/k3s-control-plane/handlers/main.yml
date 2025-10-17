@@ -1,0 +1,12 @@
+---
+- name: restart k3s
+  service:
+    name: k3s
+    state: restarted
+  listen: restart k3s
+
+- name: reload k3s
+  service:
+    name: k3s
+    state: reloaded
+  listen: reload k3s

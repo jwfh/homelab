@@ -1,0 +1,30 @@
+# {{ ansible_managed }}
+# K3s Agent Configuration
+# https://docs.k3s.io/reference/agent-config
+
+# Server URL to join
+server: {{ k3s_server_url }}
+
+# Authentication token
+token: {{ k3s_token }}
+
+{% if k3s_node_labels | length > 0 %}
+node-label:
+{% for label in k3s_node_labels %}
+  - {{ label }}
+{% endfor %}
+{% endif %}
+
+{% if k3s_node_taints | length > 0 %}
+node-taint:
+{% for taint in k3s_node_taints %}
+  - {{ taint }}
+{% endfor %}
+{% endif %}
+
+{% if k3s_agent_args | length > 0 %}
+# Additional agent arguments
+{% for arg in k3s_agent_args %}
+{{ arg }}
+{% endfor %}
+{% endif %}

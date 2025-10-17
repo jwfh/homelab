@@ -1,0 +1,42 @@
+---
+# Host variables for k8s12-002 (Kubernetes Control Plane)
+# IP: 10.174.12.177
+
+# k3s version configuration
+k3s_channel: stable
+
+# Cluster token from vault
+k3s_token: "{{ vault_k3s_token }}"
+
+# Additional TLS SANs for API server certificate
+k3s_tls_san:
+  - "k8s.lemarchant.jacobhouse.ca"
+  - "10.174.12.177"
+
+# Disable default k3s components (using alternatives)
+k3s_disable_components:
+  - traefik  # Will install ingress-nginx instead
+  - servicelb  # Will use MetalLB for LoadBalancer services
+
+# Networking configuration
+k3s_flannel_backend: vxlan
+k3s_cluster_cidr: "172.20.0.0/18"
+k3s_service_cidr: "172.20.64.0/18"
+k3s_cluster_dns: "172.20.64.10"
+
+# Enable embedded etcd for HA capability
+k3s_embedded_etcd: true
+
+# Install additional tools
+k3s_install_kubectl: true
+k3s_install_helm: true
+k3s_helm_version: "v3.13.1"
+
+# Node labels
+k3s_node_labels:
+  - "topology.kubernetes.io/zone=lemarchant"
+
+# Taint control plane to prevent regular workloads (optional)
+# Uncomment if you want control plane to only run system pods
+# k3s_node_taints:
+#   - "node-role.kubernetes.io/control-plane=true:NoSchedule"

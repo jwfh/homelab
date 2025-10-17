@@ -1,0 +1,10 @@
+---
+- name: Kubernetes Worker
+  hosts: kubernetes_worker
+  become: true
+  vars_files:
+    - inventory/vault.yml
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+    - k3s-worker

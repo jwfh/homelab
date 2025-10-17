@@ -46,13 +46,10 @@
     
     - name: Build shell name to path mapping
       set_fact:
-        shell_map: >-
-          {%- set mapping = {} -%}
-          {%- for shell_path in available_shells -%}
-            {%- set shell_name = shell_path.split('/') | last -%}
-            {%- set _ = mapping.update({shell_name: shell_path}) -%}
-          {%- endfor -%}
-          {{ mapping }}
+        shell_map: "{{ shell_map | default({}) | combine({item.split('/') | last: item}) }}"
+      loop: "{{ available_shells }}"
+      loop_control:
+        label: "{{ item.split('/') | last }}"
     
     - name: Debug shell mapping
       debug:
@@ -60,26 +57,14 @@
     
     - name: Resolve shell paths for users
       set_fact:
-        users_with_resolved_shells: >-
-          {%- set results = [] -%}
-          {%- for user in users -%}
-          {%- set shell_name = user.shell | default("sh") -%}
-          {%- set resolved_shell = "/bin/sh" -%}
-          {%- set match_found = false -%}
-          {%- if shell_name.startswith('/') -%}
-            {%- if shell_name in available_shells -%}
-              {%- set resolved_shell = shell_name -%}
-              {%- set match_found = true -%}
-            {%- endif -%}
-          {%- else -%}
-            {%- if shell_name in shell_map -%}
-              {%- set resolved_shell = shell_map[shell_name] -%}
-              {%- set match_found = true -%}
-            {%- endif -%}
-          {%- endif -%}
-          {%- set _ = results.append(user | combine({'resolved_shell': resolved_shell, 'shell_match_found': match_found, 'shell_requested': shell_name})) -%}
-          {%- endfor -%}
-          {{ results }}
+        users_with_resolved_shells: "{{ users_with_resolved_shells | default([]) + [item | combine({'resolved_shell': resolved_shell, 'shell_match_found': match_found, 'shell_requested': shell_name})] }}"
+      vars:
+        shell_name: "{{ item.shell | default('sh') }}"
+        match_found: "{{ (shell_name.startswith('/') and shell_name in available_shells) or (not shell_name.startswith('/') and shell_name in shell_map) }}"
+        resolved_shell: "{{ shell_name if (shell_name.startswith('/') and shell_name in available_shells) else (shell_map[shell_name] if (not shell_name.startswith('/') and shell_name in shell_map) else '/bin/sh') }}"
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
     
     - name: Debug resolved shells
       debug:
@@ -122,24 +107,24 @@
       loop: '{{ users_with_resolved_shells }}'
       loop_control:
         label: '{{ item.username }}'
+    - name: Find public keys for each user
+      find:
+        paths: "public_keys/{{ item.username }}"
+        file_type: file
+      register: user_key_files
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
+      delegate_to: localhost
+      become: false
+    
     - name: Add users' authorized keys
       authorized_key:
-        user: '{{ item.username }}'
+        user: '{{ item.0.item.username }}'
         state: present
         manage_dir: true
-        key: '{{ item.key }}'
-      loop: >-
-        {%- set results = [] -%}
-        {%- for user in users -%}
-        {%- for keyfile in query("fileglob", "public_keys/" + user.username + "/*") -%}
-        {%- set _ = results.append({
-            "username": user["username"],
-            "keyfile": (keyfile | basename),
-            "key": lookup("file", keyfile)
-          }) %}
-        {%- endfor -%}
-        {%- endfor -%}
-        {{ results }}
+        key: "{{ lookup('file', item.1.path) }}"
+      loop: "{{ user_key_files.results | subelements('files', {'skip_missing': True}) }}"
       loop_control:
-        label: '{{ item | ansible.utils.remove_keys(target=["key"]) }}'
+        label: '{{ item.0.item.username }}'
   when: manage_users

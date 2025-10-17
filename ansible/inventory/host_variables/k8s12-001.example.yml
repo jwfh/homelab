@@ -1,0 +1,56 @@
+---
+# Example host variables for k8s12-001 (control plane node)
+# Copy this file to 10.174.12.176.yml and customize as needed
+
+# k3s version configuration
+# k3s_version: v1.28.3+k3s1  # Uncomment to pin to specific version
+k3s_channel: stable
+
+# Cluster token (IMPORTANT: Store this in Ansible Vault in production!)
+# Generate a secure token: openssl rand -base64 32
+# k3s_token: "{{ vault_k3s_token }}"
+
+# Additional TLS SANs for API server certificate
+k3s_tls_san:
+  - "k8s.lemarchant.jwfh.ca"
+  - "10.174.12.176"
+  - "k8s12-001.local"
+
+# Disable default k3s components (if you want to use alternatives)
+k3s_disable_components:
+  - traefik  # Use ingress-nginx or another ingress controller
+  # - servicelb  # Use MetalLB instead
+  # - local-storage  # Use NFS or other storage provider
+
+# Networking configuration
+k3s_flannel_backend: vxlan  # Options: vxlan, host-gw, wireguard-native, ipsec
+k3s_cluster_cidr: "10.42.0.0/16"
+k3s_service_cidr: "10.43.0.0/16"
+
+# Enable embedded etcd for HA (true for production)
+k3s_embedded_etcd: true
+
+# Install additional tools
+k3s_install_kubectl: true
+k3s_install_helm: true
+k3s_helm_version: "v3.13.1"
+
+# Node labels
+k3s_node_labels:
+  - "node-role.kubernetes.io/control-plane=true"
+  - "topology.kubernetes.io/zone=lemarchant"
+
+# Node taints (optional - prevents workloads on control plane)
+# k3s_node_taints:
+#   - "node-role.kubernetes.io/control-plane=true:NoSchedule"
+
+# NFS mounts for persistent storage
+# k3s_nfs_mounts:
+#   - server: 10.174.12.127
+#     remote_path: /mnt/storage/k8s
+#     local_path: /mnt/k8s-storage
+#     options: rw,sync
+
+# Additional server arguments
+# k3s_server_args:
+#   - "--kube-apiserver-arg=feature-gates=SomeFeature=true"

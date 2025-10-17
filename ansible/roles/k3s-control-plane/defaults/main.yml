@@ -1,0 +1,75 @@
+---
+# k3s version to install (use 'stable', 'latest', or specific version like 'v1.28.3+k3s1')
+k3s_version: stable
+
+# k3s installation channel (stable, latest, or testing)
+k3s_channel: stable
+
+# k3s configuration directory
+k3s_config_dir: /etc/rancher/k3s
+
+# k3s data directory
+k3s_data_dir: /var/lib/rancher/k3s
+
+# k3s service name
+k3s_service_name: k3s
+
+# Cluster configuration
+k3s_cluster_cidr: "10.42.0.0/16"
+k3s_service_cidr: "10.43.0.0/16"
+k3s_cluster_dns: "10.43.0.10"
+
+# Control plane configuration
+k3s_tls_san: []
+# - "k8s.example.com"
+# - "10.174.12.100"
+
+# Disable certain k3s components (empty list means all enabled)
+k3s_disable_components: []
+# - traefik
+# - servicelb
+# - local-storage
+
+# Enable/disable specific features
+k3s_disable_cloud_controller: false
+k3s_disable_network_policy: false
+k3s_write_kubeconfig_mode: "0644"
+
+# Networking configuration
+k3s_flannel_backend: "vxlan"  # Options: vxlan, host-gw, wireguard-native, ipsec
+
+# Token for joining nodes (should be defined in vault or host_vars)
+# k3s_token: "your-secret-token-here"
+
+# Enable embedded etcd for HA (false for single control plane)
+k3s_embedded_etcd: true
+
+# Datastore endpoint for external datastore (optional, overrides embedded etcd)
+# k3s_datastore_endpoint: "postgres://user:pass@host:5432/k3s"
+
+# Node labels
+k3s_node_labels: []
+# - "node-role.kubernetes.io/control-plane=true"
+
+# Node taints
+k3s_node_taints: []
+# - "node-role.kubernetes.io/control-plane=true:NoSchedule"
+
+# Additional server arguments (passed directly to k3s server)
+k3s_server_args: []
+# - "--kube-apiserver-arg=feature-gates=SomeFeature=true"
+
+# NFS mounts for persistent storage (if needed)
+k3s_nfs_mounts: []
+# - server: 192.168.1.10
+#   remote_path: /srv/nfs/k8s
+#   local_path: /mnt/k8s-storage
+#   options: rw,sync
+
+# Install kubectl and helm
+k3s_install_kubectl: true
+k3s_install_helm: false
+k3s_helm_version: "v3.13.1"
+
+# Kubeconfig location for non-root users
+k3s_kubeconfig_dest: /etc/rancher/k3s/k3s.yaml

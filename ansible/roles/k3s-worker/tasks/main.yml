@@ -1,0 +1,105 @@
+---
+- name: Check if k3s is already installed
+  stat:
+    path: /usr/local/bin/k3s
+  register: k3s_binary
+
+- name: Get installed k3s version
+  command: /usr/local/bin/k3s --version
+  register: k3s_installed_version
+  changed_when: false
+  failed_when: false
+  when: k3s_binary.stat.exists
+
+- name: Validate required variables
+  assert:
+    that:
+      - k3s_server_url is defined
+      - k3s_token is defined
+    fail_msg: "k3s_server_url and k3s_token must be defined for worker nodes"
+
+- name: Install required system packages
+  package:
+    name:
+      - curl
+      - iptables
+      - ca-certificates
+    state: present
+
+- name: Enable IPv4 forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Enable IPv6 forwarding
+  sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Create k3s config directory
+  file:
+    path: "{{ k3s_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create k3s agent config file
+  template:
+    src: config.yaml.j2
+    dest: "{{ k3s_config_dir }}/config.yaml"
+    owner: root
+    group: root
+    mode: '0600'
+  notify: restart k3s-agent
+
+- name: Download k3s installation script
+  get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s-install.sh
+    mode: '0700'
+  when: not k3s_binary.stat.exists or (k3s_installed_version.stdout is defined and k3s_version not in k3s_installed_version.stdout and k3s_version != 'stable' and k3s_version != 'latest')
+
+- name: Install k3s agent
+  shell: |
+    INSTALL_K3S_CHANNEL={{ k3s_channel }} \
+    {% if k3s_version not in ['stable', 'latest'] %}
+    INSTALL_K3S_VERSION={{ k3s_version }} \
+    {% endif %}
+    /tmp/k3s-install.sh agent
+  args:
+    creates: /usr/local/bin/k3s-agent
+  environment:
+    K3S_URL: "{{ k3s_server_url }}"
+    K3S_TOKEN: "{{ k3s_token }}"
+  notify: restart k3s-agent
+
+- name: Wait for k3s-agent to be ready
+  wait_for:
+    path: /var/lib/rancher/k3s/agent/kubelet.kubeconfig
+    timeout: 300
+
+- name: Ensure k3s-agent service is enabled and started
+  service:
+    name: k3s-agent
+    state: started
+    enabled: true
+
+- name: Install kubectl for system users
+  copy:
+    src: /usr/local/bin/k3s
+    dest: /usr/local/bin/kubectl
+    remote_src: yes
+    mode: '0755'
+  when: k3s_install_kubectl
+
+- name: Display worker node join status
+  debug:
+    msg:
+      - "K3s worker node joined successfully!"
+      - "Connected to: {{ k3s_server_url }}"
+      - "Node will appear in 'kubectl get nodes' on the control plane"

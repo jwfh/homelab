@@ -1,0 +1,40 @@
+---
+# k3s version to install (use 'stable', 'latest', or specific version like 'v1.28.3+k3s1')
+k3s_version: stable
+
+# k3s installation channel (stable, latest, or testing)
+k3s_channel: stable
+
+# k3s configuration directory
+k3s_config_dir: /etc/rancher/k3s
+
+# k3s service name for worker
+k3s_service_name: k3s-agent
+
+# Control plane server URL (REQUIRED)
+# k3s_server_url: "https://10.174.12.177:6443"
+
+# Token for joining the cluster (should be defined in vault or host_vars)
+# k3s_token: "your-secret-token-here"
+
+# Write kubeconfig mode (for kubectl access)
+k3s_write_kubeconfig_mode: "0644"
+
+# Node labels
+k3s_node_labels: []
+# - "node-role.kubernetes.io/worker=true"
+# - "workload=general"
+
+# Node taints
+k3s_node_taints: []
+# - "workload=special:NoSchedule"
+
+# Additional agent arguments (passed directly to k3s agent)
+k3s_agent_args: []
+# - "--kubelet-arg=max-pods=110"
+
+# Install kubectl for worker nodes
+k3s_install_kubectl: true
+
+# Kubeconfig location
+k3s_kubeconfig_dest: /etc/rancher/k3s/k3s.yaml

@@ -1,0 +1,10 @@
+---
+- name: Kubernetes Control Plane
+  hosts: kubernetes_control_plane
+  become: true
+  vars_files:
+    - inventory/vault.yml
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+    - k3s-control-plane

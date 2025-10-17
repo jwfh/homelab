@@ -15,7 +15,6 @@ k3s_tls_san:
 
 # Disable default k3s components (using alternatives)
 k3s_disable_components:
-  - traefik  # Will install ingress-nginx instead
   - servicelb  # Will use MetalLB for LoadBalancer services
 
 # Networking configuration

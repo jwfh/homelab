@@ -149,10 +149,7 @@ For multiple control plane nodes:
 After deployment, you can install additional components:
 
 ```bash
-# Install ingress-nginx (if traefik disabled)
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/baremetal/deploy.yaml
-
-# Install cert-manager
+# Install cert-manager for automatic TLS certificates
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.1/cert-manager.yaml
 
 # Install MetalLB (if servicelb disabled)

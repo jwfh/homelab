@@ -1,0 +1,13 @@
+# Example Terraform variables for Docker Registry deployment
+# Copy this file to terraform.tfvars and fill in your values
+
+registry_uid = 1000
+registry_gid = 1000
+
+# Optional: Override defaults if needed
+# registry_replicas      = 1
+# registry_image         = "registry:2"
+# registry_storage_size  = "100Gi"
+# registry_hostname      = "registry.jwfh.ca"
+# nfs_server             = "ritchie.lemarchant.jacobhouse.ca"
+# nfs_path               = "/mnt/default/services/docker-registry/data"

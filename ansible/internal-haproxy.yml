@@ -11,12 +11,12 @@
       authentik:
         mode: http
         balance: roundrobin
-        port: 9443
+        port: 30141
         ssl: true
         check_sni: true
         domain_name: auth.jwfh.ca
         servers:
-          - jet.lemarchant.jacobhouse.ca
+          - ritchie.lemarchant.jacobhouse.ca
       homepage:
         mode: http
         balance: roundrobin
@@ -35,17 +35,31 @@
       jellyfin:
         mode: http
         balance: sticky
-        port: 8096
+        port: 30013
         domain_name: jellyfin.jwfh.ca
         servers:
-          - pixel.lemarchant.jacobhouse.ca
+          - ritchie.lemarchant.jacobhouse.ca
+      immich:
+        mode: http
+        balance: sticky
+        port: 30041
+        domain_name: immich.jwfh.ca
+        servers:
+          - ritchie.lemarchant.jacobhouse.ca
       jenkins:
         mode: http
         balance: sticky
-        port: 8080
+        port: 30017
         domain_name: ci.jwfh.ca
         servers:
-          - papillon.lemarchant.jacobhouse.ca
+          - ritchie.lemarchant.jacobhouse.ca
+      docker-registry:
+        mode: http
+        balance: roundrobin
+        port: 30996
+        domain_name: registry.jwfh.ca
+        servers:
+          - k8s.lemarchant.jacobhouse.ca
       mirror:
         mode: http
         balance: roundrobin
@@ -84,3 +98,4 @@
   roles:
     - base
     - haproxy
+

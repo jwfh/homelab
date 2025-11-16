@@ -14,9 +14,9 @@
         port: 30141
         ssl: true
         check_sni: true
-        domain_name: auth.jwfh.ca
+        domain_name: sso.jwfh.ca
         servers:
-          - ritchie.lemarchant.jacobhouse.ca
+          - tiny.lemarchant.jacobhouse.ca
       homepage:
         mode: http
         balance: roundrobin
@@ -25,27 +25,20 @@
         servers: 
           - scooby.lemarchant.jacobhouse.ca
           - bowser.lemarchant.jacobhouse.ca
-      plex:
-        mode: http
-        balance: sticky
-        port: 32400
-        domain_name: plex.jwfh.ca
-        servers: 
-          - pixel.lemarchant.jacobhouse.ca
       jellyfin:
         mode: http
         balance: sticky
         port: 30013
         domain_name: jellyfin.jwfh.ca
         servers:
-          - ritchie.lemarchant.jacobhouse.ca
+          - tiny.lemarchant.jacobhouse.ca
       immich:
         mode: http
         balance: sticky
         port: 30041
         domain_name: immich.jwfh.ca
         servers:
-          - ritchie.lemarchant.jacobhouse.ca
+          - tiny.lemarchant.jacobhouse.ca
       jenkins:
         mode: http
         balance: sticky
@@ -67,6 +60,13 @@
         domain_name: mirror.jwfh.ca
         servers: 
           - muffin.lemarchant.jacobhouse.ca
+      unifi:
+        mode: http
+        balance: roundrobin
+        port: 443
+        domain_name: unifi.jwfh.ca
+        servers:
+          - unifi.lemarchant.jacobhouse.ca
       shlink:
         mode: http
         balance: roundrobin
@@ -84,17 +84,21 @@
       expense_analysis:
         mode: http
         balance: sticky
-        port: 80
-        domain_name: expense-analysis.jwfh.ca
+        port: 31433
+        ssl: true
+        check_sni: true
+        domain_name: expenses.jwfh.ca
         servers:
-          - shadow.lemarchant.jacobhouse.ca
+          - k8s12-001.lemarchant.jacobhouse.ca
       expense_analysis_dev:
         mode: http
         balance: sticky
-        port: 80
-        domain_name: expense-analysis-dev.jwfh.ca
+        port: 31433
+        ssl: true
+        check_sni: true
+        domain_name: expenses-dev.jwfh.ca
         servers:
-          - storm.lemarchant.jacobhouse.ca
+          - k8s12-001.lemarchant.jacobhouse.ca
   roles:
     - base
     - haproxy

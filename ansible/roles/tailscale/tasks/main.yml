@@ -1,0 +1,14 @@
+---
+- name: Install required packages
+  package:
+    name:
+      - tailscale
+    state: present
+
+- name: Enable and start required services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - tailscale

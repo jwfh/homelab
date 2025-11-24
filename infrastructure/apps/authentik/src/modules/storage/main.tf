@@ -1,11 +1,11 @@
 # Persistent Volume for PostgreSQL (NFS)
 resource "kubernetes_persistent_volume" "postgres" {
   metadata {
-    name = "${kubernetes_namespace.authentik.id}-postgres-pv"
+    name = "${var.namespace}-postgres-pv"
     labels = {
       app       = "authentik"
       type      = "postgres"
-      namespace = kubernetes_namespace.authentik.id
+      namespace = var.namespace
     }
   }
 
@@ -32,7 +32,7 @@ resource "kubernetes_persistent_volume" "postgres" {
 resource "kubernetes_persistent_volume_claim" "postgres" {
   metadata {
     name      = "authentik-postgres-pvc"
-    namespace = kubernetes_namespace.authentik.id
+    namespace = var.namespace
     labels = {
       app  = "authentik"
       type = "postgres"
@@ -53,14 +53,69 @@ resource "kubernetes_persistent_volume_claim" "postgres" {
   }
 }
 
+# Persistent Volume for Certs (NFS)
+resource "kubernetes_persistent_volume" "certs" {
+  metadata {
+    name = "${var.namespace}-certs-pv"
+    labels = {
+      app       = "authentik"
+      type      = "certs"
+      namespace = var.namespace
+    }
+  }
+
+  spec {
+    capacity = {
+      storage = var.certs_storage_size
+    }
+
+    access_modes = ["ReadWriteMany"]
+
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = "nfs"
+
+    persistent_volume_source {
+      nfs {
+        server = local.nfs_server
+        path   = local.nfs_certs_path
+      }
+    }
+  }
+}
+
+# Persistent Volume Claim for Certs
+resource "kubernetes_persistent_volume_claim" "certs" {
+  metadata {
+    name      = "authentik-certs-pvc"
+    namespace = var.namespace
+    labels = {
+      app  = "authentik"
+      type = "certs"
+    }
+  }
+
+  spec {
+    access_modes       = ["ReadWriteMany"]
+    storage_class_name = "nfs"
+
+    resources {
+      requests = {
+        storage = var.certs_storage_size
+      }
+    }
+
+    volume_name = kubernetes_persistent_volume.certs.metadata[0].name
+  }
+}
+
 # Persistent Volume for Media (NFS)
 resource "kubernetes_persistent_volume" "media" {
   metadata {
-    name = "${kubernetes_namespace.authentik.id}-media-pv"
+    name = "${var.namespace}-media-pv"
     labels = {
       app       = "authentik"
       type      = "media"
-      namespace = kubernetes_namespace.authentik.id
+      namespace = var.namespace
     }
   }
 
@@ -87,7 +142,7 @@ resource "kubernetes_persistent_volume" "media" {
 resource "kubernetes_persistent_volume_claim" "media" {
   metadata {
     name      = "authentik-media-pvc"
-    namespace = kubernetes_namespace.authentik.id
+    namespace = var.namespace
     labels = {
       app  = "authentik"
       type = "media"
@@ -108,69 +163,14 @@ resource "kubernetes_persistent_volume_claim" "media" {
   }
 }
 
-# Persistent Volume for Redis (NFS)
-resource "kubernetes_persistent_volume" "redis" {
-  metadata {
-    name = "${kubernetes_namespace.authentik.id}-redis-pv"
-    labels = {
-      app       = "authentik"
-      type      = "redis"
-      namespace = kubernetes_namespace.authentik.id
-    }
-  }
-
-  spec {
-    capacity = {
-      storage = var.redis_storage_size
-    }
-
-    access_modes = ["ReadWriteOnce"]
-
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = "nfs"
-
-    persistent_volume_source {
-      nfs {
-        server = local.nfs_server
-        path   = local.nfs_redis_path
-      }
-    }
-  }
-}
-
-# Persistent Volume Claim for Redis
-resource "kubernetes_persistent_volume_claim" "redis" {
-  metadata {
-    name      = "authentik-redis-pvc"
-    namespace = kubernetes_namespace.authentik.id
-    labels = {
-      app  = "authentik"
-      type = "redis"
-    }
-  }
-
-  spec {
-    access_modes       = ["ReadWriteOnce"]
-    storage_class_name = "nfs"
-
-    resources {
-      requests = {
-        storage = var.redis_storage_size
-      }
-    }
-
-    volume_name = kubernetes_persistent_volume.redis.metadata[0].name
-  }
-}
-
 # Persistent Volume for Templates (NFS)
 resource "kubernetes_persistent_volume" "templates" {
   metadata {
-    name = "${kubernetes_namespace.authentik.id}-templates-pv"
+    name = "${var.namespace}-templates-pv"
     labels = {
       app       = "authentik"
       type      = "templates"
-      namespace = kubernetes_namespace.authentik.id
+      namespace = var.namespace
     }
   }
 
@@ -197,7 +197,7 @@ resource "kubernetes_persistent_volume" "templates" {
 resource "kubernetes_persistent_volume_claim" "templates" {
   metadata {
     name      = "authentik-templates-pvc"
-    namespace = kubernetes_namespace.authentik.id
+    namespace = var.namespace
     labels = {
       app  = "authentik"
       type = "templates"

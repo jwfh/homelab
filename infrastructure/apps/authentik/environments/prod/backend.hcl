@@ -1,7 +1,7 @@
 inputs = {
+  app_name         = "authentik"
   environment      = "prod"
   aws_region       = "ca-central-1"
-  terraform_bucket = "457144522784-terraform-state-cac1"
-  profile_name     = "prod-authentik-terraform-deployer"
-  kube_config_path = "~/.kube/k3s-config"
+  terraform_bucket = "501832840076-terraform-state-cac1"
+  profile_name     = "prod-apps-terraform-deployer"
 }

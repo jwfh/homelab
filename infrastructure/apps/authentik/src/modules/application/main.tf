@@ -1,4 +1,3 @@
-
 resource "helm_release" "authentik" {
   name       = "authentik"
   repository = "https://charts.goauthentik.io"
@@ -33,9 +32,6 @@ resource "helm_release" "authentik" {
           user     = "file:///postgres-creds/username"
           password = "file:///postgres-creds/password"
         }
-        redis = {
-          password = local.redis_password
-        }
       }
 
       postgresql = {
@@ -62,16 +58,6 @@ resource "helm_release" "authentik" {
         auth = {
           username = local.postgresql_user
           database = local.postgresql_name
-        }
-      }
-
-      redis = {
-        enabled = true
-        master = {
-          persistence = {
-            enabled       = true
-            existingClaim = var.redis_pvc_name
-          }
         }
       }
 
@@ -137,12 +123,11 @@ resource "helm_release" "authentik" {
           },
         ]
         ingress = {
-          enabled          = var.ingress_enabled
-          ingressClassName = var.ingress_class_name
-          annotations      = var.ingress_annotations
+          enabled          = true
+          ingressClassName = local.ingress_class_name
           hosts = [
             {
-              host = var.ingress_host
+              host = local.domain_name
               paths = [
                 {
                   path     = "/"
@@ -153,7 +138,7 @@ resource "helm_release" "authentik" {
           ]
           tls = [
             {
-              hosts      = [var.ingress_host]
+              hosts      = [local.domain_name]
               secretName = "authentik-tls"
             }
           ]

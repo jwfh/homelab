@@ -1,6 +1,6 @@
 output "namespace" {
   description = "Kubernetes namespace name"
-  value       = kubernetes_namespace.expense_analysis.metadata[0].name
+  value       = kubernetes_namespace.authentik.metadata[0].name
 }
 
 output "secrets_name" {

@@ -1,0 +1,28 @@
+# Example terraform.tfvars
+# Copy this file to terraform.tfvars and customize for your environment
+
+# AWS Configuration (for SSM Parameter Store)
+# Stored in backend.hcl per environment instead
+
+# Application Configuration (stored in AWS SSM)
+# Create a parameter in AWS SSM Parameter Store:
+# Name: /tandoor/configuration
+# Type: SecureString
+# Value (JSON):
+# {
+#   "app": {
+#     "domain_name": "recipes.example.com",
+#     "secret_key": "your-secret-key-here"
+#   },
+#   "nfs": {
+#     "server": "nfs.example.com",
+#     "media_path": "/mnt/storage/tandoor/media",
+#     "static_path": "/mnt/storage/tandoor/static",
+#     "postgres_path": "/mnt/storage/tandoor/postgres"
+#   },
+#   "database": {
+#     "name": "tandoor",
+#     "user": "tandoor",
+#     "password": "secure-database-password"
+#   }
+# }

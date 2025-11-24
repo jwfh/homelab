@@ -3,9 +3,11 @@
 
 controller:
   # Container image
-  image: "jenkins/jenkins"
-  tag: "lts"
-  imagePullPolicy: "Always"
+  image:
+    registry: "docker.io"
+    repository: "jenkins/jenkins"
+    tag: "lts"
+    pullPolicy: "Always"
 
   # Number of controller replicas (should be 1 for stateful app)
   replicas: 1
@@ -114,15 +116,16 @@ controller:
 persistence:
   enabled: true
   existingClaim: jenkins-pv-claim
-  storageClass: "nfs"
+  storageClass: "local-storage"
   size: 10Gi
   accessMode: ReadWriteMany
 
 # Agent configuration
 agent:
   enabled: true
-  image: "jenkins/inbound-agent"
-  tag: "latest"
+  image:
+    repository: "jenkins/inbound-agent"
+    tag: "latest"
   resources:
     requests:
       cpu: "250m"
@@ -149,10 +152,6 @@ service:
     prometheus.io/scrape: "true"
     prometheus.io/path: "/"
     prometheus.io/port: "8080"
-
-# Backup configuration (optional)
-backup:
-  enabled: false
 
 # Prometheus metrics
 prometheus:

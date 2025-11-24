@@ -1,20 +1,10 @@
+variable "environment" {
+  description = "Environment name (dev/prod)"
+  type        = string
+}
+
 variable "namespace" {
   description = "Kubernetes namespace"
-  type        = string
-}
-
-variable "nfs_server" {
-  description = "NFS server hostname or IP"
-  type        = string
-}
-
-variable "nfs_data_path" {
-  description = "NFS path for app data storage"
-  type        = string
-}
-
-variable "nfs_postgres_path" {
-  description = "NFS path for PostgreSQL storage"
   type        = string
 }
 

@@ -4,7 +4,7 @@ include "root" {
 }
 
 terraform {
-  source = "../../../src/modules/storage"
+  source = "../../../../..//apps/expense-analysis/src/modules/storage"
 }
 
 dependency "namespace" {
@@ -12,10 +12,8 @@ dependency "namespace" {
 }
 
 inputs = {
+  environment  = "dev"
   namespace             = dependency.namespace.outputs.namespace
-  nfs_server            = dependency.namespace.outputs.nfs_server
-  nfs_data_path         = dependency.namespace.outputs.nfs_data_path
-  nfs_postgres_path     = dependency.namespace.outputs.nfs_postgres_path
   data_storage_size     = "32Gi"
   postgres_storage_size = "50Gi"
 }

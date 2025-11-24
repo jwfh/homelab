@@ -4,7 +4,7 @@ include "root" {
 }
 
 terraform {
-  source = "../../../src/modules/ingress"
+  source = "../../../../..//apps/expense-analysis/src/modules/ingress"
 }
 
 dependency "namespace" {
@@ -12,5 +12,6 @@ dependency "namespace" {
 }
 
 inputs = {
+  environment  = "dev"
   namespace = dependency.namespace.outputs.namespace
 }

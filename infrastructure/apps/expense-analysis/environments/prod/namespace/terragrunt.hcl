@@ -4,7 +4,7 @@ include "root" {
 }
 
 terraform {
-  source = "../../../src/modules/namespace"
+  source = "../../../../..//apps/expense-analysis/src/modules/namespace"
 }
 
 inputs = {

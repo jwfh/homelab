@@ -17,7 +17,7 @@ terraform {
   backend "s3" {
     profile      = "${local.backend.inputs.profile_name}"
     bucket       = "${local.backend.inputs.terraform_bucket}"
-    key          = "expense-analysis/${local.backend.inputs.environment}/${local.relative_path}/terraform.tfstate"
+    key          = "tandoor/${local.backend.inputs.environment}/${local.relative_path}/terraform.tfstate"
     region       = "${local.backend.inputs.aws_region}"
     encrypt      = true
     use_lockfile = true

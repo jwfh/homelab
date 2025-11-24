@@ -4,7 +4,7 @@ include "root" {
 }
 
 terraform {
-  source = "../../../src/modules/database"
+  source = "../../../../..//apps/expense-analysis/src/modules/database"
 }
 
 dependency "namespace" {
@@ -16,9 +16,8 @@ dependency "storage" {
 }
 
 inputs = {
+  environment = "prod"
   namespace     = dependency.namespace.outputs.namespace
   secrets_name  = dependency.namespace.outputs.secrets_name
-  database_name = dependency.namespace.outputs.db_name
-  database_user = dependency.namespace.outputs.db_user
   pvc_name      = dependency.storage.outputs.postgres_pvc_name
 }

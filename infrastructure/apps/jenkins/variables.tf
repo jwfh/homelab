@@ -1,7 +1,7 @@
 variable "namespace" {
   description = "Kubernetes namespace for Jenkins"
   type        = string
-  default     = "devops-tools"
+  default     = "jenkins"
 }
 
 variable "jenkins_chart_version" {

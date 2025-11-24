@@ -39,8 +39,18 @@ resource "helm_release" "jenkins" {
   }
 
   set {
-    name  = "controller.tag"
+    name  = "controller.image.tag"
     value = var.jenkins_image_tag
+  }
+
+  set {
+    name  = "controller.image.registry"
+    value = "docker.io"
+  }
+
+  set {
+    name  = "controller.image.repository"
+    value = "jenkins/jenkins"
   }
 
   set {

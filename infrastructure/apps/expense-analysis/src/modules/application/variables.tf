@@ -1,3 +1,8 @@
+variable "environment" {
+  description = "Environment name (dev/prod)"
+  type        = string
+}
+
 variable "namespace" {
   description = "Kubernetes namespace"
   type        = string
@@ -19,25 +24,6 @@ variable "replicas" {
   default     = 2
 }
 
-variable "auth_method" {
-  description = "Authentication method for the application (e.g., oidc, local)"
-  type        = string
-  default     = "local"
-}
-
-variable "oidc_configuration" {
-  description = "OIDC configuration for the application"
-  type = object({
-    client_id     = string
-    client_secret = string
-    discovery_url = string
-    redirect_uri  = string
-    provider_name = string
-    provider_url  = string
-  })
-  default = null
-}
-
 variable "database_host" {
   description = "Database host"
   type        = string
@@ -48,16 +34,6 @@ variable "database_port" {
   type        = number
 }
 
-variable "database_name" {
-  description = "Database name"
-  type        = string
-}
-
-variable "database_user" {
-  description = "Database user"
-  type        = string
-}
-
 variable "data_pvc_name" {
   description = "Name of the data PVC"
   type        = string
@@ -65,11 +41,6 @@ variable "data_pvc_name" {
 
 variable "secrets_name" {
   description = "Name of the secrets resource"
-  type        = string
-}
-
-variable "domain_name" {
-  description = "Domain name for ingress"
   type        = string
 }
 

@@ -52,8 +52,8 @@ resource "kubernetes_stateful_set" "postgres" {
 
         container {
           name  = "postgres"
-          image = "postgres:16-alpine"  
-          
+          image = "postgres:16-alpine"
+
           security_context {
             run_as_non_root = true
             run_as_user     = 70
@@ -67,12 +67,12 @@ resource "kubernetes_stateful_set" "postgres" {
 
           env {
             name  = "POSTGRES_DB"
-            value = var.database_name
+            value = local.db_name
           }
 
           env {
             name  = "POSTGRES_USER"
-            value = var.database_user
+            value = local.db_user
           }
 
           env {
@@ -108,7 +108,7 @@ resource "kubernetes_stateful_set" "postgres" {
 
           liveness_probe {
             exec {
-              command = ["pg_isready", "-U", var.database_user, "-d", var.database_name]
+              command = ["pg_isready", "-U", local.db_user, "-d", local.db_name]
             }
             initial_delay_seconds = 30
             period_seconds        = 10
@@ -118,7 +118,7 @@ resource "kubernetes_stateful_set" "postgres" {
 
           readiness_probe {
             exec {
-              command = ["pg_isready", "-U", var.database_user, "-d", var.database_name]
+              command = ["pg_isready", "-U", local.db_user, "-d", local.db_name]
             }
             initial_delay_seconds = 5
             period_seconds        = 5

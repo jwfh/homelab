@@ -4,5 +4,6 @@ uid: 213815
 shell: fish
 hosts:
   - granite
+  - tailscale-noah
 groups:
   - '{{ wheel }}'

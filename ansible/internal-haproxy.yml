@@ -56,7 +56,7 @@
       docker-registry:
         mode: http
         balance: roundrobin
-        port: 30996
+        port: 30494
         domain_name: registry.jwfh.ca
         servers:
           - k8s.lemarchant.jacobhouse.ca
@@ -98,4 +98,3 @@
   roles:
     - base
     - haproxy
-

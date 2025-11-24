@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.23"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -11,11 +15,53 @@ provider "kubernetes" {
   config_path = "~/.kube/k3s-config"
 }
 
+provider "tls" {}
+
 # Namespace
 resource "kubernetes_namespace" "docker_registry" {
   metadata {
     name = "docker-registry"
   }
+}
+
+# Generate self-signed TLS certificate
+resource "tls_private_key" "registry" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "tls_self_signed_cert" "registry" {
+  private_key_pem = tls_private_key.registry.private_key_pem
+
+  subject {
+    common_name  = var.registry_hostname
+    organization = "Homelab"
+  }
+
+  validity_period_hours = 8760 # 1 year
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+}
+
+# Create TLS secret for the registry
+resource "kubernetes_secret" "registry_tls" {
+  metadata {
+    name      = "registry-tls"
+    namespace = kubernetes_namespace.docker_registry.metadata[0].name
+  }
+
+  type = "kubernetes.io/tls"
+
+  data = {
+    "tls.crt" = tls_self_signed_cert.registry.cert_pem
+    "tls.key" = tls_private_key.registry.private_key_pem
+  }
+
+  depends_on = [kubernetes_namespace.docker_registry]
 }
 
 # PersistentVolume
@@ -28,9 +74,9 @@ resource "kubernetes_persistent_volume" "registry_storage" {
     capacity = {
       storage = "100Gi"
     }
-    access_modes = ["ReadWriteOnce"]
+    access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
-    storage_class_name = "nfs"
+    storage_class_name               = "nfs"
 
     persistent_volume_source {
       nfs {
@@ -49,9 +95,9 @@ resource "kubernetes_persistent_volume_claim" "registry_storage" {
   }
 
   spec {
-    access_modes = ["ReadWriteOnce"]
+    access_modes       = ["ReadWriteOnce"]
     storage_class_name = "nfs"
-    volume_name = kubernetes_persistent_volume.registry_storage.metadata[0].name
+    volume_name        = kubernetes_persistent_volume.registry_storage.metadata[0].name
 
     resources {
       requests = {
@@ -183,6 +229,10 @@ resource "kubernetes_ingress_v1" "registry" {
   metadata {
     name      = "registry"
     namespace = kubernetes_namespace.docker_registry.metadata[0].name
+    annotations = {
+      "traefik.ingress.kubernetes.io/router.entrypoints" = "websecure"
+      "traefik.ingress.kubernetes.io/router.tls"         = "true"
+    }
   }
 
   spec {
@@ -205,7 +255,12 @@ resource "kubernetes_ingress_v1" "registry" {
         }
       }
     }
+
+    tls {
+      hosts       = [var.registry_hostname]
+      secret_name = kubernetes_secret.registry_tls.metadata[0].name
+    }
   }
 
-  depends_on = [kubernetes_service.registry]
+  depends_on = [kubernetes_service.registry, kubernetes_secret.registry_tls]
 }

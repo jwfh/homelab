@@ -6,6 +6,17 @@
     state: present
   when: ansible_os_family == 'Debian'
 
+- name: Ensure mount directories exist
+  file:
+    path: "{{ item.local_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop: "{{ nfs_mounts }}"
+  loop_control:
+    label: "{{ item.local_path }}"
+
 - name: Mount NFS shares (Debian)
   ansible.posix.mount:
     src: "{{ item.server }}:{{ item.remote_path }}"

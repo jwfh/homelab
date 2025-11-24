@@ -69,12 +69,12 @@ resource "kubernetes_deployment" "backend" {
 
           env {
             name  = "DATABASE_NAME"
-            value = var.database_name
+            value = local.db_name
           }
 
           env {
             name  = "DATABASE_USER"
-            value = var.database_user
+            value = local.db_user
           }
 
           env {
@@ -114,12 +114,12 @@ resource "kubernetes_deployment" "backend" {
 
           env {
             name  = "DATABASE_NAME"
-            value = var.database_name
+            value = local.db_name
           }
 
           env {
             name  = "DATABASE_USER"
-            value = var.database_user
+            value = local.db_user
           }
 
           env {
@@ -144,19 +144,19 @@ resource "kubernetes_deployment" "backend" {
 
           env {
             name  = "FRONTEND_URL"
-            value = "https://${var.domain_name}"
+            value = "https://${local.app_domain_name}"
           }
 
           env {
             name  = "AUTH_METHOD"
-            value = var.auth_method
+            value = local.app_auth_method
           }
 
           dynamic "env" {
-            for_each = var.auth_method == "oidc" ? ["client_id", "client_secret", "discovery_url", "redirect_uri", "provider_name", "provider_url"] : []
+            for_each = local.app_auth_method == "oidc" ? ["client_id", "client_secret", "discovery_url", "redirect_uri", "provider_name", "provider_url"] : []
             content {
               name  = "OIDC_${upper(env.value)}"
-              value = sensitive(var.oidc_configuration[env.value])
+              value = sensitive(local.oidc_configuration[env.value])
             }
           }
 
@@ -281,7 +281,7 @@ resource "kubernetes_manifest" "ingress_route" {
       entryPoints = ["websecure"]
       routes = [
         {
-          match = "Host(`${var.domain_name}`)"
+          match = "Host(`${local.app_domain_name}`)"
           kind  = "Rule"
           services = [
             {
@@ -316,7 +316,7 @@ resource "kubernetes_manifest" "ingress_route_redirect" {
       entryPoints = ["web"]
       routes = [
         {
-          match = "Host(`${var.domain_name}`)"
+          match = "Host(`${local.app_domain_name}`)"
           kind  = "Rule"
           services = [
             {

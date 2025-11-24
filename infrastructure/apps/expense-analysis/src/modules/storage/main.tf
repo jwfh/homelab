@@ -21,8 +21,8 @@ resource "kubernetes_persistent_volume" "data" {
 
     persistent_volume_source {
       nfs {
-        server = var.nfs_server
-        path   = var.nfs_data_path
+        server = local.nfs_server
+        path   = local.nfs_data_path
       }
     }
   }
@@ -76,8 +76,8 @@ resource "kubernetes_persistent_volume" "postgres" {
 
     persistent_volume_source {
       nfs {
-        server = var.nfs_server
-        path   = var.nfs_postgres_path
+        server = local.nfs_server
+        path   = local.nfs_postgres_path
       }
     }
   }

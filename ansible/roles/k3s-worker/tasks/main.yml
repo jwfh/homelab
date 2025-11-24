@@ -103,3 +103,7 @@
       - "K3s worker node joined successfully!"
       - "Connected to: {{ k3s_server_url }}"
       - "Node will appear in 'kubectl get nodes' on the control plane"
+
+- name: Include NFS mounts if defined
+  include_tasks: nfs_mounts.yml
+  when: k3s_nfs_mounts is defined and k3s_nfs_mounts | length > 0

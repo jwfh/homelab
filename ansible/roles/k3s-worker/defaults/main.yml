@@ -38,3 +38,7 @@ k3s_install_kubectl: true
 
 # Kubeconfig location
 k3s_kubeconfig_dest: /etc/rancher/k3s/k3s.yaml
+
+k3s_nfs_client_packages:
+  - nfs-common  # Debian/Ubuntu
+  # - nfs-utils  # RHEL/CentOS

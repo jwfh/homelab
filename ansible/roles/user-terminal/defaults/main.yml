@@ -3,3 +3,6 @@ user_terminal_base_packages:
   - fish
   - vim
   - htop
+debian_user_terminal_base_packages:
+  - kubectl
+  - jq

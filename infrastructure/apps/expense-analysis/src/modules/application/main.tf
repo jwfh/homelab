@@ -49,6 +49,14 @@ resource "kubernetes_deployment" "backend" {
           }
         }
 
+        # Run as UID/GID 568 for NFS mount compatibility
+        security_context {
+          run_as_user     = 568
+          run_as_group    = 568
+          fs_group        = 568
+          run_as_non_root = true
+        }
+
         init_container {
           name  = "init-db"
           image = "${var.docker_image}:${var.app_version}"

@@ -1,20 +1,29 @@
-# Storage Class for local/hostPath volumes
-resource "kubernetes_storage_class" "local_storage" {
-  metadata {
-    name = "local-storage"
-  }
+# NFS-backed storage for Jenkins controller
+# Agents use ephemeral storage configured in the kubernetes cloud
 
-  storage_provisioner    = "kubernetes.io/no-provisioner"
-  volume_binding_mode    = "WaitForFirstConsumer"
-  allow_volume_expansion = true
-}
-
-resource "kubernetes_persistent_volume" "jenkins_pv" {
+resource "kubernetes_storage_class" "nfs_jenkins" {
   metadata {
-    name = "jenkins-pv-volume"
+    name = "nfs-jenkins"
 
     labels = {
-      "type"                         = "hostpath"
+      "app.kubernetes.io/name"       = "jenkins"
+      "app.kubernetes.io/managed-by" = "terraform"
+    }
+  }
+
+  storage_provisioner = "kubernetes.io/no-provisioner"
+  volume_binding_mode = "Immediate"
+
+  # NFS doesn't support volume expansion natively
+  allow_volume_expansion = false
+}
+
+resource "kubernetes_persistent_volume" "jenkins_nfs_pv" {
+  metadata {
+    name = "jenkins-nfs-pv"
+
+    labels = {
+      "type"                         = "nfs"
       "app.kubernetes.io/name"       = "jenkins"
       "app.kubernetes.io/component"  = "storage"
       "app.kubernetes.io/managed-by" = "terraform"
@@ -26,30 +35,14 @@ resource "kubernetes_persistent_volume" "jenkins_pv" {
       storage = var.storage_size
     }
 
-    access_modes = ["ReadWriteMany"]
-
+    access_modes                     = ["ReadWriteMany"]
     persistent_volume_reclaim_policy = "Retain"
-
-    storage_class_name = "local-storage"
+    storage_class_name               = kubernetes_storage_class.nfs_jenkins.metadata[0].name
 
     persistent_volume_source {
-      host_path {
-        path = "/mnt/default/services/jenkins"
-        type = "DirectoryOrCreate"
-      }
-    }
-
-    # Optional: Node affinity to ensure pod runs on nodes with the NFS mount
-    # Uncomment if you want to restrict to specific nodes
-    node_affinity {
-      required {
-        node_selector_term {
-          match_expressions {
-            key      = "kubernetes.io/hostname"
-            operator = "In"
-            values   = ["k8s12-001.lemarchant.jacobhouse.ca"] # Replace with your worker node hostname
-          }
-        }
+      nfs {
+        server = var.nfs_server
+        path   = var.nfs_path
       }
     }
   }
@@ -57,7 +50,7 @@ resource "kubernetes_persistent_volume" "jenkins_pv" {
 
 resource "kubernetes_persistent_volume_claim" "jenkins_pvc" {
   metadata {
-    name      = "jenkins-pv-claim"
+    name      = "jenkins-pvc"
     namespace = kubernetes_namespace.jenkins.metadata[0].name
 
     labels = {
@@ -68,9 +61,8 @@ resource "kubernetes_persistent_volume_claim" "jenkins_pvc" {
   }
 
   spec {
-    access_modes = ["ReadWriteMany"]
-
-    storage_class_name = "local-storage"
+    access_modes       = ["ReadWriteMany"]
+    storage_class_name = kubernetes_storage_class.nfs_jenkins.metadata[0].name
 
     resources {
       requests = {
@@ -78,6 +70,6 @@ resource "kubernetes_persistent_volume_claim" "jenkins_pvc" {
       }
     }
 
-    volume_name = kubernetes_persistent_volume.jenkins_pv.metadata[0].name
+    volume_name = kubernetes_persistent_volume.jenkins_nfs_pv.metadata[0].name
   }
 }

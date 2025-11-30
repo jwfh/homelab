@@ -10,70 +10,31 @@ resource "helm_release" "jenkins" {
   wait_for_jobs = true
   timeout       = 600
 
-  # Use the values file
+  # Use the values file with variable interpolation
   values = [
     templatefile("${path.module}/helm-values.yaml", {
-      namespace         = var.namespace
-      ingress_host      = var.ingress_host
-      nfs_server        = var.nfs_server
-      nfs_path          = var.nfs_path
-      storage_size      = var.storage_size
-      jenkins_image_tag = var.jenkins_image_tag
+      namespace                = var.namespace
+      ingress_host             = var.ingress_host
+      ingress_class_name       = var.ingress_class_name
+      jenkins_image_tag        = var.jenkins_image_tag
+      controller_cpu_request   = var.controller_cpu_request
+      controller_cpu_limit     = var.controller_cpu_limit
+      controller_memory_request = var.controller_memory_request
+      controller_memory_limit  = var.controller_memory_limit
+      agent_cpu_request        = var.agent_cpu_request
+      agent_cpu_limit          = var.agent_cpu_limit
+      agent_memory_request     = var.agent_memory_request
+      agent_memory_limit       = var.agent_memory_limit
+      agent_max_instances      = var.agent_max_instances
+      github_organization      = var.github_organization
+      github_credentials_id    = var.github_credentials_id
+      github_repo_regex        = var.github_repo_regex
+      github_branch_regex      = var.github_branch_regex
+      github_scan_interval     = var.github_scan_interval
     })
   ]
 
-  # Override specific values via set blocks for dynamic configuration
-  set {
-    name  = "controller.serviceAccount.name"
-    value = kubernetes_service_account.jenkins.metadata[0].name
-  }
-
-  set {
-    name  = "persistence.existingClaim"
-    value = kubernetes_persistent_volume_claim.jenkins_pvc.metadata[0].name
-  }
-
-  set {
-    name  = "controller.ingress.hostName"
-    value = var.ingress_host
-  }
-
-  set {
-    name  = "controller.image.tag"
-    value = var.jenkins_image_tag
-  }
-
-  set {
-    name  = "controller.image.registry"
-    value = "docker.io"
-  }
-
-  set {
-    name  = "controller.image.repository"
-    value = "jenkins/jenkins"
-  }
-
-  set {
-    name  = "controller.resources.requests.memory"
-    value = var.resource_requests_memory
-  }
-
-  set {
-    name  = "controller.resources.requests.cpu"
-    value = var.resource_requests_cpu
-  }
-
-  set {
-    name  = "controller.resources.limits.memory"
-    value = var.resource_limits_memory
-  }
-
-  set {
-    name  = "controller.resources.limits.cpu"
-    value = var.resource_limits_cpu
-  }
-
-  # Ensure namespace and RBAC are created first
+  # Ensure namespace, RBAC, and storage are created first
   depends_on = [
     kubernetes_namespace.jenkins,
     kubernetes_service_account.jenkins,

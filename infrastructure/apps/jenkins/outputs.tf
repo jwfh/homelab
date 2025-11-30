@@ -27,3 +27,24 @@ output "jenkins_url" {
   description = "Jenkins URL"
   value       = "https://${var.ingress_host}"
 }
+
+output "github_organization" {
+  description = "GitHub organization being scanned"
+  value       = var.github_organization
+}
+
+output "github_organization_url" {
+  description = "GitHub organization URL"
+  value       = "https://github.com/${var.github_organization}"
+}
+
+output "service_account" {
+  description = "Jenkins service account name"
+  value       = kubernetes_service_account.jenkins.metadata[0].name
+}
+
+output "nfs_pvc_name" {
+  description = "NFS PVC name for Jenkins controller"
+  value       = kubernetes_persistent_volume_claim.jenkins_pvc.metadata[0].name
+}
+

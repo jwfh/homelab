@@ -7,23 +7,18 @@ variable "namespace" {
 variable "jenkins_chart_version" {
   description = "Jenkins Helm chart version"
   type        = string
-  default     = "5.0.0"
+  default     = "5.8.3"
 }
 
 variable "jenkins_image_tag" {
   description = "Jenkins Docker image tag (lts, lts-jdk17, or specific version)"
   type        = string
-  default     = "lts"
+  default     = "lts-jdk17"
 }
 
-variable "jenkins_replicas" {
-  description = "Number of Jenkins controller replicas"
-  type        = number
-  default     = 1
-}
-
+# NFS Storage Configuration
 variable "nfs_server" {
-  description = "NFS server hostname or IP"
+  description = "NFS server hostname or IP for Jenkins controller storage"
   type        = string
   default     = "ritchie"
 }
@@ -37,35 +32,105 @@ variable "nfs_path" {
 variable "storage_size" {
   description = "Storage size for Jenkins home PVC"
   type        = string
-  default     = "10Gi"
+  default     = "20Gi"
 }
 
+# Ingress Configuration
 variable "ingress_host" {
   description = "Hostname for Jenkins ingress"
   type        = string
   default     = "ci.jwfh.ca"
 }
 
-variable "resource_limits_memory" {
-  description = "Memory limit for Jenkins controller"
+variable "ingress_class_name" {
+  description = "Ingress class name (e.g., traefik, nginx)"
   type        = string
-  default     = "2Gi"
+  default     = "traefik"
 }
 
-variable "resource_limits_cpu" {
+# Controller Resource Configuration
+variable "controller_cpu_request" {
+  description = "CPU request for Jenkins controller"
+  type        = string
+  default     = "500m"
+}
+
+variable "controller_cpu_limit" {
   description = "CPU limit for Jenkins controller"
+  type        = string
+  default     = "2000m"
+}
+
+variable "controller_memory_request" {
+  description = "Memory request for Jenkins controller"
+  type        = string
+  default     = "1Gi"
+}
+
+variable "controller_memory_limit" {
+  description = "Memory limit for Jenkins controller"
+  type        = string
+  default     = "4Gi"
+}
+
+# Agent Resource Configuration  
+variable "agent_cpu_request" {
+  description = "CPU request for Jenkins agents"
+  type        = string
+  default     = "500m"
+}
+
+variable "agent_cpu_limit" {
+  description = "CPU limit for Jenkins agents"
   type        = string
   default     = "1000m"
 }
 
-variable "resource_requests_memory" {
-  description = "Memory request for Jenkins controller"
+variable "agent_memory_request" {
+  description = "Memory request for Jenkins agents"
   type        = string
-  default     = "500Mi"
+  default     = "512Mi"
 }
 
-variable "resource_requests_cpu" {
-  description = "CPU request for Jenkins controller"
+variable "agent_memory_limit" {
+  description = "Memory limit for Jenkins agents"
   type        = string
-  default     = "500m"
+  default     = "2Gi"
+}
+
+variable "agent_max_instances" {
+  description = "Maximum number of concurrent agent pods"
+  type        = number
+  default     = 10
+}
+
+# GitHub Organization Configuration
+variable "github_organization" {
+  description = "GitHub organization name to scan for repositories"
+  type        = string
+  default     = "jwfh"
+}
+
+variable "github_credentials_id" {
+  description = "Jenkins credentials ID for GitHub authentication"
+  type        = string
+  default     = "github-token"
+}
+
+variable "github_repo_regex" {
+  description = "Regex pattern to filter repositories in the GitHub organization"
+  type        = string
+  default     = ".*"
+}
+
+variable "github_branch_regex" {
+  description = "Regex pattern to filter branches for building"
+  type        = string
+  default     = "^(main|master|develop|feature/.*)$"
+}
+
+variable "github_scan_interval" {
+  description = "Organization scan interval in minutes"
+  type        = number
+  default     = 60
 }

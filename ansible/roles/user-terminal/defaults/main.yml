@@ -5,4 +5,50 @@ user_terminal_base_packages:
   - htop
 debian_user_terminal_base_packages:
   - kubectl
+  - helm
   - jq
+  - ansible
+  - awscli
+  - bsdutils
+  - code
+  - coreutils
+  - curl
+  - diffutils
+  - dmidecode
+  - ffmpeg
+  - findutils
+  - finger
+  - gcc-14-base
+  - gcc
+  - gpg
+  - gzip
+  - helm
+  - make
+  - net-tools
+  - nfs-common
+  - pciutils
+  - pipx
+  - pkg-config
+  - procps
+  - pyenv
+  - python3-all-dev
+  - python3-apt
+  - python3
+  - readline-common
+  - rsync
+  - sed
+  - tar
+  - task-french
+  - task-ssh-server
+  - tenv
+  - tmux
+  - tree
+  - tzdata
+  - udev
+  - usbutils
+  - util-linux
+  - whiptail
+  - yq
+  - yt-dlp
+  - zlib1g
+  - zstd

@@ -3,7 +3,7 @@ resource "helm_release" "authentik" {
   repository = "https://charts.goauthentik.io"
   chart      = "authentik"
   version    = var.chart_version
-  namespace  = kubernetes_namespace.authentik.id
+  namespace  = var.namespace
 
   values = [
     yamlencode({
@@ -22,11 +22,6 @@ resource "helm_release" "authentik" {
           use_tls  = local.email_security == "tls" ? true : false
           use_ssl  = local.email_security == "ssl" ? true : false
         }
-        bootstrap = {
-          email    = local.bootstrap_email
-          password = local.bootstrap_password
-          token    = local.bootstrap_token
-        }
         postgresql = {
           name     = local.postgresql_name
           user     = "file:///postgres-creds/username"
@@ -41,18 +36,18 @@ resource "helm_release" "authentik" {
             enabled       = true
             existingClaim = var.postgres_pvc_name
           }
-          securityContext = {
-            fsGroup = 26
+          podSecurityContext = {
+            enabled  = true
+            fsGroup  = 1001
+            runAsUser = 1001
           }
           containerSecurityContext = {
+            enabled                  = true
             runAsNonRoot             = true
-            runAsUser                = 26
-            runAsGroup               = 26
             allowPrivilegeEscalation = false
             capabilities = {
               drop = ["ALL"]
             }
-            readOnlyRootFilesystem = false
           }
         }
         auth = {
@@ -125,17 +120,9 @@ resource "helm_release" "authentik" {
         ingress = {
           enabled          = true
           ingressClassName = local.ingress_class_name
-          hosts = [
-            {
-              host = local.domain_name
-              paths = [
-                {
-                  path     = "/"
-                  pathType = "Prefix"
-                }
-              ]
-            }
-          ]
+          hosts = [local.domain_name]
+          paths = ["/"]
+          pathType = "Prefix"
           tls = [
             {
               hosts      = [local.domain_name]
@@ -209,8 +196,7 @@ resource "helm_release" "authentik" {
       }
 
       kubernetesIntegration = {
-        enabled    = true
-        secretName = "authentik-outpost-token"
+        enabled = true
       }
 
       serviceAccount = {
@@ -222,5 +208,5 @@ resource "helm_release" "authentik" {
   # Wait for resources to be ready
   wait          = true
   wait_for_jobs = true
-  timeout       = 600
+  timeout       = 120
 }

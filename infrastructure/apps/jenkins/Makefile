@@ -1,96 +1,176 @@
-.PHONY: help init plan apply destroy validate fmt clean check-kubeconfig
+# Jenkins Terraform Makefile
+#
+# This Makefile provides targets for managing Jenkins infrastructure
+# using Terragrunt with environment-based deployments.
+#
+# Structure:
+#   environments/
+#     prod/
+#       namespace/     - Kubernetes namespace and RBAC
+#       storage/       - NFS PV/PVC for Jenkins controller
+#       application/   - Jenkins Helm release with JCasC
+#   src/
+#     modules/
+#       namespace/     - Namespace and RBAC resources
+#       storage/       - NFS storage configuration
+#       application/   - Jenkins Helm chart deployment
 
-help: ## Show this help message
-	@echo 'Usage: make [target]'
-	@echo ''
-	@echo 'Available targets:'
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+.PHONY: help init plan apply destroy all-plan all-apply run-all fmt validate clean status logs
 
-check-kubeconfig: ## Verify kubectl access to the cluster
-	@echo "Checking Kubernetes connectivity..."
-	@kubectl cluster-info
-	@kubectl get nodes
+# Default environment (can be overridden: make ENVIRONMENT=staging plan)
+ENVIRONMENT ?= prod
 
-init: check-kubeconfig ## Initialize Terraform
-	terraform init
+# Optional: specify a single module to operate on
+MODULE ?=
 
-validate: ## Validate Terraform configuration
-	terraform validate
+# Base paths
+ENVIRONMENT_PATH := environments/$(ENVIRONMENT)
 
-fmt: ## Format Terraform files
-	terraform fmt -recursive
-
-plan: validate ## Show Terraform execution plan
-	terraform plan
-
-apply: validate ## Apply Terraform configuration
-	terraform apply
-
-apply-auto: validate ## Apply without confirmation (use with caution)
-	terraform apply -auto-approve
-
-destroy: ## Destroy all Terraform-managed resources
-	terraform destroy
-
-destroy-auto: ## Destroy without confirmation (use with caution)
-	terraform destroy -auto-approve
-
-clean: ## Remove Terraform state and cache
-	rm -rf .terraform
-	rm -f .terraform.lock.hcl
-	rm -f terraform.tfstate*
-
-show: ## Show current Terraform state
-	terraform show
-
-output: ## Display Terraform outputs
-	terraform output
-
-logs: ## Show Jenkins logs
-	kubectl logs -f deployment/jenkins -n devops-tools
-
-get-password: ## Get Jenkins initial admin password
-	@echo "Getting Jenkins initial admin password..."
-	@kubectl exec -it -n devops-tools deployment/jenkins -- cat /var/jenkins_home/secrets/initialAdminPassword
-
-helm-status: ## Show Helm release status
-	helm status jenkins -n devops-tools
-
-helm-values: ## Show current Helm values
-	helm get values jenkins -n devops-tools
-
-helm-upgrade: ## Upgrade Jenkins Helm release
-	helm upgrade jenkins jenkins/jenkins -n devops-tools -f helm-values.yaml
-
-restart: ## Restart Jenkins deployment
-	kubectl rollout restart deployment/jenkins -n devops-tools
-
-status: ## Show Jenkins deployment status
-	@echo "=== Namespace ==="
-	@kubectl get namespace devops-tools
+help:
 	@echo ""
-	@echo "=== Deployment ==="
-	@kubectl get deployment jenkins -n devops-tools
+	@echo "╔═══════════════════════════════════════════════════════════════════════╗"
+	@echo "║                   Jenkins Infrastructure Management                   ║"
+	@echo "╠═══════════════════════════════════════════════════════════════════════╣"
+	@echo "║  Modules: namespace, storage, application                             ║"
+	@echo "╚═══════════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "USAGE"
+	@echo "━━━━━"
+	@echo "  make [target] ENVIRONMENT=<env> [MODULE=<module>]"
+	@echo ""
+	@echo "ENVIRONMENT VALUES"
+	@echo "━━━━━━━━━━━━━━━━━━"
+	@echo "  prod (default)"
+	@echo ""
+	@echo "TARGETS"
+	@echo "━━━━━━━"
+	@echo "  init       Initialize Terragrunt (downloads providers, modules)"
+	@echo "  plan       Show planned changes (dry-run)"
+	@echo "  apply      Apply changes to infrastructure"
+	@echo "  destroy    Destroy infrastructure"
+	@echo "  all-plan   Plan all modules in dependency order"
+	@echo "  all-apply  Apply all modules in dependency order"
+	@echo "  fmt        Format Terraform code"
+	@echo "  validate   Validate Terraform configuration"
+	@echo "  clean      Remove Terragrunt cache directories"
+	@echo "  status     Show Jenkins deployment status"
+	@echo "  logs       Show Jenkins controller logs"
+	@echo ""
+	@echo "EXAMPLES"
+	@echo "━━━━━━━━"
+	@echo "  # Plan all modules in prod (default)"
+	@echo "  make plan"
+	@echo ""
+	@echo "  # Apply all modules in prod"
+	@echo "  make ENVIRONMENT=prod all-apply"
+	@echo ""
+	@echo "  # Update only the application module"
+	@echo "  make ENVIRONMENT=prod MODULE=application apply"
+	@echo ""
+	@echo "  # Destroy prod environment"
+	@echo "  make ENVIRONMENT=prod destroy"
+	@echo ""
+	@echo "MODULE DEPENDENCY GRAPH"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  namespace (Kubernetes namespace and RBAC)"
+	@echo "      └── storage (NFS PV/PVC for Jenkins controller)"
+	@echo "          └── application (Helm release with JCasC)"
+	@echo ""
+
+init:
+	@echo "Initializing Terragrunt for $(ENVIRONMENT) environment..."
+ifeq ($(MODULE),)
+	cd $(ENVIRONMENT_PATH) && terragrunt run-all init
+else
+	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt init
+endif
+
+plan:
+	@echo "Planning Terraform changes for $(ENVIRONMENT) environment..."
+ifeq ($(MODULE),)
+	cd $(ENVIRONMENT_PATH) && terragrunt run-all plan
+else
+	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt plan
+endif
+
+apply:
+	@echo "Applying Terraform changes for $(ENVIRONMENT) environment..."
+ifeq ($(MODULE),)
+	cd $(ENVIRONMENT_PATH) && terragrunt run-all apply
+else
+	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt apply
+endif
+
+destroy:
+	@echo "Destroying infrastructure for $(ENVIRONMENT) environment..."
+ifeq ($(MODULE),)
+	cd $(ENVIRONMENT_PATH) && terragrunt run-all destroy
+else
+	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt destroy
+endif
+
+all-plan:
+	@echo "╔═══════════════════════════════════════════════════════════════════════╗"
+	@echo "║  Planning all modules in dependency order for $(ENVIRONMENT) environment"
+	@echo "╚═══════════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "Modules to plan:"
+	@echo "  1. namespace   → Kubernetes namespace and RBAC for Jenkins"
+	@echo "  2. storage     → NFS PV/PVC for Jenkins controller"
+	@echo "  3. application → Jenkins Helm chart with JCasC"
+	@echo ""
+	cd $(ENVIRONMENT_PATH) && terragrunt run-all plan
+
+all-apply:
+	@echo "╔═══════════════════════════════════════════════════════════════════════╗"
+	@echo "║  Applying all modules in dependency order for $(ENVIRONMENT) environment"
+	@echo "╚═══════════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "Deployment order:"
+	@echo "  1. namespace   → Kubernetes namespace and RBAC for Jenkins"
+	@echo "  2. storage     → NFS PV/PVC for Jenkins controller"
+	@echo "  3. application → Jenkins Helm chart with JCasC"
+	@echo ""
+	cd $(ENVIRONMENT_PATH) && terragrunt run-all apply --terragrunt-non-interactive
+
+run-all: all-apply
+	@echo "Note: 'run-all' is deprecated. Use 'all-apply' instead."
+
+fmt:
+	@echo "Formatting Terraform code..."
+	cd src && terraform fmt -recursive
+
+validate:
+	@echo "Validating Terraform configuration for $(ENVIRONMENT) environment..."
+ifeq ($(MODULE),)
+	cd $(ENVIRONMENT_PATH) && terragrunt run-all validate
+else
+	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt validate
+endif
+
+clean:
+	@echo "Cleaning Terragrunt cache directories..."
+	find $(ENVIRONMENT_PATH) -type d -name ".terragrunt-cache" -exec rm -rf {} + 2>/dev/null || true
+	@echo "Cache cleaned."
+
+status:
+	@echo "=== Namespace ==="
+	@kubectl get namespace prod-jenkins
 	@echo ""
 	@echo "=== Pods ==="
-	@kubectl get pods -n devops-tools
+	@kubectl get pods -n prod-jenkins
 	@echo ""
-	@echo "=== Service ==="
-	@kubectl get service jenkins-service -n devops-tools
+	@echo "=== Services ==="
+	@kubectl get services -n prod-jenkins
 	@echo ""
 	@echo "=== Ingress ==="
-	@kubectl get ingress jenkins-ingress -n devops-tools
+	@kubectl get ingress -n prod-jenkins
 	@echo ""
 	@echo "=== PV & PVC ==="
-	@kubectl get pv,pvc -n devops-tools
-
-debug: ## Show detailed debug information
-	@echo "=== Pod Details ==="
-	@kubectl describe pod -l app=jenkins-server -n devops-tools
+	@kubectl get pv,pvc -n prod-jenkins
 	@echo ""
-	@echo "=== Recent Events ==="
-	@kubectl get events -n devops-tools --sort-by='.lastTimestamp' | tail -20
+	@echo "=== Helm Release ==="
+	@helm status jenkins -n prod-jenkins 2>/dev/null || echo "Helm release not found"
 
-port-forward: ## Forward Jenkins port to localhost:8080
-	@echo "Forwarding Jenkins to http://localhost:8080"
-	@kubectl port-forward -n devops-tools service/jenkins-service 8080:8080
+logs:
+	@kubectl logs -f -l app.kubernetes.io/name=jenkins -n prod-jenkins --all-containers

@@ -1,3 +1,6 @@
+# Terragrunt cache
+.terragrunt-cache/
+
 # Terraform state files
 *.tfstate
 *.tfstate.*
@@ -10,6 +13,7 @@
 # Variable files (may contain sensitive data)
 terraform.tfvars
 *.auto.tfvars
+!*.tfvars.example
 
 # Crash log files
 crash.log
@@ -24,3 +28,14 @@ override.tf.json
 # CLI configuration files
 .terraformrc
 terraform.rc
+
+# Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

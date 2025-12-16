@@ -1,0 +1,10 @@
+---
+- name: Mount NFS shares for k3s persistent storage
+  ansible.posix.mount:
+    src: "{{ item.server }}:{{ item.remote_path }}"
+    path: "{{ item.local_path }}"
+    opts: "{{ item.options | default('rw,sync') }}"
+    state: mounted
+    fstype: nfs
+  loop: "{{ k3s_nfs_mounts }}"
+  when: k3s_nfs_mounts is defined

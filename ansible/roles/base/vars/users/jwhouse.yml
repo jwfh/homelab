@@ -6,6 +6,7 @@ hosts:
   - all
 groups:
   - '{{ wheel }}'
+  - docker
 preferences:
   Darwin:
     homebrew_casks:

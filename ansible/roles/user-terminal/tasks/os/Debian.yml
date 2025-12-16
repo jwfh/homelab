@@ -1,0 +1,107 @@
+---
+- name: Install packages for adding apt repositories
+  ansible.builtin.package:
+    name: '{{ item }}'
+    state: present
+  become: '{{ package_manager_become }}'
+  loop:
+    - ca-certificates
+    - gnupg
+    - curl
+
+- name: Add Helm GPG key
+  ansible.builtin.get_url:
+    url: https://packages.buildkite.com/helm-linux/helm-debian/gpgkey
+    dest: /usr/share/keyrings/helm.asc
+    mode: '0644'
+  become: '{{ package_manager_become }}'
+
+- name: Dearmor Helm GPG key
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /usr/share/keyrings/helm.gpg /usr/share/keyrings/helm.asc
+    creates: /usr/share/keyrings/helm.gpg
+  become: '{{ package_manager_become }}'
+
+- name: Add Helm apt repository (DEB822 format)
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/helm.sources
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: https://packages.buildkite.com/helm-linux/helm-debian/any/
+      Suites: any
+      Components: main
+      Signed-By: /usr/share/keyrings/helm.gpg
+  become: '{{ package_manager_become }}'
+  register: helm_repo
+
+- name: Ensure apt keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: '{{ package_manager_become }}'
+
+- name: Remove old repository configurations
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/vscode.list
+    - /etc/apt/sources.list.d/helm-stable-debian.list
+    - /etc/apt/keyrings/microsoft-archive-keyring.asc
+    - /etc/apt/keyrings/microsoft-archive-keyring.gpg
+  become: '{{ package_manager_become }}'
+
+- name: Add Microsoft GPG key
+  ansible.builtin.get_url:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    dest: /usr/share/keyrings/microsoft.asc
+    mode: '0644'
+  become: '{{ package_manager_become }}'
+
+- name: Dearmor Microsoft GPG key
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /usr/share/keyrings/microsoft.gpg /usr/share/keyrings/microsoft.asc
+    creates: /usr/share/keyrings/microsoft.gpg
+  become: '{{ package_manager_become }}'
+
+- name: Add VS Code apt repository (DEB822 format)
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/vscode.sources
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: https://packages.microsoft.com/repos/code
+      Suites: stable
+      Components: main
+      Architectures: amd64 arm64 armhf
+      Signed-By: /usr/share/keyrings/microsoft.gpg
+  become: '{{ package_manager_become }}'
+  register: vscode_repo
+
+- name: Copy tenv repository setup script
+  ansible.builtin.copy:
+    src: debian/tofu/setup-tenv-repo.sh
+    dest: /tmp/setup-tenv-repo.sh
+    mode: '0755'
+  become: '{{ package_manager_become }}'
+
+- name: Setup tenv repository
+  ansible.builtin.command:
+    cmd: /tmp/setup-tenv-repo.sh
+    creates: /etc/apt/sources.list.d/tofuutils-tenv.list
+  become: '{{ package_manager_become }}'
+  register: tenv_repo
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+  become: '{{ package_manager_become }}'
+  when: helm_repo.changed or vscode_repo.changed or tenv_repo.changed
+
+- name: Install user terminal base packages
+  package:
+    name: '{{ debian_user_terminal_base_packages }}'
+    state: latest
+  become: '{{ package_manager_become }}'

@@ -2,11 +2,7 @@ locals {
   domain_name = module.configuration.configuration.app.domain_name
   secret_key  = module.configuration.configuration.app.secret_key
 
-  ingress_class_name = module.configuration.configuration.app.ingress.class_name
-
-  bootstrap_email    = module.configuration.configuration.bootstrap.email
-  bootstrap_password = module.configuration.configuration.bootstrap.password
-  bootstrap_token    = module.configuration.configuration.bootstrap.token
+  ingress_class_name = module.configuration.configuration.ingress.class_name
 
   email_from     = module.configuration.configuration.email.from
   email_host     = module.configuration.configuration.email.host

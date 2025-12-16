@@ -73,12 +73,31 @@
       loop_control:
         label: "{{ item.username }}"
     
+    - name: Get existing system groups
+      getent:
+        database: group
+      register: system_groups
+    
+    - name: Filter user groups to only existing groups
+      set_fact:
+        users_with_filtered_groups: "{{ users_with_filtered_groups | default([]) + [item | combine({'filtered_groups': (item.groups | default([])) | select('in', system_groups.ansible_facts.getent_group.keys()) | list})] }}"
+      loop: "{{ users_with_resolved_shells }}"
+      loop_control:
+        label: "{{ item.username }}"
+    
+    - name: Debug filtered groups
+      debug:
+        msg: "User: {{ item.username }}, Requested groups: {{ item.groups | default([]) }}, Filtered groups: {{ item.filtered_groups }}"
+      loop: "{{ users_with_filtered_groups }}"
+      loop_control:
+        label: "{{ item.username }}"
+    
     - name: Create user primary group
       group:
         name: '{{ item.username }}'
         state: present
         gid: '{{ item.uid }}'
-      loop: '{{ users_with_resolved_shells }}'
+      loop: '{{ users_with_filtered_groups }}'
       loop_control:
         label: '{{ item.username }}'
     
@@ -88,13 +107,13 @@
         comment: '{{ item.fullname }}'
         shell: '{{ item.resolved_shell }}'
         group: '{{ item.username }}'
-        groups: '{{ item.groups | default([]) }}'
+        groups: '{{ item.filtered_groups }}'
         append: false
         home: '{{ item.home | default("/home/" + item.username) }}'
         create_home: yes
         uid: '{{ item.uid }}'
         password: '*************'
-      loop: '{{ users_with_resolved_shells }}'
+      loop: '{{ users_with_filtered_groups }}'
       loop_control:
         label: '{{ item.username }}'
     - name: Set home directory permissions
@@ -104,7 +123,7 @@
         mode: '0700'
         owner: '{{ item.username }}'
         group: '{{ item.username }}'
-      loop: '{{ users_with_resolved_shells }}'
+      loop: '{{ users_with_filtered_groups }}'
       loop_control:
         label: '{{ item.username }}'
     - name: Find public keys for each user

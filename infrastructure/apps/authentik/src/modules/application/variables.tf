@@ -3,10 +3,14 @@ variable "environment" {
   type        = string
 }
 
+variable "namespace" {
+  description = "Kubernetes namespace"
+  type        = string
+}
+
 variable "chart_version" {
   description = "Version of the Authentik Helm chart"
   type        = string
-  default     = "2024.10.1"
 }
 
 variable "error_reporting_enabled" {
@@ -33,4 +37,18 @@ variable "media_pvc_name" {
 variable "templates_pvc_name" {
   description = "Name of the existing PVC for templates data"
   type        = string
+}
+
+variable "tls_cert" {
+  description = "TLS certificate (PEM format). If empty, a self-signed cert will be generated."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "tls_key" {
+  description = "TLS private key (PEM format). If empty, a self-signed cert will be generated."
+  type        = string
+  default     = null
+  sensitive   = true
 }

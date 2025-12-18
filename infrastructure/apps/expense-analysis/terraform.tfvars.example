@@ -1,0 +1,31 @@
+# Copy this file to terraform.tfvars and fill in your values
+
+# Kubernetes Configuration
+kubeconfig_path = "~/.kube/config"
+namespace       = "expense-analysis"
+
+# AWS Configuration
+aws_region = "us-east-1"
+
+# Docker Hub Authentication
+dockerhub_username = "your-dockerhub-username"
+dockerhub_password = "your-dockerhub-password-or-token"
+
+# AWS SSM Parameter Store Paths (ensure these exist with SecureString type)
+ssm_db_password_path      = "/expense-analysis/database/password"
+ssm_flask_secret_key_path = "/expense-analysis/flask/secret-key"
+
+# NFS Configuration
+nfs_server        = "ritchie"
+nfs_uploads_path  = "/mnt/default/services/expense-app/uploads"
+nfs_postgres_path = "/mnt/default/services/expense-app/postgres"
+uploads_storage_size  = "32Gi"
+postgres_storage_size = "50Gi"
+
+# Application Configuration
+app_version  = "1.0.0"  # Change this to deploy different versions
+docker_image = "jwhouse/private"
+app_replicas = 2
+
+# Domain Configuration
+domain_name = "expenses.jwfh.ca"

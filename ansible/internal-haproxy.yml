@@ -64,6 +64,8 @@
         mode: http
         balance: roundrobin
         port: 443
+        ssl: true
+        check_sni: true
         domain_name: unifi.jwfh.ca
         servers:
           - unifi.lemarchant.jacobhouse.ca
@@ -81,6 +83,24 @@
         domain_name: go-admin.jwfh.ca
         servers:
           - impulse.lemarchant.jacobhouse.ca
+      ollama:
+        mode: http
+        balance: sticky
+        port: 30996
+        ssl: true
+        check_sni: true
+        domain_name: ollama.jwfh.ca
+        servers:
+          - k8s.lemarchant.jacobhouse.ca
+      openwebui:
+        mode: http
+        balance: sticky
+        port: 30996
+        ssl: true
+        check_sni: true
+        domain_name: openwebui.jwfh.ca
+        servers:
+          - k8s.lemarchant.jacobhouse.ca
       expense_analysis:
         mode: http
         balance: sticky

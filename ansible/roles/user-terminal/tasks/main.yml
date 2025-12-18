@@ -4,6 +4,8 @@
     name: '{{ user_terminal_base_packages + user_terminal_packages }}'
     state: latest
   become: '{{ package_manager_become }}'
+- name: Include OS specific configuration
+  include_tasks: 'os/{{ ansible_os_family }}.yml'
 - name: Personalize user experience for {{ owner | default("owner") }} on {{ ansible_os_family }}
   include_tasks: 'personalize/{{ ansible_os_family }}.yml'
   when:

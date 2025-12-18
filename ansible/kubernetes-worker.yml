@@ -5,6 +5,12 @@
   vars_files:
     - inventory/vault.yml
     - "inventory/host_variables/{{ ansible_host }}.yml"
+  vars:
+    nfs_mounts:
+      - server: ritchie
+        remote_path: /mnt/default/services
+        local_path: /mnt/default/services
+        options: rw,sync
   roles:
     - base
     - k3s-worker

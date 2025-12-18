@@ -1,0 +1,25 @@
+# Example Terraform variables file
+# Copy this file to terraform.tfvars and customize for your environment
+
+# NFS Server Configuration
+nfs_server            = "10.174.12.12"
+nfs_postgres_path     = "/mnt/pool0/kubernetes/authentik/postgres"
+nfs_media_path        = "/mnt/pool0/kubernetes/authentik/media"
+nfs_redis_path        = "/mnt/pool0/kubernetes/authentik/redis"
+
+# Storage Sizes
+postgres_storage_size = "10Gi"
+media_storage_size    = "5Gi"
+redis_storage_size    = "2Gi"
+
+# Authentik Configuration
+chart_version = "2024.10.1"
+
+# Ingress Configuration
+ingress_enabled    = true
+ingress_host       = "auth.example.com"
+ingress_class_name = "traefik"
+
+# Sensitive values are read from AWS SSM Parameter Store
+# Parameter: /authentik/configuration
+# Required keys: secret_key, db_password, bootstrap_email, bootstrap_password, bootstrap_token

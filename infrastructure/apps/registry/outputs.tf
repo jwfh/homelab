@@ -41,9 +41,9 @@ output "internal_registry_url" {
 output "nfs_storage_info" {
   description = "Information about NFS storage configuration"
   value = {
-    server = var.nfs_server
-    path   = var.nfs_path
-    pv_name = kubernetes_persistent_volume.registry_storage.metadata[0].name
+    server   = var.nfs_server
+    path     = var.nfs_path
+    pv_name  = kubernetes_persistent_volume.registry_storage.metadata[0].name
     pvc_name = kubernetes_persistent_volume_claim.registry_storage.metadata[0].name
   }
 }

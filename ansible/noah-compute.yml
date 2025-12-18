@@ -1,0 +1,10 @@
+---
+- name: Compute node
+  hosts: noah_compute
+  become: true
+  vars_files:
+    - "inventory/host_variables/{{ ansible_host }}.yml"
+  roles:
+    - base
+    - user-terminal
+    - generic-compute

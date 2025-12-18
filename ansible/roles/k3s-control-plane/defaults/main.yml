@@ -59,6 +59,10 @@ k3s_node_taints: []
 k3s_server_args: []
 # - "--kube-apiserver-arg=feature-gates=SomeFeature=true"
 
+k3s_nfs_client_packages:
+  - nfs-common  # Debian/Ubuntu
+  # - nfs-utils  # RHEL/CentOS
+
 # NFS mounts for persistent storage (if needed)
 k3s_nfs_mounts: []
 # - server: 192.168.1.10

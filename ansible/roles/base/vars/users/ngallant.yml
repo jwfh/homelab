@@ -1,8 +1,11 @@
 username: ngallant
 fullname: Noah Gallant
 uid: 213815
-shell: fish
+shell: bash
 hosts:
+  - tailscale-noah
   - granite
+  - lime
 groups:
   - '{{ wheel }}'
+  - docker

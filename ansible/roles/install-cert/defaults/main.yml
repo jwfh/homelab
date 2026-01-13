@@ -1,7 +1,7 @@
 certificate_cn: '{{ ansible_site }}.jacobhouse.ca'
-certificate_server: ritchie.lemarchant.jacobhouse.ca
+certificate_server: tiny.lemarchant.jacobhouse.ca
 certificate_server_ssh_fingerprints:
-  - ritchie.lemarchant.jacobhouse.ca ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIliNnO1INcGBBdxX+EH+KXWJZLUCE/24MiI3B5l/1No
-  - ritchie.lemarchant.jacobhouse.ca ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKKRxFEZwA7UDdsZuCCUtY1SUWz39xuj5HNrYRNeqqeQZuxt9WxdMnQbE8CBoT0FWL9yyUFOnpO8cvxbN8VrVKM=
-certificates_prefix: /mnt/default/services
+  - tiny.lemarchant.jacobhouse.ca ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBNPTpTliUksRtM98tvdCmoC8BiMPTNADaUX0ves5gX6hpxABHaEBAl78wVr3nDO93+Y7DYHukYJTK9ySZg0WSSA= 
+  - tiny.lemarchant.jacobhouse.ca ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH91NVbSg1F653TB0mihByoEhUHfdzxKieuAI+AbvONq 
+certificates_prefix: /mnt/st1/services
 certificates_local_dir: /usr/local/share/certificates

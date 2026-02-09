@@ -1,97 +1,67 @@
-# Traefik Ingress Controller using Helm
-resource "helm_release" "traefik" {
-  name       = "expense-analysis-traefik"
-  repository = "https://traefik.github.io/charts"
-  chart      = "traefik"
-  version    = "26.0.0"
-  namespace  = var.namespace
+module "configuration" {
+  source = "../../../../../modules/configuration"
 
-  values = [
-    yamlencode({
-      deployment = {
-        replicas = 1
-      }
+  app_name    = "expense-analysis"
+  environment = var.environment
+}
 
-      # Use a specific IngressClass name to avoid conflicts
-      ingressClass = {
-        enabled        = true
-        isDefaultClass = false
-        name           = "traefik-${var.namespace}"
-      }
+locals {
+  domain_name        = module.configuration.configuration.app.domain_name
+  ingress_class_name = module.configuration.configuration.ingress.class_name
+}
 
-      service = {
-        type = "NodePort"
-      }
+# Kubernetes Ingress using shared Traefik
+resource "kubernetes_ingress_v1" "expense_analysis" {
+  metadata {
+    name      = "expense-analysis"
+    namespace = var.namespace
+    annotations = {
+      "traefik.ingress.kubernetes.io/router.entrypoints" = "websecure"
+      "traefik.ingress.kubernetes.io/router.tls"         = "true"
+    }
+  }
 
-      ports = {
-        websecure = {
-          port        = 443
-          exposedPort = 443
-          tls = {
-            enabled = true
+  spec {
+    ingress_class_name = local.ingress_class_name
+
+    tls {
+      hosts       = [local.domain_name]
+      secret_name = "expense-analysis-tls"
+    }
+
+    rule {
+      host = local.domain_name
+
+      http {
+        path {
+          path      = "/"
+          path_type = "Prefix"
+
+          backend {
+            service {
+              name = "expense-analysis-backend"
+              port {
+                number = 8080
+              }
+            }
           }
         }
       }
-
-      ingressRoute = {
-        dashboard = {
-          enabled = false # Disable dashboard for production
-        }
-      }
-
-      logs = {
-        general = {
-          level = "INFO"
-        }
-        access = {
-          enabled = true
-        }
-      }
-
-      resources = {
-        requests = {
-          cpu    = "100m"
-          memory = "128Mi"
-        }
-        limits = {
-          cpu    = "500m"
-          memory = "512Mi"
-        }
-      }
-    })
-  ]
+    }
+  }
 }
 
-# Self-signed certificate for TLS
-resource "kubernetes_secret" "tls_cert" {
-  metadata {
-    name      = "expense-analysis-tls"
-    namespace = var.namespace
-  }
-
-  type = "kubernetes.io/tls"
-
-  data = {
-    "tls.crt" = var.tls_cert != "" ? var.tls_cert : tls_self_signed_cert.default[0].cert_pem
-    "tls.key" = var.tls_key != "" ? var.tls_key : tls_private_key.default[0].private_key_pem
-  }
-
-  depends_on = [helm_release.traefik]
-}
-
-# Generate self-signed certificate if not provided
+# Self-signed certificate for TLS (HAProxy terminates TLS, but we need a cert for the ingress)
 resource "tls_private_key" "default" {
-  count     = var.tls_cert == "" ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 2048
 }
 
 resource "tls_self_signed_cert" "default" {
-  count           = var.tls_cert == "" ? 1 : 0
-  private_key_pem = tls_private_key.default[0].private_key_pem
+  private_key_pem = tls_private_key.default.private_key_pem
 
   subject {
-    common_name  = "expenses.jwfh.ca"
+    common_name  = local.domain_name
     organization = "Expense Analysis"
   }
 
@@ -103,5 +73,20 @@ resource "tls_self_signed_cert" "default" {
     "server_auth",
   ]
 
-  dns_names = ["expenses.jwfh.ca"]
+  dns_names = [local.domain_name]
 }
+
+resource "kubernetes_secret" "tls_cert" {
+  metadata {
+    name      = "expense-analysis-tls"
+    namespace = var.namespace
+  }
+
+  type = "kubernetes.io/tls"
+
+  data = {
+    "tls.crt" = tls_self_signed_cert.default.cert_pem
+    "tls.key" = tls_private_key.default.private_key_pem
+  }
+}
+

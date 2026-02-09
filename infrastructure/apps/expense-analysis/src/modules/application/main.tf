@@ -185,7 +185,7 @@ resource "kubernetes_deployment" "backend" {
 
           env {
             name  = "LOCAL_STORAGE_PATH"
-            value = "/app/data/uploads"
+            value = "/app/data"
           }
 
           volume_mount {
@@ -274,92 +274,4 @@ resource "kubernetes_service" "backend" {
 
     type = "ClusterIP"
   }
-}
-
-# Ingress Route for Traefik
-resource "kubernetes_manifest" "ingress_route" {
-  manifest = {
-    apiVersion = "traefik.containo.us/v1alpha1"
-    kind       = "IngressRoute"
-    metadata = {
-      name      = "expense-analysis"
-      namespace = var.namespace
-    }
-    spec = {
-      entryPoints = ["websecure"]
-      routes = [
-        {
-          match = "Host(`${local.app_domain_name}`)"
-          kind  = "Rule"
-          services = [
-            {
-              name = kubernetes_service.backend.metadata[0].name
-              port = 8080
-            }
-          ]
-        }
-      ]
-      tls = {
-        secretName = "expense-analysis-tls"
-      }
-    }
-  }
-
-  depends_on = [
-    kubernetes_service.backend,
-    var.traefik
-  ]
-}
-
-# HTTP to HTTPS redirect
-resource "kubernetes_manifest" "ingress_route_redirect" {
-  manifest = {
-    apiVersion = "traefik.containo.us/v1alpha1"
-    kind       = "IngressRoute"
-    metadata = {
-      name      = "expense-analysis-redirect"
-      namespace = var.namespace
-    }
-    spec = {
-      entryPoints = ["web"]
-      routes = [
-        {
-          match = "Host(`${local.app_domain_name}`)"
-          kind  = "Rule"
-          services = [
-            {
-              name = kubernetes_service.backend.metadata[0].name
-              port = 8080
-            }
-          ]
-          middlewares = [
-            {
-              name      = kubernetes_manifest.redirect_middleware.manifest.metadata.name
-              namespace = var.namespace
-            }
-          ]
-        }
-      ]
-    }
-  }
-}
-
-# Middleware for HTTP to HTTPS redirect
-resource "kubernetes_manifest" "redirect_middleware" {
-  manifest = {
-    apiVersion = "traefik.containo.us/v1alpha1"
-    kind       = "Middleware"
-    metadata = {
-      name      = "redirect-https"
-      namespace = var.namespace
-    }
-    spec = {
-      redirectScheme = {
-        scheme    = "https"
-        permanent = true
-      }
-    }
-  }
-
-  depends_on = [var.traefik]
 }

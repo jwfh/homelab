@@ -11,16 +11,16 @@ dependency "namespace" {
   config_path = "../namespace"
 }
 
-dependency "ingress" {
-  config_path = "../ingress"
-}
-
 dependency "storage" {
   config_path = "../storage"
 }
 
 dependency "database" {
   config_path = "../database"
+}
+
+dependency "ingress" {
+  config_path = "../ingress"
 }
 
 inputs = {
@@ -34,5 +34,4 @@ inputs = {
   database_port = dependency.database.outputs.service_port
   data_pvc_name = dependency.storage.outputs.data_pvc_name
   secrets_name = dependency.namespace.outputs.secrets_name
-  traefik = dependency.ingress.outputs.traefik
 }

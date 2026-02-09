@@ -1,4 +1,4 @@
-# Ingress (Traefik) - must run before application
+# Ingress - uses shared cluster Traefik
 include "root" {
   path = find_in_parent_folders()
 }
@@ -12,6 +12,6 @@ dependency "namespace" {
 }
 
 inputs = {
-  environment  = "dev"
-  namespace = dependency.namespace.outputs.namespace
+  environment = "dev"
+  namespace   = dependency.namespace.outputs.namespace
 }

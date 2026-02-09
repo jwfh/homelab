@@ -104,21 +104,21 @@
       expense_analysis:
         mode: http
         balance: sticky
-        port: 31433
+        port: 30996
         ssl: true
         check_sni: true
         domain_name: expenses.jwfh.ca
         servers:
-          - k8s12-001.lemarchant.jacobhouse.ca
+          - k8s.lemarchant.jacobhouse.ca
       expense_analysis_dev:
         mode: http
         balance: sticky
-        port: 31433
+        port: 30996
         ssl: true
         check_sni: true
         domain_name: expenses-dev.jwfh.ca
         servers:
-          - k8s12-001.lemarchant.jacobhouse.ca
+          - k8s.lemarchant.jacobhouse.ca
   roles:
     - base
     - haproxy

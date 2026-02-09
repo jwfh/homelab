@@ -43,8 +43,3 @@ variable "secrets_name" {
   description = "Name of the secrets resource"
   type        = string
 }
-
-variable "traefik" {
-  type    = any
-  default = null
-}

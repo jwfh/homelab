@@ -161,7 +161,7 @@ resource "kubernetes_deployment" "backend" {
           }
 
           dynamic "env" {
-            for_each = local.app_auth_method == "oidc" ? ["client_id", "client_secret", "discovery_url", "redirect_uri", "provider_name", "provider_url"] : []
+            for_each = local.app_auth_method == "oidc" ? ["client_id", "client_secret", "discovery_url", "redirect_uri", "provider_name", "provider_url", "admin_group", "groups_claim"] : []
             content {
               name  = "OIDC_${upper(env.value)}"
               value = sensitive(local.oidc_configuration[env.value])

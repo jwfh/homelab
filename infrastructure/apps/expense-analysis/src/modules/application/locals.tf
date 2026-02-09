@@ -9,6 +9,8 @@ locals {
     redirect_uri  = module.configuration.configuration.sso.oidc_redirect_uri
     provider_name = module.configuration.configuration.sso.oidc_provider_name
     provider_url  = module.configuration.configuration.sso.oidc_provider_url
+    admin_group   = module.configuration.configuration.sso.oidc_admin_group
+    groups_claim  = module.configuration.configuration.sso.oidc_groups_claim
   } : null
 
   db_name = module.configuration.configuration.database.name

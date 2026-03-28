@@ -13,8 +13,18 @@ variable "chart_version" {
   type        = string
 }
 
+variable "openwebui_chart_version" {
+  description = "Open WebUI Helm chart version"
+  type        = string
+}
+
 variable "models_pvc_name" {
   description = "Name of the PVC for Ollama models storage"
+  type        = string
+}
+
+variable "openwebui_pvc_name" {
+  description = "Name of the PVC for Open WebUI data storage"
   type        = string
 }
 

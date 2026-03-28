@@ -15,5 +15,6 @@ inputs = {
   environment = "prod"
   namespace   = dependency.namespace.outputs.namespace
 
-  models_storage_size = "64Gi"
+  models_storage_size   = "64Gi"
+  openwebui_storage_size = "10Gi"
 }

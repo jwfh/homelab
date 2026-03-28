@@ -75,7 +75,7 @@ help:
 init:
 	@echo "Initializing Terragrunt for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all init
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all init
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt init
 endif
@@ -83,7 +83,7 @@ endif
 plan:
 	@echo "Planning Terraform changes for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all plan
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all plan
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt plan
 endif
@@ -91,7 +91,7 @@ endif
 apply:
 	@echo "Applying Terraform changes for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all apply
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all apply
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt apply
 endif
@@ -99,7 +99,7 @@ endif
 destroy:
 	@echo "Destroying infrastructure for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all destroy
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all destroy
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt destroy
 endif
@@ -114,7 +114,7 @@ all-plan:
 	@echo "  2. storage      → NFS PV/PVC for Models"
 	@echo "  3. application  → Helm chart deployment"
 	@echo ""
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all plan
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all plan
 
 all-apply:
 	@echo "╔═══════════════════════════════════════════════════════════════════════╗"
@@ -126,7 +126,7 @@ all-apply:
 	@echo "  2. storage      → NFS PV/PVC for Models"
 	@echo "  3. application  → Helm chart deployment"
 	@echo ""
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all apply --terragrunt-non-interactive
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all apply --non-interactive
 
 run-all: all-apply
 	@echo "Note: 'run-all' is deprecated. Use 'all-apply' instead."
@@ -138,7 +138,7 @@ fmt:
 validate:
 	@echo "Validating Terraform configuration for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all validate
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all validate
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt validate
 endif

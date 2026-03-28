@@ -7,12 +7,18 @@ This directory contains Terraform/Terragrunt infrastructure-as-code for deployin
 Ollama is deployed with the following components:
 
 - **Namespace**: Dedicated Kubernetes namespace (`prod-ollama`)
-- **Storage**: NFS-backed persistent volume for models (64Gi)
+- **Storage**: NFS-backed persistent volumes:
+  - Models storage for Ollama (64Gi)
+  - Data storage for Open WebUI (10Gi)
 - **Ollama**: Deployed via Helm chart with:
   - CPU-only mode (no GPU)
   - Traefik ingress with TLS
   - Persistent storage for downloaded models
   - Configuration from AWS SSM Parameter Store
+- **Open WebUI**: Web interface for Ollama with:
+  - Connected to Ollama backend
+  - Traefik ingress with TLS
+  - Persistent storage for user data
 
 ## Architecture
 
@@ -20,20 +26,25 @@ Ollama is deployed with the following components:
 prod-ollama namespace
 ├── Ollama Server (Deployment)
 │   └── Models PVC → NFS PV (64Gi)
-└── Ingress (Traefik)
-    └── TLS Certificate
+├── Open WebUI (Deployment)
+│   └── Data PVC → NFS PV (10Gi)
+└── Ingresses (Traefik)
+    ├── ollama.jwfh.ca → Ollama API
+    └── openwebui.jwfh.ca → Open WebUI
 ```
 
 ## Prerequisites
 
 1. **Kubernetes Cluster**: K3s cluster with Traefik ingress controller
-2. **NFS Server**: NFS storage with the following directory:
+2. **NFS Server**: NFS storage with the following directories:
    - `/mnt/pool0/kubernetes/ollama/models`
+   - `/mnt/pool0/kubernetes/ollama/openwebui`
 3. **AWS SSM Parameter**: `/apps/prod/ollama/configuration` with the following structure:
    ```json
    {
      "app": {
        "domain_name": "ollama.jwfh.ca",
+       "openwebui_domain": "openwebui.jwfh.ca",
        "models": ["llama3.2:3b"]
      },
      "ingress": {
@@ -41,7 +52,8 @@ prod-ollama namespace
      },
      "nfs": {
        "server": "10.x.x.x",
-       "models_path": "/mnt/pool0/kubernetes/ollama/models"
+       "models_path": "/mnt/pool0/kubernetes/ollama/models",
+       "openwebui_path": "/mnt/pool0/kubernetes/ollama/openwebui"
      }
    }
    ```

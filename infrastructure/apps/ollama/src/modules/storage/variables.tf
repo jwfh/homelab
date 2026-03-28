@@ -13,3 +13,9 @@ variable "models_storage_size" {
   type        = string
   default     = "64Gi"
 }
+
+variable "openwebui_storage_size" {
+  description = "Storage size for Open WebUI data PV/PVC"
+  type        = string
+  default     = "2Gi"
+}

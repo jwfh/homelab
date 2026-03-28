@@ -21,4 +21,8 @@ inputs = {
 
   models_pvc_name = dependency.storage.outputs.models_pvc_name
   memory_limit    = "8Gi"
+
+  # Open WebUI
+  openwebui_chart_version = "8.19.0"
+  openwebui_pvc_name      = dependency.storage.outputs.openwebui_pvc_name
 }

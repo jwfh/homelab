@@ -28,10 +28,12 @@
       jellyfin:
         mode: http
         balance: sticky
-        port: 30013
+        port: 30996
+        ssl: true
+        check_sni: true
         domain_name: jellyfin.jwfh.ca
         servers:
-          - tiny.lemarchant.jacobhouse.ca
+          - k8s.lemarchant.jacobhouse.ca
       immich:
         mode: http
         balance: sticky
@@ -68,7 +70,7 @@
         check_sni: true
         domain_name: unifi.jwfh.ca
         servers:
-          - unifi.lemarchant.jacobhouse.ca
+          - cloud-key.lemarchant.jacobhouse.ca
       shlink:
         mode: http
         balance: roundrobin
@@ -117,6 +119,15 @@
         ssl: true
         check_sni: true
         domain_name: expenses-dev.jwfh.ca
+        servers:
+          - k8s.lemarchant.jacobhouse.ca
+      jellyfin_dev:
+        mode: http
+        balance: sticky
+        port: 30996
+        ssl: true
+        check_sni: true
+        domain_name: jellyfin-dev.jwfh.ca
         servers:
           - k8s.lemarchant.jacobhouse.ca
   roles:

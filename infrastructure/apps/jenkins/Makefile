@@ -40,7 +40,7 @@ help:
 	@echo ""
 	@echo "ENVIRONMENT VALUES"
 	@echo "━━━━━━━━━━━━━━━━━━"
-	@echo "  prod (default)"
+	@echo "  dev, prod (default)"
 	@echo ""
 	@echo "TARGETS"
 	@echo "━━━━━━━"
@@ -80,7 +80,7 @@ help:
 init:
 	@echo "Initializing Terragrunt for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all init
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all init
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt init
 endif
@@ -88,7 +88,7 @@ endif
 plan:
 	@echo "Planning Terraform changes for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all plan
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all plan
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt plan
 endif
@@ -96,7 +96,7 @@ endif
 apply:
 	@echo "Applying Terraform changes for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all apply
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all apply
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt apply
 endif
@@ -104,7 +104,7 @@ endif
 destroy:
 	@echo "Destroying infrastructure for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all destroy
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all destroy
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt destroy
 endif
@@ -119,7 +119,7 @@ all-plan:
 	@echo "  2. storage     → NFS PV/PVC for Jenkins controller"
 	@echo "  3. application → Jenkins Helm chart with JCasC"
 	@echo ""
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all plan
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all plan
 
 all-apply:
 	@echo "╔═══════════════════════════════════════════════════════════════════════╗"
@@ -131,7 +131,7 @@ all-apply:
 	@echo "  2. storage     → NFS PV/PVC for Jenkins controller"
 	@echo "  3. application → Jenkins Helm chart with JCasC"
 	@echo ""
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all apply --terragrunt-non-interactive
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all apply --non-interactive
 
 run-all: all-apply
 	@echo "Note: 'run-all' is deprecated. Use 'all-apply' instead."
@@ -143,7 +143,7 @@ fmt:
 validate:
 	@echo "Validating Terraform configuration for $(ENVIRONMENT) environment..."
 ifeq ($(MODULE),)
-	cd $(ENVIRONMENT_PATH) && terragrunt run-all validate
+	cd $(ENVIRONMENT_PATH) && terragrunt run --all validate
 else
 	cd $(ENVIRONMENT_PATH)/$(MODULE) && terragrunt validate
 endif
@@ -155,22 +155,22 @@ clean:
 
 status:
 	@echo "=== Namespace ==="
-	@kubectl get namespace prod-jenkins
+	@kubectl get namespace $(ENVIRONMENT)-jenkins
 	@echo ""
 	@echo "=== Pods ==="
-	@kubectl get pods -n prod-jenkins
+	@kubectl get pods -n $(ENVIRONMENT)-jenkins
 	@echo ""
 	@echo "=== Services ==="
-	@kubectl get services -n prod-jenkins
+	@kubectl get services -n $(ENVIRONMENT)-jenkins
 	@echo ""
 	@echo "=== Ingress ==="
-	@kubectl get ingress -n prod-jenkins
+	@kubectl get ingress -n $(ENVIRONMENT)-jenkins
 	@echo ""
 	@echo "=== PV & PVC ==="
-	@kubectl get pv,pvc -n prod-jenkins
+	@kubectl get pv,pvc -n $(ENVIRONMENT)-jenkins
 	@echo ""
 	@echo "=== Helm Release ==="
-	@helm status jenkins -n prod-jenkins 2>/dev/null || echo "Helm release not found"
+	@helm status jenkins -n $(ENVIRONMENT)-jenkins 2>/dev/null || echo "Helm release not found"
 
 logs:
-	@kubectl logs -f -l app.kubernetes.io/name=jenkins -n prod-jenkins --all-containers
+	@kubectl logs -f -l app.kubernetes.io/name=jenkins -n $(ENVIRONMENT)-jenkins --all-containers

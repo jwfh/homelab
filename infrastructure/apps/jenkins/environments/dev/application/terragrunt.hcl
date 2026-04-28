@@ -11,7 +11,7 @@ dependency "namespace" {
   config_path = "../namespace"
 
   mock_outputs = {
-    namespace            = "prod-jenkins"
+    namespace            = "dev-jenkins"
     service_account_name = "jenkins-admin"
   }
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
@@ -27,7 +27,7 @@ dependency "storage" {
 }
 
 inputs = {
-  environment          = "prod"
+  environment          = "dev"
   namespace            = dependency.namespace.outputs.namespace
   service_account_name = dependency.namespace.outputs.service_account_name
   pvc_name             = dependency.storage.outputs.pvc_name

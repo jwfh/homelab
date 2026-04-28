@@ -4,7 +4,6 @@ locals {
       systemMessage: |
         Jenkins CI/CD Server
         Configured automatically by JCasC and Terraform
-        GitHub Organization: https://github.com/${local.github_organization}
       numExecutors: 0
       mode: EXCLUSIVE
       quietPeriod: 5
@@ -22,9 +21,9 @@ locals {
         local:
           allowsSignup: false
           users:
-            - id: "admin"
-              name: "Administrator"
-              password: "$${JENKINS_ADMIN_PASSWORD:-admin}"
+            - id: "${local.admin_username}"
+              name: "${local.admin_username}"
+              password: "${local.admin_password}"
       authorizationStrategy:
         loggedInUsersCanDoAnything:
           allowAnonymousRead: false
@@ -194,18 +193,6 @@ locals {
               discardOldItems {
                 daysToKeep(30)
                 numToKeep(50)
-              }
-            }
-            
-            buildStrategies {
-              buildRegularBranches()
-              buildChangeRequests {
-                ignoreTargetOnlyChanges(true)
-                ignoreUntrustedChanges(false)
-              }
-              buildTags {
-                atLeastDays('-1')
-                atMostDays('7')
               }
             }
           }

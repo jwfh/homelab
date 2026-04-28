@@ -22,6 +22,16 @@ resource "helm_release" "jenkins" {
 
         replicas = 1
 
+        # Align runtime identity with NFS ownership for controller data path access.
+        runAsUser = local.controller_run_as_user
+        fsGroup   = local.controller_fs_group
+        containerSecurityContext = {
+          runAsUser               = local.controller_run_as_user
+          runAsGroup              = local.controller_run_as_group
+          readOnlyRootFilesystem  = true
+          allowPrivilegeEscalation = false
+        }
+
         resources = {
           requests = {
             cpu    = local.controller_cpu_request
@@ -38,28 +48,45 @@ resource "helm_release" "jenkins" {
           name   = var.service_account_name
         }
 
-        javaOpts = "-Djenkins.install.runSetupWizard=false -Dhudson.model.DirectoryBrowserSupport.CSP="
+        javaOpts = "-Djenkins.install.runSetupWizard=false -Dhudson.model.DirectoryBrowserSupport.CSP= -Duser.home=/var/jenkins_home"
+
+        initContainerEnv = [
+          {
+            name  = "HOME"
+            value = "/var/jenkins_home"
+          },
+          {
+            name  = "JAVA_OPTS"
+            value = "-Duser.home=/var/jenkins_home"
+          }
+        ]
+
+        containerEnv = [
+          {
+            name  = "HOME"
+            value = "/var/jenkins_home"
+          }
+        ]
 
         installPlugins = [
           # Core plugins
-          "kubernetes:4353.v14a_924f218ec",
-          "workflow-aggregator:600.vb_57cdd26fdd7",
-          "git:5.7.0",
-          "configuration-as-code:1903.v4759a_648de91",
-          "credentials-binding:681.vf91669a_32e45",
+          "kubernetes",
+          "workflow-aggregator",
+          "git",
+          "configuration-as-code",
           # GitHub integration
-          "github-branch-source:1797.v86fdb_4d57d43",
-          "github:1.40.0",
+          "github-branch-source",
+          "github",
           # Pipeline and job management
-          "job-dsl:1.89",
-          "pipeline-stage-view:2.34",
-          "pipeline-utility-steps:2.18.0",
-          # Additional useful plugins
-          "docker-workflow:580.vc0c340686b_54",
-          "timestamper:1.27",
-          "ws-cleanup:0.46",
-          "ansicolor:1.0.6",
-          "matrix-auth:3.2.2",
+          "job-dsl",
+          "pipeline-stage-step",
+          "pipeline-input-step",
+          "pipeline-milestone-step",
+          "pipeline-graph-view",
+          "pipeline-stage-view",
+          "pipeline-utility-steps",
+          "timestamper",
+          "ansicolor",
         ]
 
         additionalPlugins = []
@@ -71,6 +98,20 @@ resource "helm_release" "jenkins" {
             "security-config"   = local.jcasc_security_config
             "kubernetes-cloud"  = local.jcasc_kubernetes_cloud
             "github-org-seed"   = local.jcasc_github_org_seed
+          }
+        }
+
+        sidecars = {
+          configAutoReload = {
+            # The sidecar image does not include /var/jenkins_home and needs root to
+            # create the nested mountpoint /var/jenkins_home/casc_configs at startup.
+            containerSecurityContext = {
+              runAsUser               = 0
+              runAsGroup              = 0
+              runAsNonRoot            = false
+              readOnlyRootFilesystem  = false
+              allowPrivilegeEscalation = false
+            }
           }
         }
 

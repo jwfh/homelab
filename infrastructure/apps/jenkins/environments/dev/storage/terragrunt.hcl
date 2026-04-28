@@ -11,13 +11,13 @@ dependency "namespace" {
   config_path = "../namespace"
 
   mock_outputs = {
-    namespace = "prod-jenkins"
+    namespace = "dev-jenkins"
   }
   mock_outputs_allowed_terraform_commands = ["validate", "plan"]
 }
 
 inputs = {
-  environment  = "prod"
+  environment  = "dev"
   namespace    = dependency.namespace.outputs.namespace
   storage_size = "20Gi"
 }

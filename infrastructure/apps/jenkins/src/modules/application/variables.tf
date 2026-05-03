@@ -21,11 +21,11 @@ variable "pvc_name" {
 variable "chart_version" {
   description = "Jenkins Helm chart version"
   type        = string
-  default     = "5.8.3"
+  default     = "5.9.18"
 }
 
 variable "jenkins_image_tag" {
   description = "Jenkins Docker image tag"
   type        = string
-  default     = "lts-jdk17"
+  default     = "2.555.1-jdk21"
 }

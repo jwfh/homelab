@@ -1,3 +1,5 @@
+terraform_binary = "tofu"
+
 locals {
   # Find backend.hcl in the environment directory (parent of module directories)
   backend = read_terragrunt_config(find_in_parent_folders("backend.hcl"))

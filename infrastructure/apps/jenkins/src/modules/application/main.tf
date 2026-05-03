@@ -32,6 +32,14 @@ resource "helm_release" "jenkins" {
           allowPrivilegeEscalation = false
         }
 
+        # Init container security context - must match controller user for NFS access
+        initContainerSecurityContext = {
+          runAsUser               = local.controller_run_as_user
+          runAsGroup              = local.controller_run_as_group
+          readOnlyRootFilesystem  = false
+          allowPrivilegeEscalation = false
+        }
+
         resources = {
           requests = {
             cpu    = local.controller_cpu_request
@@ -50,6 +58,9 @@ resource "helm_release" "jenkins" {
 
         javaOpts = "-Djenkins.install.runSetupWizard=false -Dhudson.model.DirectoryBrowserSupport.CSP= -Duser.home=/var/jenkins_home"
 
+        # Overwrite plugins on restart to avoid interactive prompts
+        overwritePlugins = true
+
         initContainerEnv = [
           {
             name  = "HOME"
@@ -58,6 +69,10 @@ resource "helm_release" "jenkins" {
           {
             name  = "JAVA_OPTS"
             value = "-Duser.home=/var/jenkins_home"
+          },
+          {
+            name  = "COPY_REFERENCE_FILE_LOG"
+            value = "/var/jenkins_home/copy_reference_file.log"
           }
         ]
 
@@ -74,6 +89,9 @@ resource "helm_release" "jenkins" {
           "workflow-aggregator",
           "git",
           "configuration-as-code",
+          # Authentication and Authorization
+          "oic-auth",
+          "role-strategy",
           # GitHub integration
           "github-branch-source",
           "github",
@@ -87,6 +105,7 @@ resource "helm_release" "jenkins" {
           "pipeline-utility-steps",
           "timestamper",
           "ansicolor",
+          "junit",
         ]
 
         additionalPlugins = []
@@ -96,6 +115,7 @@ resource "helm_release" "jenkins" {
           configScripts = {
             "system-config"     = local.jcasc_system_config
             "security-config"   = local.jcasc_security_config
+            "credentials"       = local.jcasc_credentials_config
             "kubernetes-cloud"  = local.jcasc_kubernetes_cloud
             "github-org-seed"   = local.jcasc_github_org_seed
           }

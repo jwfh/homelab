@@ -106,6 +106,7 @@ resource "helm_release" "jenkins" {
           "timestamper",
           "ansicolor",
           "junit",
+          "catppuccin-theme",
         ]
 
         additionalPlugins = []
@@ -118,6 +119,7 @@ resource "helm_release" "jenkins" {
             "credentials"       = local.jcasc_credentials_config
             "kubernetes-cloud"  = local.jcasc_kubernetes_cloud
             "github-org-seed"   = local.jcasc_github_org_seed
+            "appearance"        = local.jcasc_appearance
           }
         }
 

@@ -92,6 +92,20 @@ credentials:
               description: "GitHub credentials for ${local.github_organization}"
   EOT
 
+  jcasc_appearance = <<-EOT
+appearance:
+  pipelineGraphView:
+    showGraphOnBuildPage: true
+    showGraphOnJobPage: false
+    showStageDurations: false
+    showStageNames: false
+  prism:
+    theme: PRISM
+  themeManager:
+    disableUserThemes: false
+    theme: "catppuccinMocha"
+  EOT
+
   jcasc_kubernetes_cloud = <<-EOT
 jenkins:
   clouds:
